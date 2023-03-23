@@ -1,0 +1,5 @@
+lib
+audit
+todo
+*.test.ts
+*.md
