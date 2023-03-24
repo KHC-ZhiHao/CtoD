@@ -28,6 +28,10 @@ export class ChatGPT35 {
         temperature: 1
     }
 
+    /**
+     * @zh 獲取 DAN 指令啟用的 message
+     */
+
     static getJailbrokenMessages(): Array<ChatGPT35Message> {
         return [
             {
@@ -54,13 +58,25 @@ export class ChatGPT35 {
         ]
     }
 
+    /**
+     * @zh 設定 api key
+     */
+
     setConfiguration(apiKey: string) {
         this.apiKey = apiKey
     }
 
+    /**
+     * @zh 設定 api key
+     */
+
     setConfig(options: Partial<Config>) {
         Object.assign(this.config, options)
     }
+
+    /**
+     * @zh 開啟對話
+     */
 
     async talk(messages: ChatGPT35Message[] = []) {
         const newMessages = json.jpjs(messages)
