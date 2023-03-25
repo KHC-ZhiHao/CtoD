@@ -7,6 +7,7 @@ export type TranslatorParams<
 > = {
     scheme: S
     output: O
+    parsers: TextParser[]
     assembly: (data: ValidateCallbackOutputs<S>) => Promise<string>
 }
 
@@ -15,9 +16,6 @@ export class Translator<
     O extends ValidateCallback<any>
 > {
     private params: TranslatorParams<S, O>
-    private parsers = [
-        TextParser.JsonMessage()
-    ]
 
     constructor(params: TranslatorParams<S, O>) {
         this.params = params
@@ -43,7 +41,7 @@ export class Translator<
         let result: any = undefined
         let parserName = ''
         let parserFails: { name: string, error: any }[] = []
-        for (let parse of this.parsers) {
+        for (let parse of this.params.parsers) {
             try {
                 result = await parse.read(text)
                 parserName = parse.name

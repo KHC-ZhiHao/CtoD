@@ -57,14 +57,9 @@ export class ChatGPT35Broker<
             if (count >= 10) {
                 return doBreak()
             }
+            let response: ChatGPT35TalkResponse = null as any
             let parseText = ''
             let retryFlag = false
-            let response: ChatGPT35TalkResponse = {
-                id: '',
-                isDone: false,
-                newMessages: [],
-                text: ''
-            }
             try {
                 await this.notify('talkBefore', {
                     data,

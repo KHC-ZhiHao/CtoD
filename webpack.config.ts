@@ -1,5 +1,6 @@
 import ESLintPlugin from 'eslint-webpack-plugin'
 import path from 'path'
+import nodeExternals from 'webpack-node-externals'
 
 export default {
     mode: 'production',
@@ -20,9 +21,14 @@ export default {
     resolve: {
         extensions: ['.ts']
     },
+    externalsPresets: {
+        node: true
+    },
+    externals: [nodeExternals()],
     plugins: [
         new ESLintPlugin({
-            files: 'lib/**/*.ts'
+            files: 'lib/**/*.ts',
+            fix: true
         })
     ],
     module: {

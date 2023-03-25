@@ -1,9 +1,10 @@
-import { PromiseResponseType } from 'power-helper/types/pick';
-export declare type ChatGPT35Message = {
-    role: 'system' | 'user' | 'assistant';
-    content: string;
-};
+import { PromiseResponseType } from '../types';
 declare type Config = {
+    /**
+     * @zh 一次回應數量
+     * @en How many chat completion choices to generate for each input message.
+     */
+    n: 1;
     /**
      * @zh 最長回應長度，最大值為 4096。
      * @en The token count of your prompt plus max_tokens cannot exceed the model's context length. Most models have a context length of 2048 tokens (except for the newest models, which support 4096).
@@ -16,18 +17,34 @@ declare type Config = {
      */
     temperature: number;
 };
-export declare class ChatGPT35 {
+declare type ApiResponse = {
+    id: string;
+    object: string;
+    created: number;
+    model: string;
+    choices: Array<{
+        text: string;
+        index: number;
+        logprobs: any;
+        finish_reason: string;
+    }>;
+    usage: {
+        prompt_tokens: number;
+        completion_tokens: number;
+        total_tokens: number;
+    };
+};
+export declare class ChatGPT3 {
     private apiKey;
     private config;
-    static getJailbrokenMessages(): Array<ChatGPT35Message>;
     setConfiguration(apiKey: string): void;
     setConfig(options: Partial<Config>): void;
-    talk(messages?: ChatGPT35Message[]): Promise<{
+    talk(prompt: string | string[]): Promise<{
         id: string;
         text: string;
         isDone: boolean;
-        newMessages: ChatGPT35Message[];
+        apiReseponse: ApiResponse;
     }>;
 }
-export declare type ChatGPT35TalkResponse = PromiseResponseType<ChatGPT35['talk']>;
+export declare type ChatGPT3TalkResponse = PromiseResponseType<ChatGPT3['talk']>;
 export {};

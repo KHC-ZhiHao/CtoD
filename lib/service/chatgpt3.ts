@@ -1,7 +1,12 @@
 import axios from 'axios'
-import { PromiseResponseType } from 'power-helper/types/pick'
+import { PromiseResponseType } from '../types'
 
 type Config = {
+    /**
+     * @zh 一次回應數量
+     * @en How many chat completion choices to generate for each input message.
+     */
+    n: 1
     /**
      * @zh 最長回應長度，最大值為 4096。
      * @en The token count of your prompt plus max_tokens cannot exceed the model's context length. Most models have a context length of 2048 tokens (except for the newest models, which support 4096).
@@ -15,9 +20,28 @@ type Config = {
     temperature: number
 }
 
+type ApiResponse = {
+    id: string
+    object: string
+    created: number
+    model: string
+    choices: Array<{
+        text: string
+        index: number
+        logprobs: any
+        finish_reason: string
+    }>
+    usage: {
+        prompt_tokens: number
+        completion_tokens: number
+        total_tokens: number
+    }
+}
+
 export class ChatGPT3 {
     private apiKey = ''
     private config: Config = {
+        n: 1,
         maxTokens: 2048,
         temperature: 1
     }
@@ -31,9 +55,9 @@ export class ChatGPT3 {
     }
 
     async talk(prompt: string | string[]) {
-        const result = await axios.post('https://api.openai.com/v1/completions', {
+        const result = await axios.post<ApiResponse>('https://api.openai.com/v1/completions', {
             model: 'text-davinci-003',
-            n: 1,
+            n: this.config.n,
             prompt: Array.isArray(prompt) ? prompt.join('\n') : prompt,
             max_tokens: this.config.maxTokens,
             temperature: this.config.temperature
@@ -47,7 +71,8 @@ export class ChatGPT3 {
         return {
             id: result.data.id,
             text: choices[0]?.text || '',
-            isDone: choices[0]?.finish_reason === 'stop'
+            isDone: choices[0]?.finish_reason === 'stop',
+            apiReseponse: result.data
         }
     }
 }

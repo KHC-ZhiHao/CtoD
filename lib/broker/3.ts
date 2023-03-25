@@ -39,13 +39,9 @@ export class ChatGPT3Broker<
             if (count >= 10) {
                 return doBreak()
             }
+            let response: ChatGPT3TalkResponse = null as any
             let parseText = ''
             let retryFlag = false
-            let response: ChatGPT3TalkResponse = {
-                id: '',
-                isDone: false,
-                text: ''
-            }
             try {
                 await this.notify('talkBefore', {
                     data,

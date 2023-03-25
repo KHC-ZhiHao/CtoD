@@ -1,13 +1,37 @@
 import axios from 'axios'
 import { json } from 'power-helper'
-import { PromiseResponseType } from 'power-helper/types/pick'
+import { PromiseResponseType } from '../types'
 
 export type ChatGPT35Message = {
     role: 'system' | 'user' | 'assistant'
     content: string
 }
 
+type ApiResponse = {
+    id: string
+    object: string
+    created: number
+    choices: Array<{
+        index: number
+        finish_reason: string
+        message: {
+            role: 'system' | 'user' | 'assistant'
+            content: string
+        }
+    }>
+    usage: {
+        prompt_tokens: number
+        completion_tokens: number
+        total_tokens: number
+    }
+}
+
 type Config = {
+    /**
+     * @zh 一次回應數量
+     * @en How many chat completion choices to generate for each input message.
+     */
+    n: 1
     /**
      * @zh 最長回應長度，最大值為 4096。
      * @en The token count of your prompt plus max_tokens cannot exceed the model's context length. Most models have a context length of 2048 tokens (except for the newest models, which support 4096).
@@ -24,6 +48,7 @@ type Config = {
 export class ChatGPT35 {
     private apiKey = ''
     private config: Config = {
+        n: 1,
         maxTokens: 2048,
         temperature: 1
     }
@@ -75,14 +100,14 @@ export class ChatGPT35 {
     }
 
     /**
-     * @zh 開啟對話
+     * @zh 進行對話
      */
 
     async talk(messages: ChatGPT35Message[] = []) {
         const newMessages = json.jpjs(messages)
-        const result = await axios.post('https://api.openai.com/v1/chat/completions', {
+        const result = await axios.post<ApiResponse>('https://api.openai.com/v1/chat/completions', {
             model: 'gpt-3.5-turbo',
-            n: 1,
+            n: this.config.n,
             messages: newMessages,
             max_tokens: this.config.maxTokens,
             temperature: this.config.temperature
@@ -102,7 +127,26 @@ export class ChatGPT35 {
             id: result?.data.id as string,
             text: message.content as string,
             isDone: choices[0]?.finish_reason === 'stop',
-            newMessages
+            newMessages,
+            apiReseponse: result.data
+        }
+    }
+
+    /**
+     * @zh 開啟持續性對話
+     */
+
+    async chat(prompt: string | string[], oldMessages: ChatGPT35Message[] = []) {
+        const result = await this.talk([
+            ...oldMessages,
+            {
+                role: 'user',
+                content: Array.isArray(prompt) ? prompt.join('\n') : prompt
+            }
+        ])
+        return {
+            result,
+            nextTalk: (prompt: string | string[]) => this.chat(prompt, result.newMessages)
         }
     }
 }

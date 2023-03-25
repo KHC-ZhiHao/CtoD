@@ -1,12 +1,13 @@
+import { TextParser } from './parser';
 import { ValidateCallback, ValidateCallbackOutputs } from '../utils/validate';
 export declare type TranslatorParams<S extends ValidateCallback<any>, O extends ValidateCallback<any>> = {
     scheme: S;
     output: O;
+    parsers: TextParser[];
     assembly: (data: ValidateCallbackOutputs<S>) => Promise<string>;
 };
 export declare class Translator<S extends ValidateCallback<any>, O extends ValidateCallback<any>> {
     private params;
-    private parsers;
     constructor(params: TranslatorParams<S, O>);
     get __schemeType(): ValidateCallbackOutputs<S>;
     get __outputType(): ValidateCallbackOutputs<O>;

@@ -1,11 +1,18 @@
 import * as _templates from './templates';
+import * as _Translator from './core/translator';
 import { ValidateCallback } from './utils/validate';
+import { TextParser as _TextParser } from './core/parser';
 import { ChatGPT3 as _ChatGPT3 } from './service/chatgpt3';
 import { ChatGPT35 as _ChatGPT35 } from './service/chatgpt35';
 import { ChatGPT3Broker as _ChatGPT3Broker } from './broker/3';
 import { ChatGPT35Broker as _ChatGPT35Broker } from './broker/35';
+export declare type TextParser = _TextParser;
+export declare type Translator<S extends ValidateCallback<any>, O extends ValidateCallback<any>> = _Translator.Translator<S, O>;
+export declare type TranslatorParams<S extends ValidateCallback<any>, O extends ValidateCallback<any>> = _Translator.TranslatorParams<S, O>;
 export declare type ChatGPT3Broker<S extends ValidateCallback<any>, O extends ValidateCallback<any>> = _ChatGPT3Broker<S, O>;
 export declare type ChatGPT35Broker<S extends ValidateCallback<any>, O extends ValidateCallback<any>> = _ChatGPT35Broker<S, O>;
+export declare const TextParser: typeof _TextParser;
+export declare const Translator: typeof _Translator.Translator;
 export declare const ChatGPT3: typeof _ChatGPT3;
 export declare const ChatGPT35: typeof _ChatGPT35;
 export declare const ChatGPT3Broker: typeof _ChatGPT3Broker;
@@ -15,6 +22,8 @@ export declare const ctod: {
     templates: typeof _templates;
     ChatGPT3: typeof _ChatGPT3;
     ChatGPT35: typeof _ChatGPT35;
+    Translator: typeof _Translator.Translator;
+    TextParser: typeof _TextParser;
     ChatGPT3Broker: typeof _ChatGPT3Broker;
     ChatGPT35Broker: typeof _ChatGPT35Broker;
 };

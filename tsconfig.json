@@ -6,13 +6,18 @@
     "moduleResolution": "node",
     "strict": true,
     "declaration": true,
+    "declarationDir": "./types",
+    "baseUrl": ".",
     "outDir": "dist",
+    "rootDir": ".",
     "esModuleInterop": true,
+    "skipLibCheck": true,
     "lib": [
       "dom",
       "ES2015"
     ]
   },
+  "exclude": ["node_modules", "**/*.test.ts"],
   "include": [
     "lib/*.ts"
   ]

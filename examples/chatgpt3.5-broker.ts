@@ -1,11 +1,25 @@
 import { flow } from 'power-helper'
+import { prompt } from 'inquirer'
 import { ChatGPT35Broker, templates } from '../lib/index'
 
-/** 如何透過文字獲取最佳索引 */
-
-const API_KEY = ''
+/**
+ * @zh 這裡示範如何透過 ChatGPT35Broker 從使用者獲取疑問中獲取最佳索引
+ * @en Here is a demonstration of how to use ChatGPT35Broker to obtain the best index from the user's queries.
+ * @text npx ts-node ./examples/chatgpt3.5-broker.ts
+ */
 
 flow.run(async() => {
+    const { apiKey } = await prompt([
+        {
+            type: 'input',
+            name: 'apiKey',
+            message: 'Please enter API key.',
+            default: ''
+        }
+    ])
+    if (!apiKey) {
+        throw new Error('Unable to find API key.')
+    }
     const broker = new ChatGPT35Broker({
         scheme: yup => {
             return {
@@ -22,7 +36,7 @@ flow.run(async() => {
             }
         },
         install: ({ bot, attach }) => {
-            bot.setConfiguration(API_KEY)
+            bot.setConfiguration(apiKey)
             attach('talkBefore', async({ messages }) => {
                 console.log('送出訊息:', messages)
             })
@@ -42,7 +56,7 @@ flow.run(async() => {
                 '我有以下索引',
                 `${JSON.stringify(indexs)}`,
                 `請幫我解析"${question}"可能是哪個索引`,
-                '且相關性由高到低排序並給予分數，分數由 0 ~ 1'
+                '且相關性由高到低排序並給予分數，分數為 0 ~ 1'
             ], {
                 indexs: {
                     desc: '由高到低排序的索引',
@@ -57,8 +71,13 @@ flow.run(async() => {
         }
     })
     const response = await broker.request({
-        indexs: ['腰痛', '頭痛', '喉嚨痛', '四肢疼痛'],
-        question: '閃到腰，又一直咳嗽'
+        question: '閃到腰，又一直咳嗽',
+        indexs: [
+            '腰痛',
+            '頭痛',
+            '喉嚨痛',
+            '四肢疼痛'
+        ],
     })
     console.log('輸出結果：', response.indexs)
 })
