@@ -1,9 +1,21 @@
 <br>
 
 <h1 align="center">CtoD</h1>
-<h3 align="center">Chat To Data Tool</h3>
+<h3 align="center">Chat To Data</h3>
+
+<p align="center">
+    <a href="https://www.npmjs.com/package/ctod">
+        <img src="https://img.shields.io/npm/v/ctod.svg">
+    </a>
+    <a href="https://github.com/KHC-ZhiHao/ctod">
+        <img src="https://img.shields.io/github/stars/KHC-ZhiHao/ctod.svg?style=social">
+    </a>
+    <br>
+</p>
 
 <br>
+
+[English Version](./README.md)
 
 ## 摘要
 

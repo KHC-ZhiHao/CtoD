@@ -5,7 +5,7 @@ import { ChatGPT35Broker, templates } from '../lib/index'
 /**
  * @zh 這裡示範如何透過 ChatGPT35Broker 從使用者獲取疑問中獲取最佳索引
  * @en Here is a demonstration of how to use ChatGPT35Broker to obtain the best index from the user's queries.
- * @text npx ts-node ./examples/chatgpt3.5-broker.ts
+ * @test npx ts-node ./examples/chatgpt3.5-broker.ts
  */
 
 flow.run(async() => {

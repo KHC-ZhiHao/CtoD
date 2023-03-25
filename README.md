@@ -1,7 +1,7 @@
 <br>
 
 <h1 align="center">CtoD</h1>
-<h3 align="center">Chat To Data Tool</h3>
+<h3 align="center">Chat To Data</h3>
 
 <p align="center">
     <a href="https://www.npmjs.com/package/ctod">

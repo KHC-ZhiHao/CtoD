@@ -5,7 +5,7 @@ import { ChatGPT35 } from '../lib/index'
 /**
  * @zh 這裡示範如何透過 ChatGPT35 持續對話
  * @en Here is a demonstration of how to use ChatGPT35Broker to obtain the best index from the user's queries.
- * @text npx ts-node ./examples/chatgpt3.5.ts
+ * @test npx ts-node ./examples/chatgpt3.5.ts
  */
 
 flow.run(async() => {
