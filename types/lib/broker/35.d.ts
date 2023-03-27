@@ -1,8 +1,9 @@
 import { BaseBroker } from './index';
 import { Translator } from '../core/translator';
+import { Broker35Plugin } from '../core/plugin';
 import { ValidateCallback, ValidateCallbackOutputs } from '../utils/validate';
 import { ChatGPT35, ChatGPT35Message, ChatGPT35TalkResponse } from '../service/chatgpt35';
-export declare class ChatGPT35Broker<S extends ValidateCallback<any>, O extends ValidateCallback<any>> extends BaseBroker<S, O, {
+export declare class ChatGPT35Broker<S extends ValidateCallback<any>, O extends ValidateCallback<any>> extends BaseBroker<S, O, Broker35Plugin<any>, {
     talkFirst: {
         data: ValidateCallbackOutputs<S>;
         messages: ChatGPT35Message[];
@@ -11,13 +12,18 @@ export declare class ChatGPT35Broker<S extends ValidateCallback<any>, O extends 
     talkBefore: {
         data: ValidateCallbackOutputs<S>;
         messages: ChatGPT35Message[];
+        lastUserMessage: string;
     };
     talkAfter: {
         data: ValidateCallbackOutputs<S>;
         response: ChatGPT35TalkResponse;
         messages: ChatGPT35Message[];
         parseText: string;
+        lastUserMessage: string;
         changeParseText: (text: string) => void;
+    };
+    succeeded: {
+        output: ValidateCallbackOutputs<O>;
     };
     parseFailed: {
         error: any;
@@ -29,6 +35,7 @@ export declare class ChatGPT35Broker<S extends ValidateCallback<any>, O extends 
             error: any;
         }[];
         messages: ChatGPT35Message[];
+        lastUserMessage: string;
         changeMessages: (messages: ChatGPT35Message[]) => void;
     };
 }> {

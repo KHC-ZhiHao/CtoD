@@ -1,13 +1,14 @@
 import { flow } from 'power-helper'
 import { Translator } from '../core/translator'
 import { BaseBroker } from './index'
+import { Broker3Plugin } from '../core/plugin'
 import { ChatGPT3, ChatGPT3TalkResponse } from '../service/chatgpt3'
 import { ValidateCallback, ValidateCallbackOutputs } from '../utils/validate'
 
 export class ChatGPT3Broker<
     S extends ValidateCallback<any>,
     O extends ValidateCallback<any>,
-    > extends BaseBroker<S, O, {
+    > extends BaseBroker<S, O, Broker3Plugin<any>, {
         talkBefore: {
             data: ValidateCallbackOutputs<S>
             prompt: string
@@ -18,6 +19,9 @@ export class ChatGPT3Broker<
             response: ChatGPT3TalkResponse
             parseText: string
             changeParseText: (text: string) => void
+        }
+        succeeded: {
+            output: ValidateCallbackOutputs<O>
         }
         parseFailed: {
             error: any
@@ -43,13 +47,13 @@ export class ChatGPT3Broker<
             let parseText = ''
             let retryFlag = false
             try {
-                await this.notify('talkBefore', {
+                await this.hook.notify('talkBefore', {
                     data,
                     prompt: question.prompt
                 })
                 response = await this.bot.talk(question.prompt)
                 parseText = response.text
-                await this.notify('talkAfter', {
+                await this.hook.notify('talkAfter', {
                     data,
                     prompt: question.prompt,
                     response,
@@ -59,11 +63,14 @@ export class ChatGPT3Broker<
                     }
                 })
                 output = (await this.translator.parse(parseText)).output
+                await this.hook.notify('succeeded', {
+                    output
+                })
                 doBreak()
             } catch (error: any) {
                 // 如果解析錯誤，可以選擇是否重新解讀
                 if (error.isParserError) {
-                    await this.notify('parseFailed', {
+                    await this.hook.notify('parseFailed', {
                         error: error.error,
                         count,
                         response,

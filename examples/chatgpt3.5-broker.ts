@@ -1,6 +1,6 @@
 import { flow } from 'power-helper'
 import { prompt } from 'inquirer'
-import { ChatGPT35Broker, templates } from '../lib/index'
+import { ChatGPT35Broker, plugins, templates } from '../lib/index'
 
 /**
  * @zh 這裡示範如何透過 ChatGPT35Broker 從使用者獲取疑問中獲取最佳索引
@@ -21,7 +21,7 @@ flow.run(async() => {
         throw new Error('Unable to find API key.')
     }
     const broker = new ChatGPT35Broker({
-        scheme: yup => {
+        input: yup => {
             return {
                 indexs: yup.array(yup.string()).required(),
                 question: yup.string().required()
@@ -35,14 +35,11 @@ flow.run(async() => {
                 })).required()
             }
         },
+        plugins: [
+            plugins.PrintLogPlugin.ver35.use({})
+        ],
         install: ({ bot, attach }) => {
             bot.setConfiguration(apiKey)
-            attach('talkBefore', async({ messages }) => {
-                console.log('送出訊息:', messages)
-            })
-            attach('talkAfter', async({ parseText }) => {
-                console.log('接收訊息:', parseText)
-            })
             attach('parseFailed', async({ count, retry, response, changeMessages }) => {
                 if (count <= 1) {
                     console.log(`回傳錯誤，正在重試: ${count} 次`)
@@ -70,14 +67,13 @@ flow.run(async() => {
             })
         }
     })
-    const response = await broker.request({
+    await broker.request({
         question: '閃到腰，又一直咳嗽',
         indexs: [
             '腰痛',
             '頭痛',
             '喉嚨痛',
             '四肢疼痛'
-        ],
+        ]
     })
-    console.log('輸出結果：', response.indexs)
 })

@@ -1,8 +1,9 @@
 import { Translator } from '../core/translator';
 import { BaseBroker } from './index';
+import { Broker3Plugin } from '../core/plugin';
 import { ChatGPT3, ChatGPT3TalkResponse } from '../service/chatgpt3';
 import { ValidateCallback, ValidateCallbackOutputs } from '../utils/validate';
-export declare class ChatGPT3Broker<S extends ValidateCallback<any>, O extends ValidateCallback<any>> extends BaseBroker<S, O, {
+export declare class ChatGPT3Broker<S extends ValidateCallback<any>, O extends ValidateCallback<any>> extends BaseBroker<S, O, Broker3Plugin<any>, {
     talkBefore: {
         data: ValidateCallbackOutputs<S>;
         prompt: string;
@@ -13,6 +14,9 @@ export declare class ChatGPT3Broker<S extends ValidateCallback<any>, O extends V
         response: ChatGPT3TalkResponse;
         parseText: string;
         changeParseText: (text: string) => void;
+    };
+    succeeded: {
+        output: ValidateCallbackOutputs<O>;
     };
     parseFailed: {
         error: any;

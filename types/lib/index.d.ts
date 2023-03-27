@@ -1,3 +1,5 @@
+import * as _Plugins from './core/plugin';
+import * as _plugins from './plugins';
 import * as _templates from './templates';
 import * as _Translator from './core/translator';
 import { ValidateCallback } from './utils/validate';
@@ -11,19 +13,27 @@ export declare type Translator<S extends ValidateCallback<any>, O extends Valida
 export declare type TranslatorParams<S extends ValidateCallback<any>, O extends ValidateCallback<any>> = _Translator.TranslatorParams<S, O>;
 export declare type ChatGPT3Broker<S extends ValidateCallback<any>, O extends ValidateCallback<any>> = _ChatGPT3Broker<S, O>;
 export declare type ChatGPT35Broker<S extends ValidateCallback<any>, O extends ValidateCallback<any>> = _ChatGPT35Broker<S, O>;
+export declare type Broker3Plugin<T extends ValidateCallback<any>> = _Plugins.Broker3Plugin<T>;
+export declare type Broker35Plugin<T extends ValidateCallback<any>> = _Plugins.Broker35Plugin<T>;
 export declare const TextParser: typeof _TextParser;
 export declare const Translator: typeof _Translator.Translator;
 export declare const ChatGPT3: typeof _ChatGPT3;
 export declare const ChatGPT35: typeof _ChatGPT35;
 export declare const ChatGPT3Broker: typeof _ChatGPT3Broker;
 export declare const ChatGPT35Broker: typeof _ChatGPT35Broker;
+export declare const Broker3Plugin: typeof _Plugins.Broker3Plugin;
+export declare const Broker35Plugin: typeof _Plugins.Broker35Plugin;
+export declare const plugins: typeof _plugins;
 export declare const templates: typeof _templates;
 export declare const ctod: {
+    plugins: typeof _plugins;
     templates: typeof _templates;
     ChatGPT3: typeof _ChatGPT3;
     ChatGPT35: typeof _ChatGPT35;
     Translator: typeof _Translator.Translator;
     TextParser: typeof _TextParser;
+    Broker3Plugin: typeof _Plugins.Broker3Plugin;
+    Broker35Plugin: typeof _Plugins.Broker35Plugin;
     ChatGPT3Broker: typeof _ChatGPT3Broker;
     ChatGPT35Broker: typeof _ChatGPT35Broker;
 };

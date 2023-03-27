@@ -49,7 +49,7 @@ import { ChatGPT35Broker, templates } from 'ctod'
 const API_KEY = 'openai api key'
 const broker = new ChatGPT35Broker({
     /** Validate input data */
-    scheme: yup => {
+    input: yup => {
         return {
             indexs: yup.array(yup.string()).required(),
             question: yup.string().required()

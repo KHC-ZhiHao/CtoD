@@ -1,5 +1,7 @@
 /* eslint-disable no-redeclare */
 
+import * as _Plugins from './core/plugin'
+import * as _plugins from './plugins'
 import * as _templates from './templates'
 import * as _Translator from './core/translator'
 import { ValidateCallback } from './utils/validate'
@@ -14,6 +16,8 @@ export type Translator<S extends ValidateCallback<any>, O extends ValidateCallba
 export type TranslatorParams<S extends ValidateCallback<any>, O extends ValidateCallback<any>> = _Translator.TranslatorParams<S, O>
 export type ChatGPT3Broker<S extends ValidateCallback<any>, O extends ValidateCallback<any>> = _ChatGPT3Broker<S, O>
 export type ChatGPT35Broker<S extends ValidateCallback<any>, O extends ValidateCallback<any>> = _ChatGPT35Broker<S, O>
+export type Broker3Plugin<T extends ValidateCallback<any>> = _Plugins.Broker3Plugin<T>
+export type Broker35Plugin<T extends ValidateCallback<any>> = _Plugins.Broker35Plugin<T>
 
 export const TextParser = _TextParser
 export const Translator = _Translator.Translator
@@ -21,14 +25,21 @@ export const ChatGPT3 = _ChatGPT3
 export const ChatGPT35 = _ChatGPT35
 export const ChatGPT3Broker = _ChatGPT3Broker
 export const ChatGPT35Broker = _ChatGPT35Broker
+export const Broker3Plugin = _Plugins.Broker3Plugin
+export const Broker35Plugin = _Plugins.Broker35Plugin
+
+export const plugins = _plugins
 export const templates = _templates
 
 export const ctod = {
+    plugins,
     templates,
     ChatGPT3,
     ChatGPT35,
     Translator,
     TextParser,
+    Broker3Plugin,
+    Broker35Plugin,
     ChatGPT3Broker,
     ChatGPT35Broker
 }

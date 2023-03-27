@@ -1,13 +1,14 @@
 import { flow } from 'power-helper'
 import { BaseBroker } from './index'
 import { Translator } from '../core/translator'
+import { Broker35Plugin } from '../core/plugin'
 import { ValidateCallback, ValidateCallbackOutputs } from '../utils/validate'
 import { ChatGPT35, ChatGPT35Message, ChatGPT35TalkResponse } from '../service/chatgpt35'
 
 export class ChatGPT35Broker<
     S extends ValidateCallback<any>,
     O extends ValidateCallback<any>
-    > extends BaseBroker<S, O, {
+    > extends BaseBroker<S, O, Broker35Plugin<any>, {
         talkFirst: {
             data: ValidateCallbackOutputs<S>
             messages: ChatGPT35Message[]
@@ -16,13 +17,18 @@ export class ChatGPT35Broker<
         talkBefore: {
             data: ValidateCallbackOutputs<S>
             messages: ChatGPT35Message[]
+            lastUserMessage: string
         }
         talkAfter: {
             data: ValidateCallbackOutputs<S>
             response: ChatGPT35TalkResponse
             messages: ChatGPT35Message[]
             parseText: string
+            lastUserMessage: string
             changeParseText: (text: string) => void
+        }
+        succeeded: {
+            output: ValidateCallbackOutputs<O>
         }
         parseFailed: {
             error: any
@@ -31,6 +37,7 @@ export class ChatGPT35Broker<
             response: ChatGPT35TalkResponse
             parserFails: { name: string, error: any }[]
             messages: ChatGPT35Message[]
+            lastUserMessage: string
             changeMessages: (messages: ChatGPT35Message[]) => void
         }
     }> {
@@ -46,7 +53,7 @@ export class ChatGPT35Broker<
                 content: question.prompt
             }
         ]
-        await this.notify('talkFirst', {
+        await this.hook.notify('talkFirst', {
             data,
             messages,
             changeMessages: ms => {
@@ -60,33 +67,40 @@ export class ChatGPT35Broker<
             let response: ChatGPT35TalkResponse = null as any
             let parseText = ''
             let retryFlag = false
+            let lastUserMessage = messages.filter(e => e.role === 'user').slice(-1)[0]?.content || ''
             try {
-                await this.notify('talkBefore', {
+                await this.hook.notify('talkBefore', {
                     data,
-                    messages
+                    messages,
+                    lastUserMessage
                 })
                 response = await this.bot.talk(messages)
                 parseText = response.text
-                await this.notify('talkAfter', {
+                await this.hook.notify('talkAfter', {
                     data,
                     response,
                     parseText,
                     messages: response.newMessages,
+                    lastUserMessage,
                     changeParseText: text => {
                         parseText = text
                     }
                 })
                 messages = response.newMessages
                 output = (await this.translator.parse(response.text)).output
+                await this.hook.notify('succeeded', {
+                    output
+                })
                 doBreak()
             } catch (error: any) {
                 // 如果解析錯誤，可以選擇是否重新解讀
                 if (error.isParserError) {
-                    await this.notify('parseFailed', {
+                    await this.hook.notify('parseFailed', {
                         error: error.error,
                         count,
                         response,
                         messages,
+                        lastUserMessage,
                         parserFails: error.parserFails,
                         retry: () => {
                             retryFlag = true

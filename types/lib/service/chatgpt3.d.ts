@@ -1,10 +1,11 @@
+import { AxiosInstance } from 'axios';
 import { PromiseResponseType } from '../types';
 declare type Config = {
     /**
      * @zh 一次回應數量
      * @en How many chat completion choices to generate for each input message.
      */
-    n: 1;
+    n: number;
     /**
      * @zh 最長回應長度，最大值為 4096。
      * @en The token count of your prompt plus max_tokens cannot exceed the model's context length. Most models have a context length of 2048 tokens (except for the newest models, which support 4096).
@@ -35,10 +36,24 @@ declare type ApiResponse = {
     };
 };
 export declare class ChatGPT3 {
+    private axios;
     private apiKey;
     private config;
+    /**
+     * @zh 如果你有需要特別設定 axios，請使用這方法
+     */
+    setAxios(axios: AxiosInstance): void;
+    /**
+     * @zh 設定 api key
+     */
     setConfiguration(apiKey: string): void;
+    /**
+     * @zh 改變對話的一些設定
+     */
     setConfig(options: Partial<Config>): void;
+    /**
+     * @zh 進行對話
+     */
     talk(prompt: string | string[]): Promise<{
         id: string;
         text: string;

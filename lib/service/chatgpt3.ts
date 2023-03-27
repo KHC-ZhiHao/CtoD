@@ -1,4 +1,4 @@
-import axios from 'axios'
+import axios, { AxiosInstance } from 'axios'
 import { PromiseResponseType } from '../types'
 
 type Config = {
@@ -6,7 +6,7 @@ type Config = {
      * @zh 一次回應數量
      * @en How many chat completion choices to generate for each input message.
      */
-    n: 1
+    n: number
     /**
      * @zh 最長回應長度，最大值為 4096。
      * @en The token count of your prompt plus max_tokens cannot exceed the model's context length. Most models have a context length of 2048 tokens (except for the newest models, which support 4096).
@@ -39,6 +39,7 @@ type ApiResponse = {
 }
 
 export class ChatGPT3 {
+    private axios = axios.create()
     private apiKey = ''
     private config: Config = {
         n: 1,
@@ -46,16 +47,36 @@ export class ChatGPT3 {
         temperature: 1
     }
 
+    /**
+     * @zh 如果你有需要特別設定 axios，請使用這方法
+     */
+
+    setAxios(axios: AxiosInstance) {
+        this.axios = axios
+    }
+
+    /**
+     * @zh 設定 api key
+     */
+
     setConfiguration(apiKey: string) {
         this.apiKey = apiKey
     }
+
+    /**
+     * @zh 改變對話的一些設定
+     */
 
     setConfig(options: Partial<Config>) {
         Object.assign(this.config, options)
     }
 
+    /**
+     * @zh 進行對話
+     */
+
     async talk(prompt: string | string[]) {
-        const result = await axios.post<ApiResponse>('https://api.openai.com/v1/completions', {
+        const result = await this.axios.post<ApiResponse>('https://api.openai.com/v1/completions', {
             model: 'text-davinci-003',
             n: this.config.n,
             prompt: Array.isArray(prompt) ? prompt.join('\n') : prompt,

@@ -5,7 +5,7 @@ export type TranslatorParams<
     S extends ValidateCallback<any>,
     O extends ValidateCallback<any>
 > = {
-    scheme: S
+    input: S
     output: O
     parsers: TextParser[]
     assembly: (data: ValidateCallbackOutputs<S>) => Promise<string>
@@ -29,7 +29,7 @@ export class Translator<
     }
 
     async compile(data: ValidateCallbackOutputs<S>) {
-        const scheme = validate(data, this.params.scheme)
+        const scheme = validate(data, this.params.input)
         const prompt = await this.params.assembly(scheme)
         return {
             scheme,

@@ -1,4 +1,4 @@
-import axios from 'axios'
+import axios, { AxiosInstance } from 'axios'
 import { json } from 'power-helper'
 import { PromiseResponseType } from '../types'
 
@@ -31,7 +31,7 @@ type Config = {
      * @zh 一次回應數量
      * @en How many chat completion choices to generate for each input message.
      */
-    n: 1
+    n: number
     /**
      * @zh 最長回應長度，最大值為 4096。
      * @en The token count of your prompt plus max_tokens cannot exceed the model's context length. Most models have a context length of 2048 tokens (except for the newest models, which support 4096).
@@ -46,6 +46,7 @@ type Config = {
 }
 
 export class ChatGPT35 {
+    private axios = axios.create()
     private apiKey = ''
     private config: Config = {
         n: 1,
@@ -84,6 +85,14 @@ export class ChatGPT35 {
     }
 
     /**
+     * @zh 如果你有需要特別設定 axios，請使用這方法
+     */
+
+    setAxios(axios: AxiosInstance) {
+        this.axios = axios
+    }
+
+    /**
      * @zh 設定 api key
      */
 
@@ -92,7 +101,7 @@ export class ChatGPT35 {
     }
 
     /**
-     * @zh 設定 api key
+     * @zh 改變對話的一些設定
      */
 
     setConfig(options: Partial<Config>) {
@@ -105,7 +114,7 @@ export class ChatGPT35 {
 
     async talk(messages: ChatGPT35Message[] = []) {
         const newMessages = json.jpjs(messages)
-        const result = await axios.post<ApiResponse>('https://api.openai.com/v1/chat/completions', {
+        const result = await this.axios.post<ApiResponse>('https://api.openai.com/v1/chat/completions', {
             model: 'gpt-3.5-turbo',
             n: this.config.n,
             messages: newMessages,
