@@ -1,5 +1,5 @@
 <br>
-
+<p align="center"><img style="max-width: 300px" src="./logo.png"></p>
 <h1 align="center">CtoD</h1>
 <h3 align="center">Chat To Data</h3>
 
@@ -114,7 +114,7 @@ broker.request({
 })
 ```
 
-## Examples
+### Examples
 
 1. [如何利用 ChatGPT35 持續聊天機器人對話](./examples/chatgpt3.5.ts)
 
@@ -170,6 +170,6 @@ const broker = new ChatGPT35Broker({
 })
 ```
 
-## Examples
+### Examples
 
 1. [Print Log Plugin](./lib/plugins.ts)

@@ -29,7 +29,7 @@ During the conversation, [yup](https://github.com/jquense/yup) is used to valida
 
 We also provide some basic integration solutions for chatbots. Currently, ChatGPT3 and ChatGPT3.5 are supported.
 
-# Installation
+## Installation
 
 npm:
 
@@ -115,7 +115,7 @@ broker.request({
 })
 ```
 
-## Examples
+### Examples
 
 1. [How to continue the conversation with ChatGPT35 chatbot](./examples/chatgpt3.5.ts)
 
@@ -172,6 +172,6 @@ const broker = new ChatGPT35Broker({
 })
 ```
 
-## Examples
+### Examples
 
 1. [Print Log Plugin](./lib/plugins.ts)
