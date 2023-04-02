@@ -46,22 +46,27 @@ export declare class ChatGPT35 {
     private config;
     /**
      * @zh 獲取 DAN 指令啟用的 message
+     * @en Get the message that enables the DAN command
      */
     static getJailbrokenMessages(): Array<ChatGPT35Message>;
     /**
      * @zh 如果你有需要特別設定 axios，請使用這方法
+     * @en If you need to set axios, use this method
      */
     setAxios(axios: AxiosInstance): void;
     /**
      * @zh 設定 api key
+     * @en Set api key
      */
     setConfiguration(apiKey: string): void;
     /**
      * @zh 改變對話的一些設定
+     * @en Change some settings of the conversation
      */
     setConfig(options: Partial<Config>): void;
     /**
      * @zh 進行對話
+     * @en Talk to the AI
      */
     talk(messages?: ChatGPT35Message[]): Promise<{
         id: string;

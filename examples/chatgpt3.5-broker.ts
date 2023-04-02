@@ -8,6 +8,7 @@ import { ChatGPT35Broker, plugins, templates } from '../lib/index'
  * @test npx ts-node ./examples/chatgpt3.5-broker.ts
  */
 
+
 flow.run(async() => {
     const { apiKey } = await prompt([
         {

@@ -40,19 +40,23 @@ export declare class ChatGPT3 {
     private apiKey;
     private config;
     /**
-     * @zh 如果你有需要特別設定 axios，請使用這方法
+     * @zh 如果你有需要特別設定 axios，請使用這方法。
+     * @en If you need to set axios, please use this method.
      */
     setAxios(axios: AxiosInstance): void;
     /**
-     * @zh 設定 api key
+     * @zh 設定 api key。
+     * @en Set api key.
      */
     setConfiguration(apiKey: string): void;
     /**
-     * @zh 改變對話的一些設定
+     * @zh 改變對話的一些設定。
+     * @en Change some settings of the chat.
      */
     setConfig(options: Partial<Config>): void;
     /**
-     * @zh 進行對話
+     * @zh 進行對話。
+     * @en Talk to the chatbot.
      */
     talk(prompt: string | string[]): Promise<{
         id: string;

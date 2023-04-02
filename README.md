@@ -1,5 +1,5 @@
 <br>
-
+<p align="center"><img style="max-width: 300px" src="./logo.png"></p>
 <h1 align="center">CtoD</h1>
 <h3 align="center">Chat To Data</h3>
 
@@ -16,6 +16,10 @@
 <br>
 
 [繁體中文說明](./README-TW.md)
+
+## Online Playground
+
+[Chat Of Requirement(織語)](https://cor.metalsheep.com/) is a display tool built for CtoD. You can use this tool to construct and adjust your templates.
 
 ## Summary
 
@@ -116,3 +120,58 @@ broker.request({
 1. [How to continue the conversation with ChatGPT35 chatbot](./examples/chatgpt3.5.ts)
 
 2. [How to integrate machine responses using ChatGPT35Broker](./examples/chatgpt3.5-broker.ts)
+
+
+## Plugin
+
+Although the Broker can handle most of the tasks on its own, using plugins can help improve complex workflows and facilitate project engineering.
+
+Each time a request is sent, the Broker triggers a series of lifecycles, which you can understand from the [source code](./lib/broker/35.ts) and modify their behavior.
+
+Now, let's say we want to design a plugin that backs up messages to a server every time a conversation ends:
+
+```ts
+import axios from 'axios'
+import { ChatGPT35Broker, Broker35Plugin } from 'ctod'
+const backupPlugin = new Broker35Plugin({
+    name: 'backup-plugin',
+    // Define the parameter as sendUrl
+    params: yup => {
+        return {
+            sendUrl: yup.string().required()
+        }
+    },
+    onInstall({ params, attach }) {
+        const states = new Map()
+        // Initialize data when the first conversation starts
+        attach('talkFirst', async({ id }) => {
+            states.set(id, [])
+        })
+        // Store conversation data after each conversation
+        attach('talkAfter', async({ id, lastUserMessage }) => {
+            states.set(id, [...state.get(id), lastUserMessage])
+        })
+        // Backup data after conversation ends
+        attach('done', async({ id }) => {
+            await axios.post(params.sendUrl, {
+                messages: states.get(id)
+            })
+            states.delete(id)
+        })
+    }
+})
+
+const broker = new ChatGPT35Broker({
+    // ...
+    plugins: [
+        backupPlugin.use({
+            sendUrl: 'https://api/backup'
+        })
+    ],
+    // ...
+})
+```
+
+## Examples
+
+1. [Print Log Plugin](./lib/plugins.ts)

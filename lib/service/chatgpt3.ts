@@ -48,7 +48,8 @@ export class ChatGPT3 {
     }
 
     /**
-     * @zh 如果你有需要特別設定 axios，請使用這方法
+     * @zh 如果你有需要特別設定 axios，請使用這方法。
+     * @en If you need to set axios, please use this method.
      */
 
     setAxios(axios: AxiosInstance) {
@@ -56,7 +57,8 @@ export class ChatGPT3 {
     }
 
     /**
-     * @zh 設定 api key
+     * @zh 設定 api key。
+     * @en Set api key.
      */
 
     setConfiguration(apiKey: string) {
@@ -64,7 +66,8 @@ export class ChatGPT3 {
     }
 
     /**
-     * @zh 改變對話的一些設定
+     * @zh 改變對話的一些設定。 
+     * @en Change some settings of the chat.
      */
 
     setConfig(options: Partial<Config>) {
@@ -72,7 +75,8 @@ export class ChatGPT3 {
     }
 
     /**
-     * @zh 進行對話
+     * @zh 進行對話。
+     * @en Talk to the chatbot.
      */
 
     async talk(prompt: string | string[]) {

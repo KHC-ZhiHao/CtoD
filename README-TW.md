@@ -17,6 +17,10 @@
 
 [English Version](./README.md)
 
+## Online Playground
+
+[Chat Of Requirement(織語)](https://cor.metalsheep.com/) 是為了 CtoD 建構的展示工具，你可以在這個工具中建構你與調適你的模板。
+
 ## 摘要
 
 本工具是利用聊天機器人能夠讀懂自然語言的特性，將我們的需求與資料透過口語化的方式交付給他處理，並要求回應可序列化格式，例如：JSON。
@@ -25,7 +29,7 @@
 
 我們還附帶了一些基礎的串接機器人方案，目前支援 `ChatGPT3` 與 `ChatGPT3.5`。
 
-# 安裝
+## 安裝
 
 npm:
 
@@ -115,3 +119,57 @@ broker.request({
 1. [如何利用 ChatGPT35 持續聊天機器人對話](./examples/chatgpt3.5.ts)
 
 2. [如何利用 ChatGPT35Broker 來整合機器人回應](./examples/chatgpt3.5-broker.ts)
+
+##  Plugin
+
+雖然 Broker 本身已經能夠處理大部分的事務，但透過 Plugin 可以協助改善複雜的流程，幫助專案工程化。
+
+每次發送請求時，Broker 會觸發一系列的生命週期，你可以從[原始碼](./lib/broker/35.ts)中了解每個生命週期的參數與行為，並對其行為進行加工。
+
+現在，假設我們想要設計一個插件，它會在每次對話結束時將訊息備份到伺服器上：
+
+```ts
+import axios from 'axios'
+import { ChatGPT35Broker, Broker35Plugin } from 'ctod'
+const backupPlugin = new Broker35Plugin({
+    name: 'backup-plugin',
+    // 定義參數為 sendUrl
+    params: yup => {
+        return {
+            sendUrl: yup.string().required()
+        }
+    },
+    onInstall({ params, attach }) {
+        const states = new Map()
+        // 第一次對話的時候初始化資料
+        attach('talkFirst', async({ id }) => {
+            states.set(id, [])
+        })
+        // 每次對話完畢後把對話存入狀態
+        attach('talkAfter', async({ id, lastUserMessage }) => {
+            states.set(id, [...state.get(id), lastUserMessage])
+        })
+        // 結束對話後備份資料
+        attach('done', async({ id }) => {
+            await axios.post(params.sendUrl, {
+                messages: states.get(id)
+            })
+            states.delete(id)
+        })
+    }
+})
+
+const broker = new ChatGPT35Broker({
+    // ...
+    plugins: [
+        backupPlugin.use({
+            sendUrl: 'https://api/backup'
+        })
+    ],
+    // ...
+})
+```
+
+## Examples
+
+1. [Print Log Plugin](./lib/plugins.ts)

@@ -2,11 +2,13 @@ import JSON5 from 'json5'
 
 type TextParserParams = {
     /**
-     * 解讀器名字 
+     * @zh 解讀器名字。
+     * @en The name of the parser. 
      */
     name: string
     /**
-     * 解讀文本
+     * @zh 解讀文本。
+     * @en Read the text.
      */
     handler: (text: string) => Promise<any>
 }
@@ -15,7 +17,8 @@ export class TextParser {
     private params: TextParserParams
 
     /**
-     * 盡可能將文字內的 json 解讀出來
+     * @zh 盡可能將文字內的 json 解讀出來。
+     * @en Try to read the json in the text as much as possible.
      */
 
     static JsonMessage() {
@@ -34,7 +37,8 @@ export class TextParser {
     }
 
     /**
-     * 解讀器名字 
+     * @zh 解讀器名字。
+     * @en The name of the parser. 
      */
 
     get name() {
@@ -42,7 +46,8 @@ export class TextParser {
     }
 
     /**
-     * 解讀文本
+     * @zh 解讀文本。
+     * @en Read the text.
      */
 
     async read(text: string) {
