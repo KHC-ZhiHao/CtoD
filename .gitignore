@@ -3,3 +3,6 @@ package-lock.json
 .nyc_output
 .vscode
 .DS_Store
+.key
+.output
+invoke

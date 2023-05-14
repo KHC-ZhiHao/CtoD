@@ -8,6 +8,7 @@ import { ChatGPT3 as _ChatGPT3 } from './service/chatgpt3';
 import { ChatGPT35 as _ChatGPT35 } from './service/chatgpt35';
 import { ChatGPT3Broker as _ChatGPT3Broker } from './broker/3';
 import { ChatGPT35Broker as _ChatGPT35Broker } from './broker/35';
+import { ImagesGenerations as _ImagesGenerations } from './service/images-generations';
 export declare type TextParser = _TextParser;
 export declare type Translator<S extends ValidateCallback<any>, O extends ValidateCallback<any>> = _Translator.Translator<S, O>;
 export declare type TranslatorParams<S extends ValidateCallback<any>, O extends ValidateCallback<any>> = _Translator.TranslatorParams<S, O>;
@@ -15,6 +16,7 @@ export declare type ChatGPT3Broker<S extends ValidateCallback<any>, O extends Va
 export declare type ChatGPT35Broker<S extends ValidateCallback<any>, O extends ValidateCallback<any>> = _ChatGPT35Broker<S, O>;
 export declare type Broker3Plugin<T extends ValidateCallback<any>> = _Plugins.Broker3Plugin<T>;
 export declare type Broker35Plugin<T extends ValidateCallback<any>> = _Plugins.Broker35Plugin<T>;
+export declare type ImagesGenerations = _ImagesGenerations;
 export declare const TextParser: typeof _TextParser;
 export declare const Translator: typeof _Translator.Translator;
 export declare const ChatGPT3: typeof _ChatGPT3;
@@ -23,6 +25,7 @@ export declare const ChatGPT3Broker: typeof _ChatGPT3Broker;
 export declare const ChatGPT35Broker: typeof _ChatGPT35Broker;
 export declare const Broker3Plugin: typeof _Plugins.Broker3Plugin;
 export declare const Broker35Plugin: typeof _Plugins.Broker35Plugin;
+export declare const ImagesGenerations: typeof _ImagesGenerations;
 export declare const plugins: typeof _plugins;
 export declare const templates: typeof _templates;
 export declare const ctod: {
@@ -36,5 +39,6 @@ export declare const ctod: {
     Broker35Plugin: typeof _Plugins.Broker35Plugin;
     ChatGPT3Broker: typeof _ChatGPT3Broker;
     ChatGPT35Broker: typeof _ChatGPT35Broker;
+    ImagesGenerations: typeof _ImagesGenerations;
 };
 export default ctod;

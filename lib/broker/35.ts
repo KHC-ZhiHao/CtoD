@@ -166,11 +166,13 @@ export class ChatGPT35Broker<
                         }
                     })
                     if (retryFlag === false) {
-                        return doBreak()
+                        await this.hook.notify('done', { id })
+                        throw error
                     }
+                } else {
+                    await this.hook.notify('done', { id })
+                    throw error
                 }
-                await this.hook.notify('done', { id })
-                throw error
             }
         })
         return output
