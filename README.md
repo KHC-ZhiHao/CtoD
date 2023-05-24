@@ -47,6 +47,8 @@ yarn add ctod
 
 This example demonstrates how to pass drug indices and customer requirements to a chatbot and return the most suitable result. Developers can use the index results to search the database for the most suitable drug for the consumer:
 
+> Regarding type definitions, there is an interesting issue here: the input and output must be declared first in order for the types to function properly.
+
 ```ts
 import { ChatGPT35Broker, templates } from 'ctod'
 
@@ -168,6 +170,12 @@ const broker = new ChatGPT35Broker({
             sendUrl: 'https://api/backup'
         })
     ],
+    // The following approach can also work.
+    // plugins: () => [
+    //     backupPlugin.use({
+    //         sendUrl: 'https://api/backup'
+    //     })
+    // ],
     // ...
 })
 ```

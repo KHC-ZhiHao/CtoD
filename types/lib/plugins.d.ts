@@ -15,3 +15,7 @@ export declare const PrintLogPlugin: {
      */
     ver35: Broker35Plugin<() => {}>;
 };
+export declare const retryPlugin: Broker35Plugin<(yup: typeof import("yup")) => {
+    retry: import("yup").NumberSchema<number, import("yup").AnyObject, 1, "d">;
+    warn: import("yup").BooleanSchema<boolean, import("yup").AnyObject, true, "d">;
+}>;

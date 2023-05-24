@@ -49,8 +49,7 @@ export const PrintLogPlugin = {
         params: () => {
             return {}
         },
-        onInstall({ attach }) {
-            const log = new Log('print-log-plugin')
+        onInstall({ log, attach }) {
             attach('talkBefore', async({ lastUserMessage }) => {
                 log.print('Send:', { color: 'green' })
                 log.print('\n' + lastUserMessage)
@@ -70,3 +69,24 @@ export const PrintLogPlugin = {
         }
     })
 }
+
+export const retryPlugin = new Broker35Plugin({
+    name: 'retry',
+    params: yup => {
+        return {
+            retry: yup.number().required().default(1),
+            warn: yup.boolean().required().default(true)
+        }
+    },
+    onInstall({ log, attach, params }) {
+        attach('parseFailed', async({ count, retry, response, changeMessages }) => {
+            if (count <= params.retry) {
+                if (params.warn) {
+                    log.print(`回傳錯誤，正在重試: ${count} 次`)
+                }
+                changeMessages([response.newMessages[0]])
+                retry()
+            }
+        })
+    }
+})

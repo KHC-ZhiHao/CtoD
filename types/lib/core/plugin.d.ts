@@ -1,4 +1,4 @@
-import { Hook } from 'power-helper';
+import { Log, Hook } from 'power-helper';
 import { ChatGPT3 } from '../service/chatgpt3';
 import { ChatGPT35 } from '../service/chatgpt35';
 import { ChatGPT3Broker } from '../broker/3';
@@ -11,6 +11,7 @@ declare type Broker3PluginParams<T extends ValidateCallback<any>> = {
     params: T;
     onInstall: (context: {
         bot: ChatGPT3;
+        log: Log;
         params: ValidateCallbackOutputs<T>;
         attach: Hook<Broker3Hooks>['attach'];
         attachAfter: Hook<Broker3Hooks>['attachAfter'];
@@ -31,6 +32,7 @@ declare type Broker35PluginParams<T extends ValidateCallback<any>> = {
     params: T;
     onInstall: (context: {
         bot: ChatGPT35;
+        log: Log;
         params: ValidateCallbackOutputs<T>;
         attach: Hook<Broker35Hooks>['attach'];
         attachAfter: Hook<Broker35Hooks>['attachAfter'];

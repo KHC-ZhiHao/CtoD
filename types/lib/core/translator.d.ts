@@ -32,7 +32,9 @@ export declare class Translator<S extends ValidateCallback<any>, O extends Valid
      * @en Combine the input data into a prompt.
      */
     compile(data: ValidateCallbackOutputs<S>): Promise<{
-        scheme: ReturnType<S> extends infer T ? { [K in keyof T]: ReturnType<S>[K] extends import("yup").Schema<any, any, any, ""> ? ReturnType<S>[K]["__outputType"] : unknown; } : never;
+        scheme: ReturnType<S> extends infer T ? { [K in keyof T]: ReturnType<S>[K] extends {
+            __outputType: any;
+        } ? ReturnType<S>[K]["__outputType"] : unknown; } : never;
         prompt: string;
     }>;
     /**
@@ -40,7 +42,9 @@ export declare class Translator<S extends ValidateCallback<any>, O extends Valid
      * @en Convert text to serialized data.
      */
     parse(text: string): Promise<{
-        output: ReturnType<O> extends infer T ? { [K in keyof T]: ReturnType<O>[K] extends import("yup").Schema<any, any, any, ""> ? ReturnType<O>[K]["__outputType"] : unknown; } : never;
+        output: ReturnType<O> extends infer T ? { [K in keyof T]: ReturnType<O>[K] extends {
+            __outputType: any;
+        } ? ReturnType<O>[K]["__outputType"] : unknown; } : never;
         parserName: string;
         parserFails: {
             name: string;

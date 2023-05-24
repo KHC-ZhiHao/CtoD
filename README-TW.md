@@ -47,6 +47,8 @@ yarn add ctod
 
 這個例子示範如何將藥物索引與客戶需求傳遞給聊天機器人，並返回最適合的結果，開發人員可以利用索引結果去資料庫搜尋最適合的藥物給消費者：
 
+> 關於型態定義，這裡有個有趣的議題，必須將 input 與 output 優先宣告才能讓型態正常運作。
+
 ```ts
 import { ChatGPT35Broker, templates } from 'ctod'
 
@@ -166,6 +168,12 @@ const broker = new ChatGPT35Broker({
             sendUrl: 'https://api/backup'
         })
     ],
+    // 以下方案也可以運行
+    // plugins: () => [
+    //     backupPlugin.use({
+    //         sendUrl: 'https://api/backup'
+    //     })
+    // ],
     // ...
 })
 ```

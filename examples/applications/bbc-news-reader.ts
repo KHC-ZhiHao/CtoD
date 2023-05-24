@@ -50,6 +50,9 @@ const genFocus = async (params: {
         ],
         install: ({ bot, attach }) => {
             bot.setConfiguration(params.apiKey)
+            attach('talkFirst', async() => {
+                return
+            })
             attach('parseFailed', async({ count, retry, response, changeMessages }) => {
                 if (count <= 5) {
                     console.log(`回傳錯誤，正在重試: ${count} 次`)
