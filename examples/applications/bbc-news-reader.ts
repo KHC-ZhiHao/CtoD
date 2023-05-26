@@ -45,12 +45,15 @@ const genFocus = async (params: {
                 zhTwContent: yup.array(yup.string()).required()
             }
         },
-        plugins: [
-            plugins.PrintLogPlugin.ver35.use({})
-        ],
+        plugins: {
+            print: plugins.PrintLogPlugin.ver35.use({
+                detail: false
+            })
+        },
         install: ({ bot, attach }) => {
             bot.setConfiguration(params.apiKey)
-            attach('talkFirst', async() => {
+            attach('talkFirst', async({ plugins }) => {
+                plugins.print.send({})
                 return
             })
             attach('parseFailed', async({ count, retry, response, changeMessages }) => {
@@ -61,7 +64,7 @@ const genFocus = async (params: {
                 }
             })
         },
-        assembly: async ({ title, content }) => {
+        question: async ({ title, content }) => {
             return templates.requireJsonResponse([
                 '以下是一篇來自BBC NEWs的新聞',
                 '請你幫我濃縮成200字的摘要，新聞內容如下',

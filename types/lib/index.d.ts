@@ -12,10 +12,10 @@ import { ImagesGenerations as _ImagesGenerations } from './service/images-genera
 export declare type TextParser = _TextParser;
 export declare type Translator<S extends ValidateCallback<any>, O extends ValidateCallback<any>> = _Translator.Translator<S, O>;
 export declare type TranslatorParams<S extends ValidateCallback<any>, O extends ValidateCallback<any>> = _Translator.TranslatorParams<S, O>;
-export declare type ChatGPT3Broker<S extends ValidateCallback<any>, O extends ValidateCallback<any>> = _ChatGPT3Broker<S, O>;
-export declare type ChatGPT35Broker<S extends ValidateCallback<any>, O extends ValidateCallback<any>> = _ChatGPT35Broker<S, O>;
-export declare type Broker3Plugin<T extends ValidateCallback<any>> = _Plugins.Broker3Plugin<T>;
-export declare type Broker35Plugin<T extends ValidateCallback<any>> = _Plugins.Broker35Plugin<T>;
+export declare type ChatGPT3Broker<S extends ValidateCallback<any>, O extends ValidateCallback<any>> = _ChatGPT3Broker<S, O, any, any>;
+export declare type ChatGPT35Broker<S extends ValidateCallback<any>, O extends ValidateCallback<any>> = _ChatGPT35Broker<S, O, any, any>;
+export declare type Broker3Plugin<T extends ValidateCallback<any>, R extends ValidateCallback<any>> = _Plugins.Broker3Plugin<T, R>;
+export declare type Broker35Plugin<T extends ValidateCallback<any>, R extends ValidateCallback<any>> = _Plugins.Broker35Plugin<T, R>;
 export declare type ImagesGenerations = _ImagesGenerations;
 export declare const TextParser: typeof _TextParser;
 export declare const Translator: typeof _Translator.Translator;

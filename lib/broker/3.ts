@@ -8,7 +8,9 @@ import { ValidateCallback, ValidateCallbackOutputs } from '../utils/validate'
 export class ChatGPT3Broker<
     S extends ValidateCallback<any>,
     O extends ValidateCallback<any>,
-    > extends BaseBroker<S, O, Broker3Plugin<any>, {
+    P extends Broker3Plugin<any, any>,
+    PS extends Record<string, ReturnType<P['use']>>
+    > extends BaseBroker<S, O, P, PS, {
 
         /**
          * @zh 發送聊天訊息給機器人前觸發
@@ -19,6 +21,11 @@ export class ChatGPT3Broker<
             id: string
             data: ValidateCallbackOutputs<S>
             prompt: string
+            plugins: {
+                [K in keyof PS]: {
+                    send: (data: PS[K]['__receiveData']) => void
+                }
+            }
         }
 
         /**
@@ -89,10 +96,20 @@ export class ChatGPT3Broker<
             let response: ChatGPT3TalkResponse = null as any
             let parseText = ''
             let retryFlag = false
+            let plugins = {} as any
+            for (let key in this.plugins) {
+                plugins[key] = {
+                    send: (data: any) => this.plugins[key].send({
+                        id,
+                        data
+                    })
+                }
+            }
             try {
                 await this.hook.notify('talkBefore', {
                     id,
                     data,
+                    plugins,
                     prompt: question.prompt
                 })
                 response = await this.bot.talk(question.prompt)

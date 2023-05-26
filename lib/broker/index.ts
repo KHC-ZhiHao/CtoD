@@ -10,10 +10,11 @@ export type Params<
     S extends ValidateCallback<any>,
     O extends ValidateCallback<any>,
     C extends Record<string, any>,
-    P extends Broker3Plugin<any> | Broker35Plugin<any>
+    P extends Broker3Plugin<any, any> | Broker35Plugin<any, any>,
+    PS extends Record<string, ReturnType<P['use']>>
 > = Omit<TranslatorParams<S, O>, 'parsers'> & {
     name?: string
-    plugins?: ReturnType<P['use']>[] | (() => ReturnType<P['use']>[])
+    plugins?: PS | (() => PS)
     install: (context: {
         log: Log
         bot: ChatGPT3 | ChatGPT35
@@ -26,18 +27,20 @@ export type Params<
 export class BaseBroker<
     S extends ValidateCallback<any>,
     O extends ValidateCallback<any>,
-    P extends Broker3Plugin<any> | Broker35Plugin<any>,
+    P extends Broker3Plugin<any, any> | Broker35Plugin<any, any>,
+    PS extends Record<string, ReturnType<P['use']>>,
     C extends Record<string, any>
 > {
+    protected __hookType!: C
     protected log: Log
     protected hook = new Hook<C>()
     protected bot!: ChatGPT3 | ChatGPT35
-    protected params: Params<S, O, C, P>
+    protected params: Params<S, O, C, P, PS>
+    protected plugins = {} as PS
     protected installed = false
     protected translator: Translator<S, O>
-    protected __hookType!: C
 
-    constructor(params: Params<S, O, C, P>) {
+    constructor(params: Params<S, O, C, P, PS>) {
         this.log = new Log(params.name ?? 'no name')
         this.params = params
         this.translator = new Translator({
@@ -59,16 +62,17 @@ export class BaseBroker<
                     attachAfter: this.hook.attachAfter.bind(this.hook),
                     translator: this.translator
                 }
+                this.params.install(context)
                 if (this.params.plugins) {
-                    let plugins = typeof this.params.plugins === 'function' ? this.params.plugins() : this.params.plugins
-                    for (let plugin of plugins) {
-                        plugin.instance._params.onInstall({
+                    this.plugins = typeof this.params.plugins === 'function' ? this.params.plugins() : this.params.plugins
+                    for (let key in this.plugins) {
+                        this.plugins[key].instance._params.onInstall({
                             ...context,
-                            params: plugin.params
+                            params: this.plugins[key].params,
+                            receive: this.plugins[key].receive
                         })
                     }
                 }
-                this.params.install(context)
             }
         }
     }

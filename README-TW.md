@@ -75,7 +75,7 @@ const broker = new ChatGPT35Broker({
         bot.setConfiguration(API_KEY)
     },
     /** 組裝與定義我們要向機器人發出的請求 */
-    assembly: async({ indexs, question }) => {
+    question: async({ indexs, question }) => {
         return templates.requireJsonResponse([
             '我有以下索引',
             `${JSON.stringify(indexs)}`,
@@ -141,22 +141,34 @@ const backupPlugin = new Broker35Plugin({
             sendUrl: yup.string().required()
         }
     },
-    onInstall({ params, attach }) {
-        const states = new Map()
+    // 現階段你可以在執行過程中接收到資訊，資訊結構由這裡定義。
+    receiveData: yup => {
+        return {
+            character: yup.string().required()
+        }
+    },
+    onInstall({ params, attach, receive }) {
+        const store = new Map()
+        // 假設我們有更多的自訂義資訊需要被傳遞進來，可以在 talkFirst 階段透過 plugins[key].send({ ... }) 傳遞
+        // 可以從 Applications 分類中的 請機器人角色扮演 觀看案例
+        receive(({ id, context }) => {
+            store.get(id).context = context
+        })
         // 第一次對話的時候初始化資料
         attach('talkFirst', async({ id }) => {
-            states.set(id, [])
+            store.set(id, {
+                messages: [],
+                context: null
+            })
         })
         // 每次對話完畢後把對話存入狀態
         attach('talkAfter', async({ id, lastUserMessage }) => {
-            states.set(id, [...state.get(id), lastUserMessage])
+            store.get(id).messages.push(lastUserMessage)
         })
         // 結束對話後備份資料
         attach('done', async({ id }) => {
-            await axios.post(params.sendUrl, {
-                messages: states.get(id)
-            })
-            states.delete(id)
+            await axios.post(params.sendUrl, store.get(id))
+            store.delete(id)
         })
     }
 })
@@ -180,4 +192,43 @@ const broker = new ChatGPT35Broker({
 
 ### Examples
 
-1. [Print Log Plugin](./lib/plugins.ts)
+1. 能夠印出執行流程：[Print Log Plugin](./lib/plugins/print-log.ts)
+2. 能夠限制發送流量：[Limiter Plugin](./lib/plugins/limiter.ts)
+3. 能夠在失敗的時候重試：[Retry Plugin](./lib/plugins/retry.ts)
+
+### Applications
+
+以下是一組應用範例，你可以參考這些範例來設計你的 AI System。
+
+> 你可以透過 clone 本專案，在根目錄中加入 .key file，並貼上你的 openai dev key 來快速試用這些使用範例。
+
+[解讀 BBC News](./examples/applications/bbc-news-reader.ts)
+[請機器人角色扮演](./examples/applications/cosplay.ts)
+[故事與封面生產器]('./examples/applications/story-generations.ts')
+[對話生產器]('./examples/applications/talk-generations.ts')
+
+## Version History
+
+### 0.1.x
+
+我們對 plugin 做了比較大的異動，主要是為了能夠實行資料交換。
+
+#### ChatGPT35 Service
+
+##### remove: getJailbrokenMessages
+
+方案已過時。
+
+#### Broker
+
+##### add: setPreMessages
+
+能夠讓使用者在對話開始前，先輸入一些訊息，並確保首要問題被組合至。
+
+##### fix: hook
+
+修改了綁定行為，現在是 Broker 的綁定優先，再來才是 plugins。
+
+##### change: assembly => question
+
+為了讓使用者更容易理解，我們將 assembly 改名為 question。

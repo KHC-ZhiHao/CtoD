@@ -36,20 +36,19 @@ flow.run(async() => {
                 })).required()
             }
         },
-        plugins: [
-            plugins.PrintLogPlugin.ver35.use({})
-        ],
-        install: ({ bot, attach }) => {
-            bot.setConfiguration(apiKey)
-            attach('parseFailed', async({ count, retry, response, changeMessages }) => {
-                if (count <= 1) {
-                    console.log(`回傳錯誤，正在重試: ${count} 次`)
-                    changeMessages([response.newMessages[0]])
-                    retry()
-                }
+        plugins: {
+            retry: plugins.RetryPlugin.ver35.use({
+                retry: 1,
+                printWarn: false
+            }),
+            print: plugins.PrintLogPlugin.ver35.use({
+                detail: false
             })
         },
-        assembly: async({ indexs, question }) => {
+        install: ({ bot }) => {
+            bot.setConfiguration(apiKey)
+        },
+        question: async({ indexs, question }) => {
             return templates.requireJsonResponse([
                 '我有以下索引',
                 `${JSON.stringify(indexs)}`,

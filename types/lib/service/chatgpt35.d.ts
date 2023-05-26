@@ -2,6 +2,7 @@ import { AxiosInstance } from 'axios';
 import { PromiseResponseType } from '../types';
 export declare type ChatGPT35Message = {
     role: 'system' | 'user' | 'assistant';
+    name?: string;
     content: string;
 };
 declare type ApiResponse = {
@@ -13,6 +14,7 @@ declare type ApiResponse = {
         finish_reason: string;
         message: {
             role: 'system' | 'user' | 'assistant';
+            name?: string;
             content: string;
         };
     }>;
@@ -44,11 +46,6 @@ export declare class ChatGPT35 {
     private axios;
     private apiKey;
     private config;
-    /**
-     * @zh 獲取 DAN 指令啟用的 message
-     * @en Get the message that enables the DAN command
-     */
-    static getJailbrokenMessages(): Array<ChatGPT35Message>;
     /**
      * @zh 如果你有需要特別設定 axios，請使用這方法
      * @en If you need to set axios, use this method

@@ -20,7 +20,7 @@ export declare type TranslatorParams<S extends ValidateCallback<any>, O extends 
      * @zh 組合輸入資料成為提示文字。
      * @en Combine the input data into a prompt.
      */
-    assembly: (data: ValidateCallbackOutputs<S>) => Promise<string>;
+    question: (data: ValidateCallbackOutputs<S>) => Promise<string>;
 };
 export declare class Translator<S extends ValidateCallback<any>, O extends ValidateCallback<any>> {
     private params;

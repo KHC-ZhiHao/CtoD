@@ -15,10 +15,10 @@ import { ImagesGenerations as _ImagesGenerations } from './service/images-genera
 export type TextParser = _TextParser
 export type Translator<S extends ValidateCallback<any>, O extends ValidateCallback<any>> = _Translator.Translator<S, O>
 export type TranslatorParams<S extends ValidateCallback<any>, O extends ValidateCallback<any>> = _Translator.TranslatorParams<S, O>
-export type ChatGPT3Broker<S extends ValidateCallback<any>, O extends ValidateCallback<any>> = _ChatGPT3Broker<S, O>
-export type ChatGPT35Broker<S extends ValidateCallback<any>, O extends ValidateCallback<any>> = _ChatGPT35Broker<S, O>
-export type Broker3Plugin<T extends ValidateCallback<any>> = _Plugins.Broker3Plugin<T>
-export type Broker35Plugin<T extends ValidateCallback<any>> = _Plugins.Broker35Plugin<T>
+export type ChatGPT3Broker<S extends ValidateCallback<any>, O extends ValidateCallback<any>> = _ChatGPT3Broker<S, O, any, any>
+export type ChatGPT35Broker<S extends ValidateCallback<any>, O extends ValidateCallback<any>> = _ChatGPT35Broker<S, O, any, any>
+export type Broker3Plugin<T extends ValidateCallback<any>, R extends ValidateCallback<any>> = _Plugins.Broker3Plugin<T, R>
+export type Broker35Plugin<T extends ValidateCallback<any>, R extends ValidateCallback<any>> = _Plugins.Broker35Plugin<T, R>
 export type ImagesGenerations = _ImagesGenerations
 
 export const TextParser = _TextParser

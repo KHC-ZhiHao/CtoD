@@ -48,9 +48,11 @@ const genStory = async (params: {
                 zhTwContent: yup.array(yup.string()).required()
             }
         },
-        plugins: [
-            plugins.PrintLogPlugin.ver35.use({})
-        ],
+        plugins: {
+            print: plugins.PrintLogPlugin.ver35.use({
+                detail: false
+            })
+        },
         install: ({ bot, attach }) => {
             bot.setConfiguration(params.apiKey)
             attach('parseFailed', async({ count, retry, response, changeMessages }) => {
@@ -61,7 +63,7 @@ const genStory = async (params: {
                 }
             })
         },
-        assembly: async ({ style, ending }) => {
+        question: async ({ style, ending }) => {
             return templates.requireJsonResponse([
                 `生成一個 ${style} 風格的故事，必須是 ${ending} 結局`,
                 '內容請豐富精彩有深度，而且有起承轉合，符合電影的三段結構，必須1000字以上',

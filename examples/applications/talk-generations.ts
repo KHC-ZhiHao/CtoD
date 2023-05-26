@@ -176,9 +176,11 @@ const genTalk = async (params: {
                 zhTwContent: yup.array(yup.string()).required()
             }
         },
-        plugins: [
-            plugins.PrintLogPlugin.ver35.use({})
-        ],
+        plugins: {
+            print: plugins.PrintLogPlugin.ver35.use({
+                detail: false
+            })
+        },
         install: ({ bot, attach }) => {
             bot.setConfiguration(params.apiKey)
             attach('parseFailed', async ({ count, retry, response, changeMessages }) => {
@@ -189,7 +191,7 @@ const genTalk = async (params: {
                 }
             })
         },
-        assembly: async ({ situation, style, tone }) => {
+        question: async ({ situation, style, tone }) => {
             return templates.requireJsonResponse([
                 `幫我生成一組以${style}為出發點的對話`,
                 `是兩個 ${tone} 的人進行，${situation}`,

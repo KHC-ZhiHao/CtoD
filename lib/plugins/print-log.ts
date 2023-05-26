@@ -1,12 +1,6 @@
-import { Log } from 'power-helper'
-import { Broker35Plugin, Broker3Plugin } from './core/plugin'
+import { Broker35Plugin, Broker3Plugin } from '../core/plugin'
 
-/**
- * @zh 一個基於印出 log 的 plugin。
- * @en A plugin based on printing log.
- */
-
-export const PrintLogPlugin = {
+export default  {
 
     /**
      * @zh 用於 Broker3 的版本。
@@ -18,8 +12,10 @@ export const PrintLogPlugin = {
         params: () => {
             return {}
         },
-        onInstall({ attach }) {
-            const log = new Log('print-log-plugin')
+        receiveData: () => {
+            return {}
+        },
+        onInstall({ log, attach }) {
             attach('talkBefore', async({ prompt }) => {
                 log.print('Send:', { color: 'green' })
                 log.print(prompt)
@@ -46,13 +42,22 @@ export const PrintLogPlugin = {
 
     ver35: new Broker35Plugin({
         name: 'print-log',
-        params: () => {
+        params: yup => {
+            return {
+                detail: yup.boolean().required().default(false)
+            }
+        },
+        receiveData: () => {
             return {}
         },
-        onInstall({ log, attach }) {
-            attach('talkBefore', async({ lastUserMessage }) => {
+        onInstall({ params, log, attach }) {
+            attach('talkBefore', async({ lastUserMessage, messages }) => {
                 log.print('Send:', { color: 'green' })
-                log.print('\n' + lastUserMessage)
+                if (params.detail) {
+                    log.print('\n' + JSON.stringify(messages, null, 4))
+                } else {
+                    log.print('\n' + lastUserMessage)
+                }
             })
             attach('talkAfter', async({ parseText }) => {
                 log.print('Receive:', { color: 'cyan' })
@@ -69,24 +74,3 @@ export const PrintLogPlugin = {
         }
     })
 }
-
-export const retryPlugin = new Broker35Plugin({
-    name: 'retry',
-    params: yup => {
-        return {
-            retry: yup.number().required().default(1),
-            warn: yup.boolean().required().default(true)
-        }
-    },
-    onInstall({ log, attach, params }) {
-        attach('parseFailed', async({ count, retry, response, changeMessages }) => {
-            if (count <= params.retry) {
-                if (params.warn) {
-                    log.print(`回傳錯誤，正在重試: ${count} 次`)
-                }
-                changeMessages([response.newMessages[0]])
-                retry()
-            }
-        })
-    }
-})

@@ -3,7 +3,7 @@ import { BaseBroker } from './index';
 import { Broker3Plugin } from '../core/plugin';
 import { ChatGPT3, ChatGPT3TalkResponse } from '../service/chatgpt3';
 import { ValidateCallback, ValidateCallbackOutputs } from '../utils/validate';
-export declare class ChatGPT3Broker<S extends ValidateCallback<any>, O extends ValidateCallback<any>> extends BaseBroker<S, O, Broker3Plugin<any>, {
+export declare class ChatGPT3Broker<S extends ValidateCallback<any>, O extends ValidateCallback<any>, P extends Broker3Plugin<any, any>, PS extends Record<string, ReturnType<P['use']>>> extends BaseBroker<S, O, P, PS, {
     /**
      * @zh 發送聊天訊息給機器人前觸發
      * @en Triggered before sending chat message to bot
@@ -12,6 +12,11 @@ export declare class ChatGPT3Broker<S extends ValidateCallback<any>, O extends V
         id: string;
         data: ValidateCallbackOutputs<S>;
         prompt: string;
+        plugins: {
+            [K in keyof PS]: {
+                send: (data: PS[K]['__receiveData']) => void;
+            };
+        };
     };
     /**
      * @zh 當聊天機器人回傳資料的時候觸發

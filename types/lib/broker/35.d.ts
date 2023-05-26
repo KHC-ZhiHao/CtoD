@@ -3,7 +3,7 @@ import { Translator } from '../core/translator';
 import { Broker35Plugin } from '../core/plugin';
 import { ValidateCallback, ValidateCallbackOutputs } from '../utils/validate';
 import { ChatGPT35, ChatGPT35Message, ChatGPT35TalkResponse } from '../service/chatgpt35';
-export declare class ChatGPT35Broker<S extends ValidateCallback<any>, O extends ValidateCallback<any>> extends BaseBroker<S, O, Broker35Plugin<any>, {
+export declare class ChatGPT35Broker<S extends ValidateCallback<any>, O extends ValidateCallback<any>, P extends Broker35Plugin<any, any>, PS extends Record<string, ReturnType<P['use']>>> extends BaseBroker<S, O, P, PS, {
     /**
      * @zh 第一次聊天的時候觸發
      * @en Triggered when chatting for the first time
@@ -11,7 +11,13 @@ export declare class ChatGPT35Broker<S extends ValidateCallback<any>, O extends 
     talkFirst: {
         id: string;
         data: ValidateCallbackOutputs<S>;
+        plugins: {
+            [K in keyof PS]: {
+                send: (data: PS[K]['__receiveData']) => void;
+            };
+        };
         messages: ChatGPT35Message[];
+        setPreMessages: (messages: ChatGPT35Message[]) => void;
         changeMessages: (messages: ChatGPT35Message[]) => void;
     };
     /**

@@ -75,7 +75,7 @@ const broker = new ChatGPT35Broker({
         bot.setConfiguration(API_KEY)
     },
     /** Assemble and define the request we want to send to the bot */
-    assembly: async({ indexs, question }) => {
+    question: async({ indexs, question }) => {
         return templates.requireJsonResponse([
             'I have the following indices',
             `${JSON.stringify(indexs)}`,
@@ -123,42 +123,54 @@ broker.request({
 
 2. [How to integrate machine responses using ChatGPT35Broker](./examples/chatgpt3.5-broker.ts)
 
-
 ## Plugin
 
-Although the Broker can handle most of the tasks on its own, using plugins can help improve complex workflows and facilitate project engineering.
+Although the Broker itself is capable of handling most tasks, plugins can help improve complex processes and facilitate project engineering.
 
-Each time a request is sent, the Broker triggers a series of lifecycles, which you can understand from the [source code](./lib/broker/35.ts) and modify their behavior.
+Each time a request is sent, the Broker triggers a series of lifecycles. You can understand the parameters and behaviors of each lifecycle from the [source code](./lib/broker/35.ts) and modify its behavior.
 
 Now, let's say we want to design a plugin that backs up messages to a server every time a conversation ends:
 
 ```ts
 import axios from 'axios'
 import { ChatGPT35Broker, Broker35Plugin } from 'ctod'
+
 const backupPlugin = new Broker35Plugin({
     name: 'backup-plugin',
-    // Define the parameter as sendUrl
+    // Define the 'sendUrl' parameter
     params: yup => {
         return {
             sendUrl: yup.string().required()
         }
     },
-    onInstall({ params, attach }) {
-        const states = new Map()
-        // Initialize data when the first conversation starts
+    // Define the structure of received data
+    receiveData: yup => {
+        return {
+            character: yup.string().required()
+        }
+    },
+    onInstall({ params, attach, receive }) {
+        const store = new Map()
+        // If there are more custom information to be passed, you can use plugins[key].send({ ... }) during the execution process
+        // You can refer to the case of Role-playing as a Chatbot in the Applications section
+        receive(({ id, context }) => {
+            store.get(id).context = context
+        })
+        // Initialize data for the first conversation
         attach('talkFirst', async({ id }) => {
-            states.set(id, [])
-        })
-        // Store conversation data after each conversation
-        attach('talkAfter', async({ id, lastUserMessage }) => {
-            states.set(id, [...state.get(id), lastUserMessage])
-        })
-        // Backup data after conversation ends
-        attach('done', async({ id }) => {
-            await axios.post(params.sendUrl, {
-                messages: states.get(id)
+            store.set(id, {
+                messages: [],
+                context: null
             })
-            states.delete(id)
+        })
+        // Store the conversation after each conversation
+        attach('talkAfter', async({ id, lastUserMessage }) => {
+            store.get(id).messages.push(lastUserMessage)
+        })
+        // Backup data after the conversation ends
+        attach('done', async({ id }) => {
+            await axios.post(params.sendUrl, store.get(id))
+            store.delete(id)
         })
     }
 })
@@ -170,7 +182,7 @@ const broker = new ChatGPT35Broker({
             sendUrl: 'https://api/backup'
         })
     ],
-    // The following approach can also work.
+    // Alternatively, you can use the following approach
     // plugins: () => [
     //     backupPlugin.use({
     //         sendUrl: 'https://api/backup'
@@ -182,4 +194,43 @@ const broker = new ChatGPT35Broker({
 
 ### Examples
 
-1. [Print Log Plugin](./lib/plugins.ts)
+1. Print the execution flow: [Print Log Plugin](./lib/plugins/print-log.ts)
+2. Limit the sending rate: [Limiter Plugin](./lib/plugins/limiter.ts)
+3. Retry on failure: [Retry Plugin](./lib/plugins/retry.ts)
+
+### Applications
+
+Here are some application examples that you can refer to when designing your AI system.
+
+> You can clone this project, add a .key file in the root directory, and paste your OpenAI Dev Key to quickly try out these examples.
+
+[Interpret BBC News](./examples/applications/bbc-news-reader.ts)
+[Role-playing as a Chatbot](./examples/applications/cosplay.ts)
+[Story and Cover Generator]('./examples/applications/story-generations.ts')
+[Conversation Generator]('./examples/applications/talk-generations.ts')
+
+## Version History
+
+### 0.1.x
+
+We made significant changes to the plugin to facilitate data exchange.
+
+#### ChatGPT35 Service
+
+##### remove: getJailbrokenMessages
+
+This approach is deprecated.
+
+#### Broker
+
+##### add: setPreMessages
+
+Allows users to enter some messages before the conversation starts, ensuring that the primary question is included.
+
+##### fix: hook
+
+Modified the binding behavior. Now, the binding of the Broker takes priority over plugins.
+
+##### change: assembly => question
+
+To make it easier for users to understand, we renamed "assembly" to "question".

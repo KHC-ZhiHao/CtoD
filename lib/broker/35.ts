@@ -7,8 +7,10 @@ import { ChatGPT35, ChatGPT35Message, ChatGPT35TalkResponse } from '../service/c
 
 export class ChatGPT35Broker<
     S extends ValidateCallback<any>,
-    O extends ValidateCallback<any>
-    > extends BaseBroker<S, O, Broker35Plugin<any>, {
+    O extends ValidateCallback<any>,
+    P extends Broker35Plugin<any, any>,
+    PS extends Record<string, ReturnType<P['use']>>
+    > extends BaseBroker<S, O, P, PS, {
 
         /**
          * @zh 第一次聊天的時候觸發
@@ -18,7 +20,13 @@ export class ChatGPT35Broker<
         talkFirst: {
             id: string
             data: ValidateCallbackOutputs<S>
+            plugins: {
+                [K in keyof PS]: {
+                    send: (data: PS[K]['__receiveData']) => void
+                }
+            }
             messages: ChatGPT35Message[]
+            setPreMessages: (messages: ChatGPT35Message[]) => void
             changeMessages: (messages: ChatGPT35Message[]) => void
         }
 
@@ -96,6 +104,7 @@ export class ChatGPT35Broker<
         this._install()
         let id = flow.createUuid()
         let output: any = null
+        let plugins = {} as any
         let question = await this.translator.compile(data)
         let messages: ChatGPT35Message[] = [
             {
@@ -103,10 +112,28 @@ export class ChatGPT35Broker<
                 content: question.prompt
             }
         ]
+        for (let key in this.plugins) {
+            plugins[key] = {
+                send: (data: any) => this.plugins[key].send({
+                    id,
+                    data
+                })
+            }
+        }
         await this.hook.notify('talkFirst', {
             id,
             data,
+            plugins,
             messages,
+            setPreMessages: ms => {
+                messages = [
+                    ...ms,
+                    {
+                        role: 'user',
+                        content: question.prompt
+                    }
+                ]
+            },
             changeMessages: ms => {
                 messages = ms
             }

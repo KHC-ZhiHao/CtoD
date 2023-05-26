@@ -24,7 +24,7 @@ export type TranslatorParams<
      * @zh 組合輸入資料成為提示文字。
      * @en Combine the input data into a prompt.
      */
-    assembly: (data: ValidateCallbackOutputs<S>) => Promise<string>
+    question: (data: ValidateCallbackOutputs<S>) => Promise<string>
 }
 
 export class Translator<
@@ -51,7 +51,7 @@ export class Translator<
 
     async compile(data: ValidateCallbackOutputs<S>) {
         const scheme = validate(data, this.params.input)
-        const prompt = await this.params.assembly(scheme)
+        const prompt = await this.params.question(scheme)
         return {
             scheme,
             prompt
