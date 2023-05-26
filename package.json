@@ -1,6 +1,6 @@
 {
   "name": "ctod",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "CtoD Is Chat To Data, support chatGPT3 and 3.5 now!",
   "main": "./dist/index.js",
   "scripts": {
