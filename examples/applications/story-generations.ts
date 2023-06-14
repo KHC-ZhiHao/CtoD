@@ -66,7 +66,7 @@ const genStory = async (params: {
         question: async ({ style, ending }) => {
             return templates.requireJsonResponse([
                 `生成一個 ${style} 風格的故事，必須是 ${ending} 結局`,
-                '內容請豐富精彩有深度，而且有起承轉合，符合電影的三段結構，必須1000字以上',
+                '內容請豐富精彩有深度，而且有起承轉合，符合電影的三段結構，約300~400字',
                 '有中英兩種版本，中文是繁體中文'
             ], {
                 enUsOutline: {

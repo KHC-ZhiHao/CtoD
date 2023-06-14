@@ -35,8 +35,8 @@ type Config = {
      */
     n: number
     /**
-     * @zh 最長回應長度，最大值為 4096。
-     * @en The token count of your prompt plus max_tokens cannot exceed the model's context length. Most models have a context length of 2048 tokens (except for the newest models, which support 4096).
+     * @zh 最長回應長度，最大值為 16,384。
+     * @en The token count of your prompt plus max_tokens cannot exceed the model's context length. Most models have a context length of 2048 tokens (except for the newest models, which support 16,384).
      * @see https://platform.openai.com/tokenizer
      */
     maxTokens: number
@@ -91,7 +91,7 @@ export class ChatGPT35 {
     async talk(messages: ChatGPT35Message[] = []) {
         const newMessages = json.jpjs(messages)
         const result = await this.axios.post<ApiResponse>('https://api.openai.com/v1/chat/completions', {
-            model: 'gpt-3.5-turbo',
+            model: 'gpt-3.5-turbo-16k',
             n: this.config.n,
             messages: newMessages,
             max_tokens: this.config.maxTokens,

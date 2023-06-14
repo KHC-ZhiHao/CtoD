@@ -31,8 +31,8 @@ declare type Config = {
      */
     n: number;
     /**
-     * @zh 最長回應長度，最大值為 4096。
-     * @en The token count of your prompt plus max_tokens cannot exceed the model's context length. Most models have a context length of 2048 tokens (except for the newest models, which support 4096).
+     * @zh 最長回應長度，最大值為 16,384。
+     * @en The token count of your prompt plus max_tokens cannot exceed the model's context length. Most models have a context length of 2048 tokens (except for the newest models, which support 16,384).
      * @see https://platform.openai.com/tokenizer
      */
     maxTokens: number;
