@@ -35,11 +35,10 @@ type Config = {
      */
     n: number
     /**
-     * @zh 最長回應長度，最大值為 16,384。
-     * @en The token count of your prompt plus max_tokens cannot exceed the model's context length. Most models have a context length of 2048 tokens (except for the newest models, which support 16,384).
-     * @see https://platform.openai.com/tokenizer
+     * @zh 選擇運行的模型，16k意味著能處理長度為 16,384 的文本，而預設為 4096。
+     * @en How many chat completion choices to generate for each input message.
      */
-    maxTokens: number
+    model: 'gpt-3.5-turbo' | 'gpt-3.5-turbo-16k'
     /**
      * @zh 冒險指數，數值由 0 ~ 2 之間。
      * @en What sampling temperature to use, between 0 and 2. Higher values like 0.8 will make the output more random, while lower values like 0.2 will make it more focused and deterministic.
@@ -52,7 +51,7 @@ export class ChatGPT35 {
     private apiKey = ''
     private config: Config = {
         n: 1,
-        maxTokens: 2048,
+        model: 'gpt-3.5-turbo',
         temperature: 1
     }
 
@@ -91,10 +90,9 @@ export class ChatGPT35 {
     async talk(messages: ChatGPT35Message[] = []) {
         const newMessages = json.jpjs(messages)
         const result = await this.axios.post<ApiResponse>('https://api.openai.com/v1/chat/completions', {
-            model: 'gpt-3.5-turbo-16k',
+            model: this.config.model,
             n: this.config.n,
             messages: newMessages,
-            max_tokens: this.config.maxTokens,
             temperature: this.config.temperature
         }, {
             headers: {

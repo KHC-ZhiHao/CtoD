@@ -234,3 +234,8 @@ Modified the binding behavior. Now, the binding of the Broker takes priority ove
 ##### change: assembly => question
 
 To make it easier for users to understand, we renamed "assembly" to "question".
+
+### 0.1.3
+
+* Remove: max_token
+* Add: model add 16k

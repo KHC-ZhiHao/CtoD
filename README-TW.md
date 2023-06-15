@@ -232,3 +232,8 @@ const broker = new ChatGPT35Broker({
 ##### change: assembly => question
 
 為了讓使用者更容易理解，我們將 assembly 改名為 question。
+
+### 0.1.3
+
+* 移除: max_token
+* 新增: model add 16k
