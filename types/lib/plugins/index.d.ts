@@ -38,3 +38,12 @@ export declare const LimiterPlugin: {
     closeSchedule: () => void;
     ver35: import("../core/plugin").Broker35Plugin<() => {}, () => {}>;
 };
+/**
+ * @zh 設定角色扮演。
+ * @en Set role play.
+ */
+export declare const RolePlugin: {
+    ver35: import("../core/plugin").Broker35Plugin<(yup: typeof import("yup")) => {
+        role: import("yup").StringSchema<string, import("yup").AnyObject, undefined, "">;
+    }, () => {}>;
+};

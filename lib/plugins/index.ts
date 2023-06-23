@@ -1,6 +1,7 @@
 import Retry from './retry'
 import PrintLog from './print-log'
 import Limiter from './limiter'
+import Role from './role'
 
 /**
  * @zh 一個基於印出 log 的 plugin。
@@ -22,3 +23,11 @@ export const RetryPlugin = Retry
  */
 
 export const LimiterPlugin = Limiter
+
+
+/**
+ * @zh 設定角色扮演。
+ * @en Set role play.
+ */
+
+export const RolePlugin = Role
