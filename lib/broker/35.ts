@@ -167,7 +167,7 @@ export class ChatGPT35Broker<
                     }
                 })
                 messages = response.newMessages
-                output = (await this.translator.parse(response.text)).output
+                output = (await this.translator.parse(parseText)).output
                 await this.hook.notify('succeeded', {
                     id,
                     output
