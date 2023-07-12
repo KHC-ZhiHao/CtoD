@@ -1,16 +1,34 @@
 import { flow } from 'power-helper'
-import { Translator } from '../core/translator'
 import { BaseBroker } from './index'
-import { Broker3Plugin } from '../core/plugin'
-import { ChatGPT3, ChatGPT3TalkResponse } from '../service/chatgpt3'
+import { Translator } from '../core/translator'
+import { Broker4Plugin } from '../core/plugin'
 import { ValidateCallback, ValidateCallbackOutputs } from '../utils/validate'
+import { ChatGPT4, ChatGPT4Message, ChatGPT4TalkResponse } from '../service/chatgpt4'
 
-export class ChatGPT3Broker<
+export class ChatGPT4Broker<
     S extends ValidateCallback<any>,
     O extends ValidateCallback<any>,
-    P extends Broker3Plugin<any, any>,
+    P extends Broker4Plugin<any, any>,
     PS extends Record<string, ReturnType<P['use']>>
-    > extends BaseBroker<ChatGPT3, S, O, P, PS, {
+    > extends BaseBroker<ChatGPT4, S, O, P, PS, {
+
+        /**
+         * @zh 第一次聊天的時候觸發
+         * @en Triggered when chatting for the first time
+         */
+
+        talkFirst: {
+            id: string
+            data: ValidateCallbackOutputs<S>
+            plugins: {
+                [K in keyof PS]: {
+                    send: (data: PS[K]['__receiveData']) => void
+                }
+            }
+            messages: ChatGPT4Message[]
+            setPreMessages: (messages: ChatGPT4Message[]) => void
+            changeMessages: (messages: ChatGPT4Message[]) => void
+        }
 
         /**
          * @zh 發送聊天訊息給機器人前觸發
@@ -20,12 +38,8 @@ export class ChatGPT3Broker<
         talkBefore: {
             id: string
             data: ValidateCallbackOutputs<S>
-            prompt: string
-            plugins: {
-                [K in keyof PS]: {
-                    send: (data: PS[K]['__receiveData']) => void
-                }
-            }
+            messages: ChatGPT4Message[]
+            lastUserMessage: string
         }
 
         /**
@@ -36,12 +50,13 @@ export class ChatGPT3Broker<
         talkAfter: {
             id: string
             data: ValidateCallbackOutputs<S>
-            prompt: string
-            response: ChatGPT3TalkResponse
+            response: ChatGPT4TalkResponse
+            messages: ChatGPT4Message[]
             parseText: string
+            lastUserMessage: string
             changeParseText: (text: string) => void
         }
-        
+
         /**
          * @zh 當回傳資料符合規格時觸發
          * @en Triggered when the returned data meets the specifications
@@ -51,7 +66,7 @@ export class ChatGPT3Broker<
             id: string
             output: ValidateCallbackOutputs<O>
         }
- 
+    
         /**
          * @zh 當回傳資料不符合規格，或是解析錯誤時觸發
          * @en Triggered when the returned data does not meet the specifications or parsing errors
@@ -60,11 +75,13 @@ export class ChatGPT3Broker<
         parseFailed: {
             id: string
             error: any
-            count: number
             retry: () => void
-            response: ChatGPT3TalkResponse
+            count: number
+            response: ChatGPT4TalkResponse
             parserFails: { name: string, error: any }[]
-            changePrompt: (text: string) => void
+            messages: ChatGPT4Message[]
+            lastUserMessage: string
+            changeMessages: (messages: ChatGPT4Message[]) => void
         }
 
         /**
@@ -76,8 +93,7 @@ export class ChatGPT3Broker<
             id: string
         }
     }> {
-
-    bot: ChatGPT3 = new ChatGPT3()
+    bot: ChatGPT4 = new ChatGPT4()
 
     /**
      * @zh 將請求發出至聊天機器人。
@@ -88,42 +104,69 @@ export class ChatGPT3Broker<
         this._install()
         let id = flow.createUuid()
         let output: any = null
+        let plugins = {} as any
         let question = await this.translator.compile(data)
+        let messages: ChatGPT4Message[] = [
+            {
+                role: 'user',
+                content: question.prompt
+            }
+        ]
+        for (let key in this.plugins) {
+            plugins[key] = {
+                send: (data: any) => this.plugins[key].send({
+                    id,
+                    data
+                })
+            }
+        }
+        await this.hook.notify('talkFirst', {
+            id,
+            data,
+            plugins,
+            messages,
+            setPreMessages: ms => {
+                messages = [
+                    ...ms,
+                    {
+                        role: 'user',
+                        content: question.prompt
+                    }
+                ]
+            },
+            changeMessages: ms => {
+                messages = ms
+            }
+        })
         await flow.asyncWhile(async ({ count, doBreak }) => {
             if (count >= 10) {
                 return doBreak()
             }
-            let response: ChatGPT3TalkResponse = null as any
+            let response: ChatGPT4TalkResponse = null as any
             let parseText = ''
             let retryFlag = false
-            let plugins = {} as any
-            for (let key in this.plugins) {
-                plugins[key] = {
-                    send: (data: any) => this.plugins[key].send({
-                        id,
-                        data
-                    })
-                }
-            }
+            let lastUserMessage = messages.filter(e => e.role === 'user').slice(-1)[0]?.content || ''
             try {
                 await this.hook.notify('talkBefore', {
                     id,
                     data,
-                    plugins,
-                    prompt: question.prompt
+                    messages,
+                    lastUserMessage
                 })
-                response = await this.bot.talk(question.prompt)
+                response = await this.bot.talk(messages)
                 parseText = response.text
                 await this.hook.notify('talkAfter', {
                     id,
                     data,
-                    prompt: question.prompt,
                     response,
                     parseText,
+                    messages: response.newMessages,
+                    lastUserMessage,
                     changeParseText: text => {
                         parseText = text
                     }
                 })
+                messages = response.newMessages
                 output = (await this.translator.parse(parseText)).output
                 await this.hook.notify('succeeded', {
                     id,
@@ -139,20 +182,24 @@ export class ChatGPT3Broker<
                         error: error.error,
                         count,
                         response,
+                        messages,
+                        lastUserMessage,
                         parserFails: error.parserFails,
                         retry: () => {
                             retryFlag = true
                         },
-                        changePrompt: (text) => {
-                            question.prompt = text
+                        changeMessages: ms => {
+                            messages = ms
                         }
                     })
                     if (retryFlag === false) {
-                        return doBreak()
+                        await this.hook.notify('done', { id })
+                        throw error
                     }
+                } else {
+                    await this.hook.notify('done', { id })
+                    throw error
                 }
-                await this.hook.notify('done', { id })
-                throw error
             }
         })
         return output

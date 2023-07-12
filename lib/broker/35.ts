@@ -10,7 +10,7 @@ export class ChatGPT35Broker<
     O extends ValidateCallback<any>,
     P extends Broker35Plugin<any, any>,
     PS extends Record<string, ReturnType<P['use']>>
-    > extends BaseBroker<S, O, P, PS, {
+    > extends BaseBroker<ChatGPT35, S, O, P, PS, {
 
         /**
          * @zh 第一次聊天的時候觸發

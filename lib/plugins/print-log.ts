@@ -1,4 +1,4 @@
-import { Broker35Plugin, Broker3Plugin } from '../core/plugin'
+import { Broker35Plugin, Broker3Plugin, Broker4Plugin } from '../core/plugin'
 
 export default  {
 
@@ -41,6 +41,45 @@ export default  {
      */
 
     ver35: new Broker35Plugin({
+        name: 'print-log',
+        params: yup => {
+            return {
+                detail: yup.boolean().required().default(false)
+            }
+        },
+        receiveData: () => {
+            return {}
+        },
+        onInstall({ params, log, attach }) {
+            attach('talkBefore', async({ lastUserMessage, messages }) => {
+                log.print('Send:', { color: 'green' })
+                if (params.detail) {
+                    log.print('\n' + JSON.stringify(messages, null, 4))
+                } else {
+                    log.print('\n' + lastUserMessage)
+                }
+            })
+            attach('talkAfter', async({ parseText }) => {
+                log.print('Receive:', { color: 'cyan' })
+                log.print('\n' + parseText)
+            })
+            attach('succeeded', async({ output }) => {
+                log.print('Output:', { color: 'yellow' })
+                try {
+                    log.print('\n' + JSON.stringify(output, null, 4))
+                } catch (error) {
+                    log.print('\n' + output)
+                }
+            })
+        }
+    }),
+
+    /**
+     * @zh 用於 Broker4 的版本。
+     * @en The version for Broker4.
+     */
+
+    ver4: new Broker4Plugin({
         name: 'print-log',
         params: yup => {
             return {

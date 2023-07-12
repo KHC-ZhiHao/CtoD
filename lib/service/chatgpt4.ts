@@ -2,7 +2,7 @@ import axios, { AxiosInstance } from 'axios'
 import { json } from 'power-helper'
 import { PromiseResponseType } from '../types'
 
-export type ChatGPT35Message = {
+export type ChatGPT4Message = {
     role: 'system' | 'user' | 'assistant'
     name?: string
     content: string
@@ -35,10 +35,10 @@ type Config = {
      */
     n: number
     /**
-     * @zh 選擇運行的模型，16k意味著能處理長度為 16,384 的文本，而預設為 4096。
+     * @zh 選擇運行的模型，32k意味著能處理長度為 32768 的文本，而預設為 8192。
      * @en How many chat completion choices to generate for each input message.
      */
-    model: 'gpt-3.5-turbo' | 'gpt-3.5-turbo-16k'
+    model: 'gpt-4' | 'gpt-4-32k'
     /**
      * @zh 冒險指數，數值由 0 ~ 2 之間。
      * @en What sampling temperature to use, between 0 and 2. Higher values like 0.8 will make the output more random, while lower values like 0.2 will make it more focused and deterministic.
@@ -46,12 +46,12 @@ type Config = {
     temperature: number
 }
 
-export class ChatGPT35 {
+export class ChatGPT4 {
     axios = axios.create()
     apiKey = ''
     config: Config = {
         n: 1,
-        model: 'gpt-3.5-turbo',
+        model: 'gpt-4',
         temperature: 1
     }
 
@@ -87,7 +87,7 @@ export class ChatGPT35 {
      * @en Talk to the AI
      */
 
-    async talk(messages: ChatGPT35Message[] = []) {
+    async talk(messages: ChatGPT4Message[] = []) {
         const newMessages = json.jpjs(messages)
         const result = await this.axios.post<ApiResponse>('https://api.openai.com/v1/chat/completions', {
             model: this.config.model,
@@ -119,7 +119,7 @@ export class ChatGPT35 {
      * @zh 開啟持續性對話
      */
 
-    async chat(prompt: string | string[], oldMessages: ChatGPT35Message[] = []) {
+    async chat(prompt: string | string[], oldMessages: ChatGPT4Message[] = []) {
         const result = await this.talk([
             ...oldMessages,
             {
@@ -134,4 +134,4 @@ export class ChatGPT35 {
     }
 }
 
-export type ChatGPT35TalkResponse = PromiseResponseType<ChatGPT35['talk']>
+export type ChatGPT4TalkResponse = PromiseResponseType<ChatGPT4['talk']>

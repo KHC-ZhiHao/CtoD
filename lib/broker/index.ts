@@ -1,23 +1,25 @@
 import { Hook, Log } from 'power-helper'
 import { ChatGPT3 } from '../service/chatgpt3'
 import { ChatGPT35 } from '../service/chatgpt35'
+import { ChatGPT4 } from '../service/chatgpt4'
 import { TextParser } from '../core/parser'
 import { ValidateCallback } from '../utils/validate'
 import { Translator, TranslatorParams } from '../core/translator'
-import { Broker3Plugin, Broker35Plugin } from '../core/plugin'
+import { Broker3Plugin, Broker35Plugin, Broker4Plugin } from '../core/plugin'
 
 export type Params<
+    B extends ChatGPT3 | ChatGPT35 | ChatGPT4,
     S extends ValidateCallback<any>,
     O extends ValidateCallback<any>,
     C extends Record<string, any>,
-    P extends Broker3Plugin<any, any> | Broker35Plugin<any, any>,
+    P extends Broker3Plugin<any, any> | Broker35Plugin<any, any> | Broker4Plugin<any, any>,
     PS extends Record<string, ReturnType<P['use']>>
 > = Omit<TranslatorParams<S, O>, 'parsers'> & {
     name?: string
     plugins?: PS | (() => PS)
     install: (context: {
         log: Log
-        bot: ChatGPT3 | ChatGPT35
+        bot: B
         attach: Hook<C>['attach']
         attachAfter: Hook<C>['attachAfter']
         translator: Translator<S, O>
@@ -25,22 +27,23 @@ export type Params<
 }
 
 export class BaseBroker<
+    B extends ChatGPT3 | ChatGPT35 | ChatGPT4,
     S extends ValidateCallback<any>,
     O extends ValidateCallback<any>,
-    P extends Broker3Plugin<any, any> | Broker35Plugin<any, any>,
+    P extends Broker3Plugin<any, any> | Broker35Plugin<any, any> | Broker4Plugin<any, any>,
     PS extends Record<string, ReturnType<P['use']>>,
     C extends Record<string, any>
 > {
     protected __hookType!: C
     protected log: Log
     protected hook = new Hook<C>()
-    protected bot!: ChatGPT3 | ChatGPT35
-    protected params: Params<S, O, C, P, PS>
+    protected bot!: B
+    protected params: Params<B, S, O, C, P, PS>
     protected plugins = {} as PS
     protected installed = false
     protected translator: Translator<S, O>
 
-    constructor(params: Params<S, O, C, P, PS>) {
+    constructor(params: Params<B, S, O, C, P, PS>) {
         this.log = new Log(params.name ?? 'no name')
         this.params = params
         this.translator = new Translator({

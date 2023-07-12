@@ -6,9 +6,6 @@ import { ChatGPT35Broker } from '../broker/35'
 import { Translator } from './translator'
 import { ValidateCallback, ValidateCallbackOutputs } from '../utils/validate'
 
-// TODO: 初始化 和 receive 都沒實作檢查機制
-// 3
-
 type Broker3Hooks = ChatGPT3Broker<any, any, any, any>['__hookType']
 type Broker3PluginParams<
     T extends ValidateCallback<any>,
@@ -82,6 +79,51 @@ export class Broker35Plugin<
     _event = new Event()
     _params: Broker35PluginParams<T, R>
     constructor(params: Broker35PluginParams<T, R>) {
+        this._params = params
+    }
+
+    use(params: ValidateCallbackOutputs<T>) {
+        return {
+            instance: this as any,
+            params,
+            send: (data: ValidateCallbackOutputs<R>) => { this._event.emit('receive', data) },
+            receive: (callback: any) => { this._event.on('receive', callback) },
+            __receiveData: null as unknown as ValidateCallbackOutputs<R>
+        }
+    }
+}
+
+// 4
+
+type Broker4Hooks = ChatGPT35Broker<any, any, any, any>['__hookType']
+type Broker4PluginParams<
+    T extends ValidateCallback<any>,
+    R extends ValidateCallback<any>
+> = {
+    name: string
+    params: T
+    receiveData: R
+    onInstall: (context: {
+        bot: ChatGPT35
+        log: Log
+        params: ValidateCallbackOutputs<T>
+        attach: Hook<Broker4Hooks>['attach']
+        attachAfter: Hook<Broker4Hooks>['attachAfter']
+        translator: Translator<any, any>
+        receive: (callback: (params: {
+            id: string
+            data: ValidateCallbackOutputs<R>
+        }) => void) => void
+    }) => void
+}
+
+export class Broker4Plugin<
+    T extends ValidateCallback<any>,
+    R extends ValidateCallback<any>
+> {
+    _event = new Event()
+    _params: Broker4PluginParams<T, R>
+    constructor(params: Broker4PluginParams<T, R>) {
         this._params = params
     }
 

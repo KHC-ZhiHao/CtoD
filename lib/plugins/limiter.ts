@@ -1,4 +1,4 @@
-import { Broker35Plugin } from '../core/plugin'
+import { Broker35Plugin, Broker4Plugin } from '../core/plugin'
 import { Event, flow, Schedule } from 'power-helper'
 
 type Events = {
@@ -55,6 +55,58 @@ export default {
      */
 
     ver35: new Broker35Plugin({
+        name: 'limiter',
+        params: () => {
+            return {}
+        },
+        receiveData: () => {
+            return {}
+        },
+        onInstall({ attach }) {
+            if (state.schedule == null) {
+                state.schedule = new Schedule()
+                state.schedule.add('calc queue', 1000, async() => {
+                    const now = Date.now()
+                    state.waitTimes = state.waitTimes.filter(time => {
+                        return now - time < config.interval
+                    })
+                    if (state.waitTimes.length !== config.limit) {
+                        let nextId = state.waitQueue.shift()
+                        if (nextId) {
+                            state.waitTimes.push(Date.now())
+                            state.event.emit('run', {
+                                id: nextId
+                            })
+                        }
+                    } else if (state.waitTimes[0]) {
+                        state.event.emit('waitTimeChange', {
+                            waitTime: Math.floor(60 - (now - state.waitTimes[0]) / 1000)
+                        })
+                    }
+                })
+                state.schedule.play()
+            }
+            attach('talkBefore', async() => {
+                const uid = flow.createUuid()
+                state.waitQueue.push(uid)
+                return new Promise(resolve => {
+                    state.event.on('run', ({ id }, { off }) => {
+                        if (id === uid) {
+                            off()
+                            resolve()
+                        }
+                    })
+                })
+            })
+        }
+    }),
+
+    /**
+     * @zh 用於 Broker4 的版本。
+     * @en The version for Broker4.
+     */
+
+    ver4: new Broker4Plugin({
         name: 'limiter',
         params: () => {
             return {}

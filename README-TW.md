@@ -49,6 +49,8 @@ yarn add ctod
 
 > 關於型態定義，這裡有個有趣的議題，必須將 input 與 output 優先宣告才能讓型態正常運作。
 
+> ChatGPT4 的用法與 ChatGPT35 完全一致。
+
 ```ts
 import { ChatGPT35Broker, templates } from 'ctod'
 
@@ -209,6 +211,15 @@ const broker = new ChatGPT35Broker({
 
 ## Version History
 
+### 0.2.0
+
+* Add ChatGPT 4
+
+### 0.1.3
+
+* 移除: max_token
+* 新增: model add 16k
+
 ### 0.1.x
 
 我們對 plugin 做了比較大的異動，主要是為了能夠實行資料交換。
@@ -232,8 +243,3 @@ const broker = new ChatGPT35Broker({
 ##### change: assembly => question
 
 為了讓使用者更容易理解，我們將 assembly 改名為 question。
-
-### 0.1.3
-
-* 移除: max_token
-* 新增: model add 16k

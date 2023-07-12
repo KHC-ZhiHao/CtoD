@@ -49,6 +49,8 @@ This example demonstrates how to pass drug indices and customer requirements to 
 
 > Regarding type definitions, there is an interesting issue here: the input and output must be declared first in order for the types to function properly.
 
+> The usage of ChatGPT4 is exactly the same as ChatGPT35.
+
 ```ts
 import { ChatGPT35Broker, templates } from 'ctod'
 
@@ -211,6 +213,15 @@ Here are some application examples that you can refer to when designing your AI 
 
 ## Version History
 
+### 0.2.0
+
+* Add ChatGPT 4
+
+### 0.1.3
+
+* Remove: max_token
+* Add: model add 16k
+
 ### 0.1.x
 
 We made significant changes to the plugin to facilitate data exchange.
@@ -234,8 +245,3 @@ Modified the binding behavior. Now, the binding of the Broker takes priority ove
 ##### change: assembly => question
 
 To make it easier for users to understand, we renamed "assembly" to "question".
-
-### 0.1.3
-
-* Remove: max_token
-* Add: model add 16k

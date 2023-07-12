@@ -1,13 +1,13 @@
 import { flow } from 'power-helper'
 import { getKey } from '../utils'
 import { prompt } from 'inquirer'
-import { ChatGPT35Broker, plugins, Broker35Plugin, templates } from '../../lib/index'
+import { ChatGPT4Broker, plugins, Broker4Plugin, templates } from '../../lib/index'
 
 /**
  * @invoke npx ts-node ./examples/applications/cosplay.ts
  */
 
-const characterPlugin = new Broker35Plugin({
+const characterPlugin = new Broker4Plugin({
     name: 'character',
     params: () => {
         return {}
@@ -57,7 +57,7 @@ flow.run(async () => {
         }
     ])
     const apiKey = await getKey()
-    const broker = new ChatGPT35Broker({
+    const broker = new ChatGPT4Broker({
         input: yup => {
             return {
                 action: yup.string().required(),
@@ -76,6 +76,9 @@ flow.run(async () => {
             character: characterPlugin.use({})
         },
         install: ({ bot, attach }) => {
+            bot.setConfig({
+                model: 'gpt-4-32k'
+            })
             bot.setConfiguration(apiKey)
             attach('talkFirst', async({ data, plugins }) => {
                 plugins.character.send({
