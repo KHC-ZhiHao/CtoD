@@ -1,4 +1,4 @@
-import axios, { AxiosInstance } from 'axios'
+import { OpenAI } from './index'
 
 type ApiResponse = {
     created: string
@@ -20,30 +20,15 @@ type Config = {
     size: `${number}x${number}`
 }
 
-export class ImagesGenerations {
-    private axios = axios.create()
-    private apiKey = ''
+export class OpenAIImagesGeneration {
+    private openai: OpenAI
     private config: Config = {
         n: 1,
         size: '1024x1024'
     }
 
-    /**
-     * @zh 如果你有需要特別設定 axios，請使用這方法
-     * @en If you need to set axios, use this method
-     */
-
-    setAxios(axios: AxiosInstance) {
-        this.axios = axios
-    }
-
-    /**
-     * @zh 設定 api key
-     * @en Set api key
-     */
-
-    setConfiguration(apiKey: string) {
-        this.apiKey = apiKey
+    constructor(openai: OpenAI) {
+        this.openai = openai
     }
 
     /**
@@ -61,7 +46,7 @@ export class ImagesGenerations {
      */
 
     async create(prompt: string) {
-        const result = await this.axios.post<ApiResponse>('https://api.openai.com/v1/images/generations', {
+        const result = await this.openai._axios.post<ApiResponse>('https://api.openai.com/v1/images/generations', {
             prompt,
             n: this.config.n,
             size: this.config.size,
@@ -70,7 +55,7 @@ export class ImagesGenerations {
             timeout: 1000 * 60 * 5,
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${this.apiKey}`
+                'Authorization': `Bearer ${this.openai._apiKey}`
             }
         })
         return result.data

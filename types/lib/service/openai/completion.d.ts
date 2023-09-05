@@ -1,5 +1,5 @@
-import { AxiosInstance } from 'axios';
-import { PromiseResponseType } from '../types';
+import { OpenAI } from './index';
+import { PromiseResponseType } from '../../types';
 declare type Config = {
     /**
      * @zh 一次回應數量
@@ -35,35 +35,25 @@ declare type ApiResponse = {
         total_tokens: number;
     };
 };
-export declare class ChatGPT3 {
-    private axios;
-    private apiKey;
+export declare class OpenAICompletion {
+    private openai;
     private config;
-    /**
-     * @zh 如果你有需要特別設定 axios，請使用這方法。
-     * @en If you need to set axios, please use this method.
-     */
-    setAxios(axios: AxiosInstance): void;
-    /**
-     * @zh 設定 api key。
-     * @en Set api key.
-     */
-    setConfiguration(apiKey: string): void;
+    constructor(openai: OpenAI);
     /**
      * @zh 改變對話的一些設定。
      * @en Change some settings of the chat.
      */
     setConfig(options: Partial<Config>): void;
     /**
-     * @zh 進行對話。
-     * @en Talk to the chatbot.
+     * @zh 進行補文。
+     * @en Do completion.
      */
-    talk(prompt: string | string[]): Promise<{
+    run(prompt: string | string[]): Promise<{
         id: string;
         text: string;
         isDone: boolean;
         apiReseponse: ApiResponse;
     }>;
 }
-export declare type ChatGPT3TalkResponse = PromiseResponseType<ChatGPT3['talk']>;
+export declare type OpenAiOpenAICompletionResponse = PromiseResponseType<OpenAICompletion['run']>;
 export {};

@@ -1,4 +1,4 @@
-import { AxiosInstance } from 'axios';
+import { OpenAI } from './index';
 declare type ApiResponse = {
     created: string;
     data: {
@@ -17,20 +17,10 @@ declare type Config = {
      */
     size: `${number}x${number}`;
 };
-export declare class ImagesGenerations {
-    private axios;
-    private apiKey;
+export declare class OpenAIImagesGeneration {
+    private openai;
     private config;
-    /**
-     * @zh 如果你有需要特別設定 axios，請使用這方法
-     * @en If you need to set axios, use this method
-     */
-    setAxios(axios: AxiosInstance): void;
-    /**
-     * @zh 設定 api key
-     * @en Set api key
-     */
-    setConfiguration(apiKey: string): void;
+    constructor(openai: OpenAI);
     /**
      * @zh 改變對話的一些設定
      * @en Change some settings of the conversation

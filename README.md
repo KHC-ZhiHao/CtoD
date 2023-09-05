@@ -15,21 +15,19 @@
 
 <br>
 
-[繁體中文說明](./README-TW.md)
-
 ## Online Playground
 
-[Chat Of Requirement(織語)](https://cor.metalsheep.com/) is a display tool built for CtoD. You can use this tool to construct and adjust your templates.
+[Chat Of Requirement(織語)](https://cor.metalsheep.com/) 是為了 CtoD 建構的展示工具，你可以在這個工具中建構你與調適你的模板。
 
-## Summary
+## 摘要
 
-This tool utilizes the natural language processing capability of chatbots to deliver our requirements and data in a conversational manner and request a response in a serializable format, such as JSON.
+本工具是利用聊天機器人能夠讀懂自然語言的特性，將我們的需求與資料透過口語化的方式交付給他處理，並要求回應可序列化格式，例如：JSON。
 
-During the conversation, [yup](https://github.com/jquense/yup) is used to validate whether the request and response data meet expectations to ensure consistency. As long as this interaction mode is maintained, it can be used in API integration or automation systems.
+在對話過程中，本工具採用 [yup](https://github.com/jquense/yup) 來驗證請求與回復資料是否符合預期，以確保一致性，只要保持這個互動模式，就可以利用在 API 串接或是自動化系統上。
 
-We also provide some basic integration solutions for chatbots. Currently, ChatGPT3 and ChatGPT3.5 are supported.
+我們還附帶支援 `OpenAI` 的相關服務。
 
-## Installation
+## 安裝
 
 npm:
 
@@ -43,27 +41,24 @@ yarn:
 yarn add ctod
 ```
 
-## Quick Start
+## 快速開始
 
-This example demonstrates how to pass drug indices and customer requirements to a chatbot and return the most suitable result. Developers can use the index results to search the database for the most suitable drug for the consumer:
+這個例子示範如何將藥物索引與客戶需求傳遞給聊天機器人，並返回最適合的結果，開發人員可以利用索引結果去資料庫搜尋最適合的藥物給消費者：
 
-> Regarding type definitions, there is an interesting issue here: the input and output must be declared first in order for the types to function properly.
-
-> The usage of ChatGPT4 is exactly the same as ChatGPT35.
+> 關於型態定義，這裡有個有趣的議題，必須將 input 與 output 優先宣告才能讓型態正常運作。
 
 ```ts
-import { ChatGPT35Broker, templates } from 'ctod'
+import { ChatBroker, OpenAI, templates } from 'ctod'
 
-const API_KEY = 'openai api key'
-const broker = new ChatGPT35Broker({
-    /** Validate input data */
+const broker = new ChatBroker({
+    /** 驗證輸入資料 */
     input: yup => {
         return {
             indexs: yup.array(yup.string()).required(),
             question: yup.string().required()
         }
     },
-    /** Validate output data */
+    /** 驗證輸出資料 */
     output: yup => {
         return {
             indexs: yup.array(yup.object({
@@ -72,24 +67,29 @@ const broker = new ChatGPT35Broker({
             })).required()
         }
     },
-    /** Initialize the system, usually by embedding or hooking into the life cycle */
-    install: ({ bot }) => {
-        bot.setConfiguration(API_KEY)
-    },
-    /** Assemble and define the request we want to send to the bot */
+    /** 初始化系統，通常來植入或掛鉤生命週期 */
+    install: () => {},
+    /** 定義發送請求的接口 */
+    request: async(messages) => {
+        const openai = new OpenAI(API_KEY)
+        const chat = openai.createChat()
+        const { text } = await chat.talk(messages)
+        return text
+    }
+    /** 組裝與定義我們要向機器人發出的請求 */
     question: async({ indexs, question }) => {
         return templates.requireJsonResponse([
-            'I have the following indices',
+            '我有以下索引',
             `${JSON.stringify(indexs)}`,
-            `Please help me parse "${question}" to which index it might belong`,
-            'and sort by relevance from high to low, giving a score of 0 to 1.'
+            `請幫我解析"${question}"可能是哪個索引`,
+            '且相關性由高到低排序並給予分數，分數由 0 ~ 1'
         ], {
             indexs: {
-                desc: 'Indices sorted in descending order',
+                desc: '由高到低排序的索引',
                 example: [
                     {
-                        name: 'Index name',
-                        score: 'Evaluation score displayed as a number'
+                        name: '索引名稱',
+                        score: '評比分數，數字顯示'
                     }
                 ]
             }
@@ -97,20 +97,19 @@ const broker = new ChatGPT35Broker({
     }
 })
 
-
 broker.request({
-    indexs: ['stomach-ache', 'back-pain', 'headache', 'sore-throat', 'limb-pain'],
-    question: 'drinking coffee, eating sweets, gastroesophageal reflux'
+    indexs: ['胃痛', '腰痛', '頭痛', '喉嚨痛', '四肢疼痛'],
+    question: '喝咖啡，吃甜食，胃食道逆流'
 }).then(e => {
-    console.log('output result:', e.indexs)
+    console.log('輸出結果：', e.indexs)
     /*
         [
             {
-                name: 'stomach-ache',
+                name: '胃痛',
                 score: 1
             },
             {
-                name: 'sore-throat',
+                name: '喉嚨痛',
                 score: 0.7
             },
             ...
@@ -119,33 +118,26 @@ broker.request({
 })
 ```
 
-### Examples
+##  Plugin
 
-1. [How to continue the conversation with ChatGPT35 chatbot](./examples/chatgpt3.5.ts)
+雖然 Broker 本身已經能夠處理大部分的事務，但透過 Plugin 可以協助改善複雜的流程，幫助專案工程化。
 
-2. [How to integrate machine responses using ChatGPT35Broker](./examples/chatgpt3.5-broker.ts)
+每次發送請求時，Broker 會觸發一系列的生命週期，你可以從[原始碼](./lib/broker/chat.ts)中了解每個生命週期的參數與行為，並對其行為進行加工。
 
-## Plugin
-
-Although the Broker itself is capable of handling most tasks, plugins can help improve complex processes and facilitate project engineering.
-
-Each time a request is sent, the Broker triggers a series of lifecycles. You can understand the parameters and behaviors of each lifecycle from the [source code](./lib/broker/35.ts) and modify its behavior.
-
-Now, let's say we want to design a plugin that backs up messages to a server every time a conversation ends:
+現在，假設我們想要設計一個插件，它會在每次對話結束時將訊息備份到伺服器上：
 
 ```ts
 import axios from 'axios'
-import { ChatGPT35Broker, Broker35Plugin } from 'ctod'
-
-const backupPlugin = new Broker35Plugin({
+import { ChatBroker, ChatBrokerPlugin } from 'ctod'
+const backupPlugin = new ChatBrokerPlugin({
     name: 'backup-plugin',
-    // Define the 'sendUrl' parameter
+    // 定義參數為 sendUrl
     params: yup => {
         return {
             sendUrl: yup.string().required()
         }
     },
-    // Define the structure of received data
+    // 現階段你可以在執行過程中接收到資訊，資訊結構由這裡定義。
     receiveData: yup => {
         return {
             character: yup.string().required()
@@ -153,23 +145,23 @@ const backupPlugin = new Broker35Plugin({
     },
     onInstall({ params, attach, receive }) {
         const store = new Map()
-        // If there are more custom information to be passed, you can use plugins[key].send({ ... }) during the execution process
-        // You can refer to the case of Role-playing as a Chatbot in the Applications section
+        // 假設我們有更多的自訂義資訊需要被傳遞進來，可以在 start 階段透過 plugins[key].send({ ... }) 傳遞
+        // 可以從 Applications 分類中的 請機器人角色扮演 觀看案例
         receive(({ id, context }) => {
             store.get(id).context = context
         })
-        // Initialize data for the first conversation
-        attach('talkFirst', async({ id }) => {
+        // 第一次對話的時候初始化資料
+        attach('start', async({ id }) => {
             store.set(id, {
                 messages: [],
                 context: null
             })
         })
-        // Store the conversation after each conversation
+        // 每次對話完畢後把對話存入狀態
         attach('talkAfter', async({ id, lastUserMessage }) => {
             store.get(id).messages.push(lastUserMessage)
         })
-        // Backup data after the conversation ends
+        // 結束對話後備份資料
         attach('done', async({ id }) => {
             await axios.post(params.sendUrl, store.get(id))
             store.delete(id)
@@ -177,71 +169,33 @@ const backupPlugin = new Broker35Plugin({
     }
 })
 
-const broker = new ChatGPT35Broker({
+const broker = new ChatBroker({
     // ...
-    plugins: [
-        backupPlugin.use({
+    plugins: {
+        backup: backupPlugin.use({
             sendUrl: 'https://api/backup'
         })
-    ],
-    // Alternatively, you can use the following approach
-    // plugins: () => [
-    //     backupPlugin.use({
-    //         sendUrl: 'https://api/backup'
-    //     })
-    // ],
+    },
+    // 以下方案也可以運行
+    // plugins: () => {
+    //     return {
+    //         backup: backupPlugin.use({
+    //             sendUrl: 'https://api/backup'
+    //         })
+    //     }
+    // },
     // ...
 })
 ```
 
-### Examples
+## Examples
 
-1. Print the execution flow: [Print Log Plugin](./lib/plugins/print-log.ts)
-2. Limit the sending rate: [Limiter Plugin](./lib/plugins/limiter.ts)
-3. Retry on failure: [Retry Plugin](./lib/plugins/retry.ts)
+[基礎用法 - 藥物查詢功能](./examples/chat-demo.ts)
 
-### Applications
-
-Here are some application examples that you can refer to when designing your AI system.
-
-> You can clone this project, add a .key file in the root directory, and paste your OpenAI Dev Key to quickly try out these examples.
-
-[Interpret BBC News](./examples/applications/bbc-news-reader.ts)
-[Role-playing as a Chatbot](./examples/applications/cosplay.ts)
-[Story and Cover Generator]('./examples/applications/story-generations.ts')
-[Conversation Generator]('./examples/applications/talk-generations.ts')
+[進階用法 - 請 AI COSPLAY](./examples//plugin-demo.ts)
 
 ## Version History
 
-### 0.2.0
+### 0.3.0
 
-* Add ChatGPT 4
-
-### 0.1.3
-
-* Remove: max_token
-* Add: model add 16k
-
-### 0.1.x
-
-We made significant changes to the plugin to facilitate data exchange.
-
-#### ChatGPT35 Service
-
-##### remove: getJailbrokenMessages
-
-This approach is deprecated.
-
-#### Broker
-
-##### add: setPreMessages
-
-Allows users to enter some messages before the conversation starts, ensuring that the primary question is included.
-
-##### fix: hook
-
-Modified the binding behavior. Now, the binding of the Broker takes priority over plugins.
-
-##### change: assembly => question
-
-To make it easier for users to understand, we renamed "assembly" to "question".
+為了支援更多平台與自建服務，我們捨棄了完全為了 ChatGPT 客制化的接口，這樣也能完整保持 Broker 與 Plugin 的一致性。

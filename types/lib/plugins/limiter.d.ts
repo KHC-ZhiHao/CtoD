@@ -1,4 +1,4 @@
-import { Broker35Plugin } from '../core/plugin';
+import { ChatBrokerPlugin } from '../core/plugin';
 declare type Events = {
     run: {
         id: string;
@@ -27,9 +27,9 @@ declare const _default: {
      */
     closeSchedule: () => void;
     /**
-     * @zh 用於 Broker35 的版本。
-     * @en The version for Broker35.
+     * @zh Plugin 的接口
+     * @en Plugin interface
      */
-    ver35: Broker35Plugin<() => {}, () => {}>;
+    plugin: ChatBrokerPlugin<() => {}, () => {}>;
 };
 export default _default;

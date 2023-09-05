@@ -1,61 +1,39 @@
 /* eslint-disable no-redeclare */
 
-import * as _Plugins from './core/plugin'
 import * as _plugins from './plugins'
 import * as _templates from './templates'
 import * as _Translator from './core/translator'
 import { ValidateCallback } from './utils/validate'
+import { OpenAI as _OpenAI } from './service/openai'
 import { TextParser as _TextParser } from './core/parser'
-import { ChatGPT3 as _ChatGPT3 } from './service/chatgpt3'
-import { ChatGPT35 as _ChatGPT35 } from './service/chatgpt35'
-import { ChatGPT4 as _ChatGPT4 } from './service/chatgpt4'
-import { ChatGPT3Broker as _ChatGPT3Broker } from './broker/3'
-import { ChatGPT35Broker as _ChatGPT35Broker, } from './broker/35'
-import { ChatGPT4Broker as _ChatGPT4Broker, } from './broker/4'
-import { ImagesGenerations as _ImagesGenerations } from './service/images-generations'
+import { ChatBroker as _ChatBroker } from './broker/chat'
+import { ChatBrokerPlugin as _ChatBrokerPlugin } from './core/plugin'
 
+export type OpenAI = _OpenAI
 export type TextParser = _TextParser
 export type Translator<S extends ValidateCallback<any>, O extends ValidateCallback<any>> = _Translator.Translator<S, O>
 export type TranslatorParams<S extends ValidateCallback<any>, O extends ValidateCallback<any>> = _Translator.TranslatorParams<S, O>
-export type ChatGPT3Broker<S extends ValidateCallback<any>, O extends ValidateCallback<any>> = _ChatGPT3Broker<S, O, any, any>
-export type ChatGPT35Broker<S extends ValidateCallback<any>, O extends ValidateCallback<any>> = _ChatGPT35Broker<S, O, any, any>
-export type ChatGPT4Broker<S extends ValidateCallback<any>, O extends ValidateCallback<any>> = _ChatGPT35Broker<S, O, any, any>
-export type Broker3Plugin<T extends ValidateCallback<any>, R extends ValidateCallback<any>> = _Plugins.Broker3Plugin<T, R>
-export type Broker35Plugin<T extends ValidateCallback<any>, R extends ValidateCallback<any>> = _Plugins.Broker35Plugin<T, R>
-export type Broker4Plugin<T extends ValidateCallback<any>, R extends ValidateCallback<any>> = _Plugins.Broker35Plugin<T, R>
-export type ImagesGenerations = _ImagesGenerations
+export type ChatBroker<S extends ValidateCallback<any>, O extends ValidateCallback<any>> = _ChatBroker<S, O, any, any>
+export type ChatBrokerPlugin<T extends ValidateCallback<any>, R extends ValidateCallback<any>> = _ChatBrokerPlugin<T, R>
 
+export const OpenAI = _OpenAI
 export const TextParser = _TextParser
 export const Translator = _Translator.Translator
-export const ChatGPT3 = _ChatGPT3
-export const ChatGPT35 = _ChatGPT35
-export const ChatGPT4 = _ChatGPT4
-export const ChatGPT3Broker = _ChatGPT3Broker
-export const ChatGPT35Broker = _ChatGPT35Broker
-export const ChatGPT4Broker = _ChatGPT4Broker
-export const Broker3Plugin = _Plugins.Broker3Plugin
-export const Broker35Plugin = _Plugins.Broker35Plugin
-export const Broker4Plugin = _Plugins.Broker35Plugin
-export const ImagesGenerations = _ImagesGenerations
+
+export const ChatBroker = _ChatBroker
+export const ChatBrokerPlugin = _ChatBrokerPlugin
 
 export const plugins = _plugins
 export const templates = _templates
 
 export const ctod = {
+    OpenAI,
     plugins,
     templates,
-    ChatGPT3,
-    ChatGPT35,
-    ChatGPT4,
+    ChatBroker,
     Translator,
     TextParser,
-    Broker3Plugin,
-    Broker35Plugin,
-    Broker4Plugin,
-    ChatGPT3Broker,
-    ChatGPT35Broker,
-    ChatGPT4Broker,
-    ImagesGenerations
+    ChatBrokerPlugin
 }
 
 module.exports = ctod

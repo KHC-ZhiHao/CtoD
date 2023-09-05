@@ -1,14 +1,18 @@
-import { BaseBroker } from './index';
-import { Translator } from '../core/translator';
-import { Broker35Plugin } from '../core/plugin';
+import { ChatBrokerPlugin } from '../core/plugin';
+import { Hook, Log } from 'power-helper';
+import { Translator, TranslatorParams } from '../core/translator';
 import { ValidateCallback, ValidateCallbackOutputs } from '../utils/validate';
-import { ChatGPT35, ChatGPT35Message, ChatGPT35TalkResponse } from '../service/chatgpt35';
-export declare class ChatGPT35Broker<S extends ValidateCallback<any>, O extends ValidateCallback<any>, P extends Broker35Plugin<any, any>, PS extends Record<string, ReturnType<P['use']>>> extends BaseBroker<S, O, P, PS, {
+declare type Message = {
+    role: 'system' | 'user' | 'assistant';
+    name?: string;
+    content: string;
+};
+export declare type ChatBrokerHooks<S extends ValidateCallback<any>, O extends ValidateCallback<any>, P extends ChatBrokerPlugin<any, any>, PS extends Record<string, ReturnType<P['use']>>> = {
     /**
      * @zh 第一次聊天的時候觸發
      * @en Triggered when chatting for the first time
      */
-    talkFirst: {
+    start: {
         id: string;
         data: ValidateCallbackOutputs<S>;
         plugins: {
@@ -16,9 +20,9 @@ export declare class ChatGPT35Broker<S extends ValidateCallback<any>, O extends 
                 send: (data: PS[K]['__receiveData']) => void;
             };
         };
-        messages: ChatGPT35Message[];
-        setPreMessages: (messages: ChatGPT35Message[]) => void;
-        changeMessages: (messages: ChatGPT35Message[]) => void;
+        messages: Message[];
+        setPreMessages: (messages: Message[]) => void;
+        changeMessages: (messages: Message[]) => void;
     };
     /**
      * @zh 發送聊天訊息給機器人前觸發
@@ -27,7 +31,7 @@ export declare class ChatGPT35Broker<S extends ValidateCallback<any>, O extends 
     talkBefore: {
         id: string;
         data: ValidateCallbackOutputs<S>;
-        messages: ChatGPT35Message[];
+        messages: Message[];
         lastUserMessage: string;
     };
     /**
@@ -37,8 +41,8 @@ export declare class ChatGPT35Broker<S extends ValidateCallback<any>, O extends 
     talkAfter: {
         id: string;
         data: ValidateCallbackOutputs<S>;
-        response: ChatGPT35TalkResponse;
-        messages: ChatGPT35Message[];
+        response: any;
+        messages: Message[];
         parseText: string;
         lastUserMessage: string;
         changeParseText: (text: string) => void;
@@ -60,14 +64,14 @@ export declare class ChatGPT35Broker<S extends ValidateCallback<any>, O extends 
         error: any;
         retry: () => void;
         count: number;
-        response: ChatGPT35TalkResponse;
+        response: any;
         parserFails: {
             name: string;
             error: any;
         }[];
-        messages: ChatGPT35Message[];
+        messages: Message[];
         lastUserMessage: string;
-        changeMessages: (messages: ChatGPT35Message[]) => void;
+        changeMessages: (messages: Message[]) => void;
     };
     /**
      * @zh 不論成功失敗，執行結束的時候會執行。
@@ -76,11 +80,32 @@ export declare class ChatGPT35Broker<S extends ValidateCallback<any>, O extends 
     done: {
         id: string;
     };
-}> {
-    bot: ChatGPT35;
+};
+export declare type Params<S extends ValidateCallback<any>, O extends ValidateCallback<any>, C extends Record<string, any>, P extends ChatBrokerPlugin<any, any>, PS extends Record<string, ReturnType<P['use']>>> = Omit<TranslatorParams<S, O>, 'parsers'> & {
+    name?: string;
+    plugins?: PS | (() => PS);
+    request: (messages: Message[]) => Promise<string>;
+    install: (context: {
+        log: Log;
+        attach: Hook<C>['attach'];
+        attachAfter: Hook<C>['attachAfter'];
+        translator: Translator<S, O>;
+    }) => void;
+};
+export declare class ChatBroker<S extends ValidateCallback<any>, O extends ValidateCallback<any>, P extends ChatBrokerPlugin<any, any>, PS extends Record<string, ReturnType<P['use']>>, C extends ChatBrokerHooks<S, O, P, PS> = ChatBrokerHooks<S, O, P, PS>> {
+    protected __hookType: C;
+    protected log: Log;
+    protected hook: import("power-helper/dist/modules/hook").Hook<C>;
+    protected params: Params<S, O, C, P, PS>;
+    protected plugins: PS;
+    protected installed: boolean;
+    protected translator: Translator<S, O>;
+    constructor(params: Params<S, O, C, P, PS>);
+    protected _install(): any;
     /**
      * @zh 將請求發出至聊天機器人。
      * @en Send request to chatbot.
      */
     request<T extends Translator<S, O>>(data: T['__schemeType']): Promise<T['__outputType']>;
 }
+export {};

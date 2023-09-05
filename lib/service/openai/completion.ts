@@ -1,5 +1,5 @@
-import axios, { AxiosInstance } from 'axios'
-import { PromiseResponseType } from '../types'
+import { OpenAI } from './index'
+import { PromiseResponseType } from '../../types'
 
 type Config = {
     /**
@@ -38,31 +38,16 @@ type ApiResponse = {
     }
 }
 
-export class ChatGPT3 {
-    private axios = axios.create()
-    private apiKey = ''
+export class OpenAICompletion {
+    private openai: OpenAI
     private config: Config = {
         n: 1,
         maxTokens: 2048,
         temperature: 1
     }
 
-    /**
-     * @zh 如果你有需要特別設定 axios，請使用這方法。
-     * @en If you need to set axios, please use this method.
-     */
-
-    setAxios(axios: AxiosInstance) {
-        this.axios = axios
-    }
-
-    /**
-     * @zh 設定 api key。
-     * @en Set api key.
-     */
-
-    setConfiguration(apiKey: string) {
-        this.apiKey = apiKey
+    constructor(openai: OpenAI) {
+        this.openai = openai
     }
 
     /**
@@ -75,12 +60,12 @@ export class ChatGPT3 {
     }
 
     /**
-     * @zh 進行對話。
-     * @en Talk to the chatbot.
+     * @zh 進行補文。
+     * @en Do completion.
      */
 
-    async talk(prompt: string | string[]) {
-        const result = await this.axios.post<ApiResponse>('https://api.openai.com/v1/completions', {
+    async run(prompt: string | string[]) {
+        const result = await this.openai._axios.post<ApiResponse>('https://api.openai.com/v1/completions', {
             model: 'text-davinci-003',
             n: this.config.n,
             prompt: Array.isArray(prompt) ? prompt.join('\n') : prompt,
@@ -89,7 +74,7 @@ export class ChatGPT3 {
         }, {
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${this.apiKey}`
+                'Authorization': `Bearer ${this.openai._apiKey}`
             }
         })
         const choices = result.data.choices || []
@@ -102,4 +87,4 @@ export class ChatGPT3 {
     }
 }
 
-export type ChatGPT3TalkResponse = PromiseResponseType<ChatGPT3['talk']>
+export type OpenAiOpenAICompletionResponse = PromiseResponseType<OpenAICompletion['run']>

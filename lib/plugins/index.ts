@@ -22,8 +22,13 @@ export const RetryPlugin = Retry
  * @en Limit the use of traffic. This plugin can effectively prevent all conversations from being sent at the same time within the limit, and can be used when the server blocks requests due to high frequency during development.
  */
 
-export const LimiterPlugin = Limiter
+export const LimiterPlugin = Limiter.plugin
 
+/**
+ * @zh 排程系統將全域託管，有什麼必要設定可以來更動它的狀態，例如：關閉排程。
+ * @en The scheduling system will be globally hosted. What is necessary to set can come to change its status, for example: close the schedule.
+ */
+export const LimiterPluginGlobState = Limiter
 
 /**
  * @zh 設定角色扮演。

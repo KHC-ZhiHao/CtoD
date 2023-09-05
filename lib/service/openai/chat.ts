@@ -1,8 +1,8 @@
-import axios, { AxiosInstance } from 'axios'
 import { json } from 'power-helper'
-import { PromiseResponseType } from '../types'
+import { OpenAI } from './index'
+import { PromiseResponseType } from '../../types'
 
-export type ChatGPT4Message = {
+type ChatGPTMessage = {
     role: 'system' | 'user' | 'assistant'
     name?: string
     content: string
@@ -35,10 +35,10 @@ type Config = {
      */
     n: number
     /**
-     * @zh 選擇運行的模型，32k意味著能處理長度為 32768 的文本，而預設為 8192。
+     * @zh 選擇運行的模型，16k意味著能處理長度為 16,384 的文本，32k意味著能處理長度為 32768 的文本。
      * @en How many chat completion choices to generate for each input message.
      */
-    model: 'gpt-4' | 'gpt-4-32k'
+    model: 'gpt-4' | 'gpt-4-32k' | 'gpt-3.5-turbo' | 'gpt-3.5-turbo-16k'
     /**
      * @zh 冒險指數，數值由 0 ~ 2 之間。
      * @en What sampling temperature to use, between 0 and 2. Higher values like 0.8 will make the output more random, while lower values like 0.2 will make it more focused and deterministic.
@@ -46,31 +46,16 @@ type Config = {
     temperature: number
 }
 
-export class ChatGPT4 {
-    axios = axios.create()
-    apiKey = ''
+export class OpenAIChat {
+    openai: OpenAI
     config: Config = {
         n: 1,
-        model: 'gpt-4',
+        model: 'gpt-3.5-turbo',
         temperature: 1
     }
 
-    /**
-     * @zh 如果你有需要特別設定 axios，請使用這方法
-     * @en If you need to set axios, use this method
-     */
-
-    setAxios(axios: AxiosInstance) {
-        this.axios = axios
-    }
-
-    /**
-     * @zh 設定 api key
-     * @en Set api key
-     */
-
-    setConfiguration(apiKey: string) {
-        this.apiKey = apiKey
+    constructor(openai: OpenAI) {
+        this.openai = openai
     }
 
     /**
@@ -87,9 +72,9 @@ export class ChatGPT4 {
      * @en Talk to the AI
      */
 
-    async talk(messages: ChatGPT4Message[] = []) {
+    async talk(messages: ChatGPTMessage[] = []) {
         const newMessages = json.jpjs(messages)
-        const result = await this.axios.post<ApiResponse>('https://api.openai.com/v1/chat/completions', {
+        const result = await this.openai._axios.post<ApiResponse>('https://api.openai.com/v1/chat/completions', {
             model: this.config.model,
             n: this.config.n,
             messages: newMessages,
@@ -97,7 +82,7 @@ export class ChatGPT4 {
         }, {
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${this.apiKey}`
+                'Authorization': `Bearer ${this.openai._apiKey}`
             }
         })
         const choices = result.data.choices || []
@@ -109,8 +94,8 @@ export class ChatGPT4 {
         return {
             id: result?.data.id as string,
             text: message.content as string,
-            isDone: choices[0]?.finish_reason === 'stop',
             newMessages,
+            isDone: choices[0]?.finish_reason === 'stop',
             apiReseponse: result.data
         }
     }
@@ -119,7 +104,7 @@ export class ChatGPT4 {
      * @zh 開啟持續性對話
      */
 
-    async chat(prompt: string | string[], oldMessages: ChatGPT4Message[] = []) {
+    async keepTalk(prompt: string | string[], oldMessages: ChatGPTMessage[] = []) {
         const result = await this.talk([
             ...oldMessages,
             {
@@ -129,9 +114,9 @@ export class ChatGPT4 {
         ])
         return {
             result,
-            nextTalk: (prompt: string | string[]) => this.chat(prompt, result.newMessages)
+            nextTalk: (prompt: string | string[]) => this.keepTalk(prompt, result.newMessages)
         }
     }
 }
 
-export type ChatGPT4TalkResponse = PromiseResponseType<ChatGPT4['talk']>
+export type OpenAIChatTalkResponse = PromiseResponseType<OpenAIChat['talk']>

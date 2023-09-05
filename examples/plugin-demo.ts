@@ -1,13 +1,13 @@
 import { flow } from 'power-helper'
-import { getKey } from '../utils'
 import { prompt } from 'inquirer'
-import { ChatGPT4Broker, plugins, Broker4Plugin, templates } from '../../lib/index'
+import { OpenAI, ChatBroker, plugins, ChatBrokerPlugin, templates } from '../lib'
 
 /**
- * @invoke npx ts-node ./examples/applications/cosplay.ts
+ * @invoke npx ts-node ./examples/plugin-demo.ts
  */
 
-const characterPlugin = new Broker4Plugin({
+const API_KEY = ''
+const characterPlugin = new ChatBrokerPlugin({
     name: 'character',
     params: () => {
         return {}
@@ -22,7 +22,7 @@ const characterPlugin = new Broker4Plugin({
         receive(({ id, data }) => {
             characters.set(id, data.character)
         })
-        attach('talkFirst', async({ id, setPreMessages }) => {
+        attach('start', async({ id, setPreMessages }) => {
             const character = characters.get(id)
             setPreMessages([
                 {
@@ -56,8 +56,7 @@ flow.run(async () => {
             default: '你最好的朋友是誰？'
         }
     ])
-    const apiKey = await getKey()
-    const broker = new ChatGPT4Broker({
+    const broker = new ChatBroker({
         input: yup => {
             return {
                 action: yup.string().required(),
@@ -70,21 +69,26 @@ flow.run(async () => {
             }
         },
         plugins: {
-            print: plugins.PrintLogPlugin.ver35.use({
+            character: characterPlugin.use({}),
+            print: plugins.PrintLogPlugin.use({
                 detail: false
-            }),
-            character: characterPlugin.use({})
-        },
-        install: ({ bot, attach }) => {
-            bot.setConfig({
-                model: 'gpt-4-32k'
             })
-            bot.setConfiguration(apiKey)
-            attach('talkFirst', async({ data, plugins }) => {
+        },
+        install: ({ attach }) => {
+            attach('start', async({ data, plugins }) => {
                 plugins.character.send({
                     character: data.character
                 })
             })
+        },
+        request: async(messages) => {
+            const openai = new OpenAI(API_KEY)
+            const chat = openai.createChat()
+            chat.setConfig({
+                model: 'gpt-4'
+            })
+            const { text } = await chat.talk(messages)
+            return text
         },
         question: async ({ action }) => {
             return templates.requireJsonResponse([
