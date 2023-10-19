@@ -194,6 +194,10 @@ const broker = new ChatBroker({
 
 [進階用法 - 請 AI COSPLAY](./examples//plugin-demo.ts)
 
+## Other
+
+[計算 token 的方案: tiktoken](https://www.npmjs.com/package/tiktoken)
+
 ## Version History
 
 ### 0.3.0
