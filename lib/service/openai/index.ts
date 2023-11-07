@@ -1,4 +1,4 @@
-import { OpenAIChat } from './chat'
+import { OpenAIChat, Config } from './chat'
 import { OpenAICompletion } from './completion'
 import { OpenAIImagesGeneration } from './images-generation'
 import axios, { AxiosInstance } from 'axios'
@@ -6,6 +6,16 @@ import axios, { AxiosInstance } from 'axios'
 export class OpenAI {
     _axios = axios.create()
     _apiKey = ''
+
+    static createChatRequest(apiKey: string, config: Partial<Config> = {}) {
+        return async(messages: any[]) => {
+            const openai = new OpenAI(apiKey)
+            const chat = openai.createChat()
+            chat.setConfig(config)
+            const { text } = await chat.talk(messages)
+            return text
+        }
+    }
 
     constructor(apiKey = '') {
         this._apiKey = apiKey

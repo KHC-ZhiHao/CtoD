@@ -81,15 +81,9 @@ flow.run(async () => {
                 })
             })
         },
-        request: async(messages) => {
-            const openai = new OpenAI(API_KEY)
-            const chat = openai.createChat()
-            chat.setConfig({
-                model: 'gpt-4'
-            })
-            const { text } = await chat.talk(messages)
-            return text
-        },
+        request: OpenAI.createChatRequest(API_KEY, {
+            model: 'gpt-4'
+        }),
         question: async ({ action }) => {
             return templates.requireJsonResponse([
                 '請基於你的角色個性，並依據以下指令進行回應：',

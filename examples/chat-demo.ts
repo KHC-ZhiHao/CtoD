@@ -21,12 +21,7 @@ const broker = new ChatBroker({
         }
     },
     install: () => null,
-    request: async(messages) => {
-        const openai = new OpenAI(API_KEY)
-        const chat = openai.createChat()
-        const { text } = await chat.talk(messages)
-        return text
-    },
+    request: OpenAI.createChatRequest(API_KEY),
     question: async({ indexs, question }) => {
         return templates.requireJsonResponse([
             '我有以下索引',

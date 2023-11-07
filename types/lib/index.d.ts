@@ -3,6 +3,7 @@ import * as _templates from './templates';
 import * as _Translator from './core/translator';
 import { ValidateCallback } from './utils/validate';
 import { OpenAI as _OpenAI } from './service/openai';
+import { ChatGPTMessage as _ChatGPTMessage } from './service/openai/chat';
 import { TextParser as _TextParser } from './core/parser';
 import { ChatBroker as _ChatBroker } from './broker/chat';
 import { ChatBrokerPlugin as _ChatBrokerPlugin } from './core/plugin';
@@ -12,6 +13,7 @@ export declare type Translator<S extends ValidateCallback<any>, O extends Valida
 export declare type TranslatorParams<S extends ValidateCallback<any>, O extends ValidateCallback<any>> = _Translator.TranslatorParams<S, O>;
 export declare type ChatBroker<S extends ValidateCallback<any>, O extends ValidateCallback<any>> = _ChatBroker<S, O, any, any>;
 export declare type ChatBrokerPlugin<T extends ValidateCallback<any>, R extends ValidateCallback<any>> = _ChatBrokerPlugin<T, R>;
+export declare type ChatGPTMessage = _ChatGPTMessage;
 export declare const OpenAI: typeof _OpenAI;
 export declare const TextParser: typeof _TextParser;
 export declare const Translator: typeof _Translator.Translator;
