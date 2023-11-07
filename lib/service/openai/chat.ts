@@ -44,6 +44,11 @@ export type Config = {
      * @en What sampling temperature to use, between 0 and 2. Higher values like 0.8 will make the output more random, while lower values like 0.2 will make it more focused and deterministic.
      */
     temperature: number
+    /**
+     * @zh 是否強制要回傳 JSON 格式的資料
+     * @en Whether to force the return of JSON format data
+     */
+    forceJsonFormat: boolean
 }
 
 export class OpenAIChat {
@@ -51,7 +56,8 @@ export class OpenAIChat {
     config: Config = {
         n: 1,
         model: 'gpt-3.5-turbo',
-        temperature: 1
+        temperature: 1,
+        forceJsonFormat: true
     }
 
     constructor(openai: OpenAI) {
@@ -74,12 +80,12 @@ export class OpenAIChat {
 
     async talk(messages: ChatGPTMessage[] = []) {
         const newMessages = json.jpjs(messages)
-        const isSupportJson = ['gpt-4-1106-preview', 'gpt-3.5-turbo-1106'].includes(this.config.model)
+        const isSupportJson =  ['gpt-4-1106-preview', 'gpt-3.5-turbo-1106'].includes(this.config.model)
         const result = await this.openai._axios.post<ApiResponse>('https://api.openai.com/v1/chat/completions', {
             model: this.config.model,
             n: this.config.n,
             messages: newMessages,
-            response_format: !isSupportJson ? undefined : {
+            response_format: (isSupportJson === false || this.config.forceJsonFormat === false) ? undefined : {
                 type: 'json_object'
             },
             temperature: this.config.temperature

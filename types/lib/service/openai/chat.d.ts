@@ -40,6 +40,11 @@ export declare type Config = {
      * @en What sampling temperature to use, between 0 and 2. Higher values like 0.8 will make the output more random, while lower values like 0.2 will make it more focused and deterministic.
      */
     temperature: number;
+    /**
+     * @zh 是否強制要回傳 JSON 格式的資料
+     * @en Whether to force the return of JSON format data
+     */
+    forceJsonFormat: boolean;
 };
 export declare class OpenAIChat {
     openai: OpenAI;
