@@ -1,5 +1,6 @@
-import { OpenAIChat, Config } from './chat'
+import { OpenAIVision } from './vision'
 import { OpenAICompletion } from './completion'
+import { OpenAIChat, Config } from './chat'
 import { OpenAIImagesGeneration } from './images-generation'
 import axios, { AxiosInstance } from 'axios'
 
@@ -41,6 +42,10 @@ export class OpenAI {
 
     createChat() {
         return new OpenAIChat(this)
+    }
+
+    createVision() {
+        return new OpenAIVision(this)
     }
 
     createCompletion() {

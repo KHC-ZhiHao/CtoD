@@ -25,9 +25,14 @@ export class TextParser {
         return new TextParser({
             name: 'JsonMessage',
             handler: async (text) => {
-                const jsonRegex = /{(?:[^{}]|(?:{[^{}]*}))*}/
-                const matchedText = text.match(jsonRegex)?.[0] || ''
-                return JSON5.parse(matchedText)
+                try {
+                    const result = JSON.parse(text)
+                    return result
+                } catch (error) {
+                    const jsonRegex = /{(?:[^{}]|(?:{[^{}]*}))*}/
+                    const matchedText = text.match(jsonRegex)?.[0] || ''
+                    return JSON5.parse(matchedText)
+                }
             }
         })
     }

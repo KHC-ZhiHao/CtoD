@@ -49,6 +49,11 @@ export type Config = {
      * @en Whether to force the return of JSON format data
      */
     forceJsonFormat: boolean
+    /**
+     * @zh 每次對話最多產生幾個 tokens。
+     * @en How many tokens to complete to.
+     */
+    maxTokens?: number
 }
 
 export class OpenAIChat {
@@ -57,6 +62,7 @@ export class OpenAIChat {
         n: 1,
         model: 'gpt-3.5-turbo',
         temperature: 1,
+        maxTokens: undefined,
         forceJsonFormat: true
     }
 
