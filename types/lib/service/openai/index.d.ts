@@ -1,5 +1,6 @@
-import { OpenAIChat, Config } from './chat';
+import { OpenAIVision } from './vision';
 import { OpenAICompletion } from './completion';
+import { OpenAIChat, Config } from './chat';
 import { OpenAIImagesGeneration } from './images-generation';
 import { AxiosInstance } from 'axios';
 export declare class OpenAI {
@@ -18,6 +19,7 @@ export declare class OpenAI {
      */
     setConfiguration(apiKey: string): void;
     createChat(): OpenAIChat;
+    createVision(): OpenAIVision;
     createCompletion(): OpenAICompletion;
     createImagesGeneration(): OpenAIImagesGeneration;
 }

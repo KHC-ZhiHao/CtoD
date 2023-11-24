@@ -38,7 +38,7 @@ export declare class Translator<S extends ValidateCallback<any>, O extends Valid
         prompt: string;
     }>;
     /**
-     * @zh 將文字轉換成序列化資量。
+     * @zh 將文字轉換成序列化資料。
      * @en Convert text to serialized data.
      */
     parse(text: string): Promise<{

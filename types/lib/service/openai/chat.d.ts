@@ -45,6 +45,11 @@ export declare type Config = {
      * @en Whether to force the return of JSON format data
      */
     forceJsonFormat: boolean;
+    /**
+     * @zh 每次對話最多產生幾個 tokens。
+     * @en How many tokens to complete to.
+     */
+    maxTokens?: number;
 };
 export declare class OpenAIChat {
     openai: OpenAI;
@@ -55,6 +60,14 @@ export declare class OpenAIChat {
      * @en Change some settings of the conversation
      */
     setConfig(options: Partial<Config>): void;
+    /**
+     * @zh 檢視內容是否符合 OpenAI 的審查
+     * @en View content for OpenAI moderation
+     */
+    moderations(input: string): Promise<{
+        isSafe: boolean;
+        result: any;
+    }>;
     /**
      * @zh 進行對話
      * @en Talk to the AI

@@ -7,10 +7,10 @@ declare type ApiResponse = {
 };
 declare type Config = {
     /**
-     * @zh 一次圖片回應數量
-     * @en Number of image responses at a time
+     * @zh 模型，支援 dall-e-2 和 dall-e-3
+     * @en Model, support dall-e-2 and dall-e-3
      */
-    n: number;
+    model: 'dall-e-2' | 'dall-e-3';
     /**
      * @zh 解析度，例如 1024x1024
      * @en Resolution, for example 1024x1024

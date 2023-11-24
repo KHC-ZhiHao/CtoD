@@ -80,6 +80,26 @@ export class OpenAIChat {
     }
 
     /**
+     * @zh 檢視內容是否符合 OpenAI 的審查
+     * @en View content for OpenAI moderation
+     */
+
+    async moderations(input: string) {
+        const result = await this.openai._axios.post<any>('https://api.openai.com/v1/moderations', {
+            input: input
+        }, {
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${this.openai._apiKey}`
+            }
+        })
+        return {
+            isSafe: result.data.results?.[0]?.flagged === false,
+            result: result.data
+        }
+    }
+
+    /**
      * @zh 進行對話
      * @en Talk to the AI
      */

@@ -9,10 +9,10 @@ type ApiResponse = {
 
 type Config = {
     /**
-     * @zh 一次圖片回應數量
-     * @en Number of image responses at a time
+     * @zh 模型，支援 dall-e-2 和 dall-e-3
+     * @en Model, support dall-e-2 and dall-e-3
      */
-    n: number
+    model: 'dall-e-2' | 'dall-e-3'
     /**
      * @zh 解析度，例如 1024x1024
      * @en Resolution, for example 1024x1024
@@ -23,7 +23,7 @@ type Config = {
 export class OpenAIImagesGeneration {
     private openai: OpenAI
     private config: Config = {
-        n: 1,
+        model: 'dall-e-2',
         size: '1024x1024'
     }
 
@@ -48,8 +48,9 @@ export class OpenAIImagesGeneration {
     async create(prompt: string) {
         const result = await this.openai._axios.post<ApiResponse>('https://api.openai.com/v1/images/generations', {
             prompt,
-            n: this.config.n,
+            n: 1,
             size: this.config.size,
+            model: this.config.model,
             response_format: 'b64_json'
         }, {
             timeout: 1000 * 60 * 5,
