@@ -12,12 +12,12 @@ export default new ChatBrokerPlugin({
         return {}
     },
     onInstall({ log, attach, params }) {
-        attach('parseFailed', async({ count, retry, response, changeMessages }) => {
+        attach('parseFailed', async({ count, retry, messages, changeMessages }) => {
             if (count <= params.retry) {
                 if (params.printWarn) {
                     log.print(`Is Failed, Retry ${count} times.`)
                 }
-                changeMessages(response.newMessages.slice(0, -1))
+                changeMessages(messages)
                 retry()
             }
         })

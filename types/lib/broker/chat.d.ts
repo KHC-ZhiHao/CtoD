@@ -81,10 +81,14 @@ export declare type ChatBrokerHooks<S extends ValidateCallback<any>, O extends V
         id: string;
     };
 };
+declare type RequestContext = {
+    count: number;
+    isRetry: boolean;
+};
 export declare type Params<S extends ValidateCallback<any>, O extends ValidateCallback<any>, C extends Record<string, any>, P extends ChatBrokerPlugin<any, any>, PS extends Record<string, ReturnType<P['use']>>> = Omit<TranslatorParams<S, O>, 'parsers'> & {
     name?: string;
     plugins?: PS | (() => PS);
-    request: (messages: Message[]) => Promise<string>;
+    request: (messages: Message[], context: RequestContext) => Promise<string>;
     install: (context: {
         log: Log;
         attach: Hook<C>['attach'];

@@ -99,6 +99,11 @@ export type ChatBrokerHooks<
     }
 }
 
+type RequestContext = {
+    count: number
+    isRetry: boolean
+}
+
 export type Params<
     S extends ValidateCallback<any>,
     O extends ValidateCallback<any>,
@@ -108,7 +113,7 @@ export type Params<
 > = Omit<TranslatorParams<S, O>, 'parsers'> & {
     name?: string
     plugins?: PS | (() => PS)
-    request: (messages: Message[]) => Promise<string>
+    request: (messages: Message[], context: RequestContext) => Promise<string>
     install: (context: {
         log: Log
         attach: Hook<C>['attach']
@@ -224,7 +229,10 @@ export class ChatBroker<
                     messages,
                     lastUserMessage
                 })
-                response = await this.params.request(messages)
+                response = await this.params.request(messages, {
+                    count,
+                    isRetry: retryFlag
+                })
                 parseText = response
                 await this.hook.notify('talkAfter', {
                     id,
