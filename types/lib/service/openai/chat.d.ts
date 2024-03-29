@@ -34,7 +34,7 @@ export declare type Config = {
      * @zh 選擇運行的模型，16k意味著能處理長度為 16,384 的文本，32k意味著能處理長度為 32768 的文本。
      * @en How many chat completion choices to generate for each input message.
      */
-    model: 'gpt-4' | 'gpt-4-32k' | 'gpt-3.5-turbo' | 'gpt-3.5-turbo-16k' | 'gpt-4-1106-preview' | 'gpt-3.5-turbo-1106';
+    model: 'gpt-4' | 'gpt-3.5-turbo' | 'gpt-4-turbo-preview';
     /**
      * @zh 冒險指數，數值由 0 ~ 2 之間。
      * @en What sampling temperature to use, between 0 and 2. Higher values like 0.8 will make the output more random, while lower values like 0.2 will make it more focused and deterministic.
