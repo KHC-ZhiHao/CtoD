@@ -38,9 +38,9 @@ export type Config = {
      * @zh 選擇運行的模型，16k意味著能處理長度為 16,384 的文本，32k意味著能處理長度為 32768 的文本。
      * @en How many chat completion choices to generate for each input message.
      */
-    model: 'gpt-4' | 'gpt-3.5-turbo' | 'gpt-4-turbo-preview'
+    model: 'gpt-4' | 'gpt-3.5-turbo' | 'gpt-4-turbo' | 'gpt-4o'
     /**
-     * @zh 冒險指數，數值由 0 ~ 2 之間。
+     * @zh 冒險指數，數值由 0 ~ 2 之間，越低回應越穩定。
      * @en What sampling temperature to use, between 0 and 2. Higher values like 0.8 will make the output more random, while lower values like 0.2 will make it more focused and deterministic.
      */
     temperature: number
@@ -108,8 +108,8 @@ export class OpenAIChat {
         const newMessages = json.jpjs(messages)
         const isSupportJson =  [
             'gpt-4-turbo-preview',
-            'gpt-4-0125-preview',
-            'gpt-4-1106-preview',
+            'gpt-4-turbo',
+            'gpt-4o',
             'gpt-3.5-turbo-1106'
         ].includes(this.config.model)
         const result = await this.openai._axios.post<ApiResponse>('https://api.openai.com/v1/chat/completions', {

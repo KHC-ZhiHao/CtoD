@@ -6,7 +6,7 @@ import { AxiosInstance } from 'axios';
 export declare class OpenAI {
     _axios: AxiosInstance;
     _apiKey: string;
-    static createChatRequest(apiKey: string, config?: Partial<Config>): (messages: any[]) => Promise<string>;
+    static createChatRequest(apiKey: string | (() => Promise<string>), config?: Partial<Config>): (messages: any[]) => Promise<string>;
     constructor(apiKey?: string);
     /**
      * @zh 如果你有需要特別設定 axios，請使用這方法。

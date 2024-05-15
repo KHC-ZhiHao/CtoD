@@ -8,9 +8,9 @@ export class OpenAI {
     _axios = axios.create()
     _apiKey = ''
 
-    static createChatRequest(apiKey: string, config: Partial<Config> = {}) {
+    static createChatRequest(apiKey: string | (() => Promise<string>), config: Partial<Config> = {}) {
         return async(messages: any[]) => {
-            const openai = new OpenAI(apiKey)
+            const openai = new OpenAI(typeof apiKey === 'string' ? apiKey : await apiKey())
             const chat = openai.createChat()
             chat.setConfig(config)
             const { text } = await chat.talk(messages)
