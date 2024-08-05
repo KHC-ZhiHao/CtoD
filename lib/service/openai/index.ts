@@ -1,5 +1,4 @@
 import { OpenAIVision } from './vision'
-import { OpenAICompletion } from './completion'
 import { OpenAIChat, Config } from './chat'
 import { OpenAIImagesGeneration } from './images-generation'
 import axios, { AxiosInstance } from 'axios'
@@ -8,12 +7,16 @@ export class OpenAI {
     _axios = axios.create()
     _apiKey = ''
 
-    static createChatRequest(apiKey: string | (() => Promise<string>), config: Partial<Config> = {}) {
-        return async(messages: any[]) => {
+    static createChatRequest(apiKey: string | (() => Promise<string>), config: Partial<Config> | (() => Promise<Partial<Config>>) = {}) {
+        return async(messages: any[], { onCancel }: any) => {
             const openai = new OpenAI(typeof apiKey === 'string' ? apiKey : await apiKey())
             const chat = openai.createChat()
-            chat.setConfig(config)
-            const { text } = await chat.talk(messages)
+            const abortController = new AbortController()
+            chat.setConfig(typeof config === 'function' ? await config() : config)
+            onCancel(() => abortController.abort())
+            const { text } = await chat.talk(messages, {
+                abortController
+            })
             return text
         }
     }
@@ -46,10 +49,6 @@ export class OpenAI {
 
     createVision() {
         return new OpenAIVision(this)
-    }
-
-    createCompletion() {
-        return new OpenAICompletion(this)
     }
 
     createImagesGeneration() {

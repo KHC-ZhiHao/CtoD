@@ -56,3 +56,16 @@ export const requireJsonResponseWithHandlebars = (
 
     return handlebars.compile(requireJsonResponse(question, format))(value)
 }
+
+/**
+ * @zh 協助使用者將格式需求轉成論敘語句，並支援 Json Schema。
+ * @en Assist the user in converting the formatting requirements into declarative sentences, and support Json Schema.
+ */
+
+export const requireJsonResponseWithJsonSchema = (question: string | string[], format: Record<string, any>) => {
+    return [
+        ...(Array.isArray(question) ? question : [question]),
+        'Please provide JSON data according to the following JSON Schema format:',
+        JSON.stringify(format)
+    ].join('\n')
+}

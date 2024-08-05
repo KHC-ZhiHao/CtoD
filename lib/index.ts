@@ -1,35 +1,26 @@
-/* eslint-disable no-redeclare */
+export * as plugins from './plugins'
+export * as templates from './templates'
+export { validateToJsonSchema } from './utils/validate'
+export { OpenAI } from './service/openai'
+export { Llama3Cpp } from './service/llama3.cpp'
+export { TextParser } from './core/parser'
+export { ChatGPTMessage } from './service/openai/chat'
+export { ChatBroker } from './broker/chat'
+export { ChatBrokerPlugin } from './core/plugin'
+export { Translator, TranslatorParams } from './core/translator'
 
-import * as _plugins from './plugins'
-import * as _templates from './templates'
-import * as _Translator from './core/translator'
-import { ValidateCallback } from './utils/validate'
-import { OpenAI as _OpenAI } from './service/openai'
-import { ChatGPTMessage as _ChatGPTMessage } from './service/openai/chat'
-import { TextParser as _TextParser } from './core/parser'
-import { ChatBroker as _ChatBroker } from './broker/chat'
-import { ChatBrokerPlugin as _ChatBrokerPlugin } from './core/plugin'
-
-export type OpenAI = _OpenAI
-export type TextParser = _TextParser
-export type Translator<S extends ValidateCallback<any>, O extends ValidateCallback<any>> = _Translator.Translator<S, O>
-export type TranslatorParams<S extends ValidateCallback<any>, O extends ValidateCallback<any>> = _Translator.TranslatorParams<S, O>
-export type ChatBroker<S extends ValidateCallback<any>, O extends ValidateCallback<any>> = _ChatBroker<S, O, any, any>
-export type ChatBrokerPlugin<T extends ValidateCallback<any>, R extends ValidateCallback<any>> = _ChatBrokerPlugin<T, R>
-export type ChatGPTMessage = _ChatGPTMessage
-
-export const OpenAI = _OpenAI
-export const TextParser = _TextParser
-export const Translator = _Translator.Translator
-
-export const ChatBroker = _ChatBroker
-export const ChatBrokerPlugin = _ChatBrokerPlugin
-
-export const plugins = _plugins
-export const templates = _templates
+import * as plugins from './plugins'
+import * as templates from './templates'
+import { OpenAI } from './service/openai'
+import { Llama3Cpp } from './service/llama3.cpp'
+import { Translator } from './core/translator'
+import { TextParser } from './core/parser'
+import { ChatBroker } from './broker/chat'
+import { ChatBrokerPlugin } from './core/plugin'
 
 export const ctod = {
     OpenAI,
+    Llama3Cpp,
     plugins,
     templates,
     ChatBroker,

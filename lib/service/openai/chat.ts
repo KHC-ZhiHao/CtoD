@@ -38,7 +38,7 @@ export type Config = {
      * @zh 選擇運行的模型，16k意味著能處理長度為 16,384 的文本，32k意味著能處理長度為 32768 的文本。
      * @en How many chat completion choices to generate for each input message.
      */
-    model: 'gpt-4' | 'gpt-3.5-turbo' | 'gpt-4-turbo' | 'gpt-4o'
+    model: 'gpt-4' | 'gpt-3.5-turbo' | 'gpt-4-turbo' | 'gpt-4o' | 'gpt-4o-mini'
     /**
      * @zh 冒險指數，數值由 0 ~ 2 之間，越低回應越穩定。
      * @en What sampling temperature to use, between 0 and 2. Higher values like 0.8 will make the output more random, while lower values like 0.2 will make it more focused and deterministic.
@@ -60,7 +60,7 @@ export class OpenAIChat {
     openai: OpenAI
     config: Config = {
         n: 1,
-        model: 'gpt-3.5-turbo',
+        model: 'gpt-4o',
         temperature: 1,
         maxTokens: undefined,
         forceJsonFormat: true
@@ -104,7 +104,9 @@ export class OpenAIChat {
      * @en Talk to the AI
      */
 
-    async talk(messages: ChatGPTMessage[] = []) {
+    async talk(messages: ChatGPTMessage[] = [], options?: {
+        abortController?: AbortController
+    }) {
         const newMessages = json.jpjs(messages)
         const isSupportJson =  [
             'gpt-4-turbo-preview',
@@ -121,6 +123,7 @@ export class OpenAIChat {
             },
             temperature: this.config.temperature
         }, {
+            signal: options?.abortController?.signal,
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${this.openai._apiKey}`
@@ -138,6 +141,71 @@ export class OpenAIChat {
             newMessages,
             isDone: choices[0]?.finish_reason === 'stop',
             apiReseponse: result.data
+        }
+    }
+
+    talkStream(params: {
+        messages: any[]
+        onMessage: (message: string) => void
+        onEnd: () => void
+        onWarn: (warn: any) => void
+        onError: (error: any) => void
+    }) {
+        const controller = new AbortController()
+        fetch('https://api.openai.com/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${this.openai._apiKey}`
+            },
+            body: JSON.stringify({
+                model: this.config.model,
+                stream: true,
+                messages: params.messages
+            }),
+            signal: controller.signal
+        }).then(async response => {
+            // eslint-disable-next-line no-undef
+            const reader = response.body?.pipeThrough(new TextDecoderStream()).getReader()
+            if (!reader) {
+                throw new Error('Can not get reader')
+            }
+            // eslint-disable-next-line no-constant-condition
+            while (true) {
+                const { value, done } = await reader.read()
+                if (done) {
+                    break
+                }
+                const items = value.split('\n')
+                for (let item of items) {
+                    if (item.length === 0) {
+                        continue
+                    }
+                    if (item.startsWith(':')) {
+                        continue
+                    }
+                    if (item === 'data: [DONE]') {
+                        params.onEnd()
+                        break
+                    }
+                    try {
+                        const result = JSON.parse(item.substring(6))
+                        const content = result.choices[0].delta.content
+                        params.onMessage(content)
+                    } catch (error) {
+                        params.onWarn(error)
+                    }
+                }
+            }
+        }).catch(error => {
+            if (error.name === 'AbortError') {
+                params.onEnd()
+            } else {
+                params.onError(error)
+            }
+        })
+        return {
+            cancel: () => controller.abort()
         }
     }
 

@@ -24,7 +24,12 @@ export type TranslatorParams<
      * @zh 組合輸入資料成為提示文字。
      * @en Combine the input data into a prompt.
      */
-    question: (data: ValidateCallbackOutputs<S>) => Promise<string>
+    question: (data: ValidateCallbackOutputs<S>, context: {
+        schema: {
+            input: S
+            output: O
+        }
+    }) => Promise<string>
 }
 
 export class Translator<
@@ -49,12 +54,24 @@ export class Translator<
      * @en Combine the input data into a prompt.
      */
 
-    async compile(data: ValidateCallbackOutputs<S>) {
+    async compile(data: ValidateCallbackOutputs<S>, context: {
+        schema: {
+            input: S
+            output: O
+        }
+    }) {
         const scheme = validate(data, this.params.input)
-        const prompt = await this.params.question(scheme)
+        const prompt = await this.params.question(scheme, context)
         return {
             scheme,
             prompt
+        }
+    }
+
+    getValidate() {
+        return {
+            input: this.params.input,
+            output: this.params.output
         }
     }
 

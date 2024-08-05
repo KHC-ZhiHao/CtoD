@@ -1041,6 +1041,11 @@
     "@nodelib/fs.scandir" "2.1.5"
     fastq "^1.6.0"
 
+"@sodaru/yup-to-json-schema@^2.0.1":
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/@sodaru/yup-to-json-schema/-/yup-to-json-schema-2.0.1.tgz#117ddf49cb03896b785f0efbe7b6679456a03287"
+  integrity sha512-lWb0Wiz8KZ9ip/dY1eUqt7fhTPmL24p6Hmv5Fd9pzlzAdw/YNcWZr+tiCT4oZ4Zyxzi9+1X4zv82o7jYvcFxYA==
+
 "@tootallnate/once@2":
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/@tootallnate/once/-/once-2.0.0.tgz#f544a148d3ab35801c1f633a7441fd87c2e484bf"
@@ -1820,6 +1825,11 @@ cheerio@^1.0.0-rc.12:
     htmlparser2 "^8.0.1"
     parse5 "^7.0.0"
     parse5-htmlparser2-tree-adapter "^7.0.0"
+
+chinese-conv@^1.1.0:
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/chinese-conv/-/chinese-conv-1.1.0.tgz#e5a69f8b3d8dc38c6672eb5c485f67d7cbcbdcc6"
+  integrity sha512-D/ybRVt9ascTbXPqIS+GkTKTlXyExY6a8mBk5JOvsRR48emHfOqFQ2wS8ephnWLim8SYWKR+epq6dTybtgmJ7Q==
 
 chokidar@3.5.3:
   version "3.5.3"
@@ -3556,10 +3566,10 @@ pkg-dir@^4.1.0, pkg-dir@^4.2.0:
   dependencies:
     find-up "^4.0.0"
 
-power-helper@^0.6.0:
-  version "0.6.0"
-  resolved "https://registry.yarnpkg.com/power-helper/-/power-helper-0.6.0.tgz#0927aa68f45f3281114d394ae96213f1e8db9b23"
-  integrity sha512-DJgEe7E5FoKXGDp+Dl4tsrqXBqCoTDqDYo98Dt1TO8gX+54UDdK1gO7VuOS1tWnHJHplQgDM+fqU6RPMRf+hdA==
+power-helper@^0.7.6:
+  version "0.7.6"
+  resolved "https://registry.yarnpkg.com/power-helper/-/power-helper-0.7.6.tgz#ff786ef208c80cac06f9a6afb2653a761c019e63"
+  integrity sha512-G6+57eCb+EPSWFPW9cbexnQxxClewbp2K9rrUpQn9B8eKWWCJbhsvSl9bnDKn+o+bAx9vgNMt4UBEGIIuh1c+A==
 
 prelude-ls@^1.2.1:
   version "1.2.1"

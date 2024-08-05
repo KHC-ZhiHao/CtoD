@@ -200,6 +200,13 @@ const broker = new ChatBroker({
 
 ## Version History
 
-### 0.3.0
+### 0.3.x
 
 為了支援更多平台與自建服務，我們捨棄了完全為了 ChatGPT 客制化的接口，這樣也能完整保持 Broker 與 Plugin 的一致性。
+
+### 0.4.x
+
+主要是支援 llama3.cpp 或者是其他自建服務上流程的調整。
+
+1. 支援 llama3.cpp server service
+2. 新增 yup to json scheme。

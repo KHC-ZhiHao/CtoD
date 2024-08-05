@@ -1,6 +1,6 @@
 {
   "name": "ctod",
-  "version": "0.3.6",
+  "version": "0.4.0",
   "description": "CtoD Is Chat To Data Utils.",
   "main": "./dist/index.js",
   "scripts": {
@@ -54,10 +54,12 @@
     "webpack-node-externals": "^3.0.0"
   },
   "dependencies": {
+    "@sodaru/yup-to-json-schema": "^2.0.1",
     "axios": "^1.4.0",
+    "chinese-conv": "^1.1.0",
     "handlebars": "^4.7.7",
     "json5": "^2.2.3",
-    "power-helper": "^0.6.5",
+    "power-helper": "^0.7.6",
     "yup": "^1.1.1"
   }
 }

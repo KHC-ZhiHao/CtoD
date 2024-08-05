@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "target": "ES5",
+    "target": "ESNext",
     "downlevelIteration": true,
     "module": "commonjs",
     "moduleResolution": "node",
@@ -14,11 +14,11 @@
     "skipLibCheck": true,
     "lib": [
       "dom",
-      "ES2015"
+      "ESNext"
     ]
   },
   "exclude": ["node_modules", "**/*.test.ts"],
   "include": [
-    "lib/*.ts"
+    "lib/**/*.ts"
   ]
 }

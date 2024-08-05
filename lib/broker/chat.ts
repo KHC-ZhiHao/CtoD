@@ -1,6 +1,6 @@
 import { TextParser } from '../core/parser'
 import { ChatBrokerPlugin } from '../core/plugin'
-import { flow, Hook, Log } from 'power-helper'
+import { Event, flow, Hook, Log } from 'power-helper'
 import { Translator, TranslatorParams } from '../core/translator'
 import { ValidateCallback, ValidateCallbackOutputs } from '../utils/validate'
 
@@ -29,6 +29,10 @@ export type ChatBrokerHooks<
             [K in keyof PS]: {
                 send: (data: PS[K]['__receiveData']) => void
             }
+        }
+        schema: {
+            input: S
+            output: O
         }
         messages: Message[]
         setPreMessages: (messages: Message[]) => void
@@ -102,6 +106,11 @@ export type ChatBrokerHooks<
 type RequestContext = {
     count: number
     isRetry: boolean
+    onCancel: (cb: () => void) => void
+    schema: {
+        input: any
+        output: any
+    }
 }
 
 export type Params<
@@ -136,6 +145,12 @@ export class ChatBroker<
     protected plugins = {} as PS
     protected installed = false
     protected translator: Translator<S, O>
+    protected event = new Event<{
+        cancel: {
+            requestId: string
+        }
+        cancelAll: any
+    }>()
 
     constructor(params: Params<S, O, C, P, PS>) {
         this.log = new Log(params.name ?? 'no name')
@@ -171,115 +186,206 @@ export class ChatBroker<
         }
     }
 
+    async cancel(requestId?: string) {
+        if (requestId) {
+            this.event.emit('cancel', {
+                requestId
+            })
+        } else {
+            this.event.emit('cancelAll', {})
+        }
+    }
+
+    requestWithId<T extends Translator<S, O>>(data: T['__schemeType']): {
+        id: string
+        request: Promise<T['__outputType']>
+    } {
+        this._install()
+        let id = flow.createUuid()
+        let waitCancel = null as (() => void) | null
+        let isCancel = false
+        let isSending = false
+
+        // =================
+        //
+        // event
+        //
+
+        let listeners = [
+            this.event.on('cancel', ({ requestId }) => {
+                if (requestId === id) {
+                    cancelTrigger()
+                }
+            }),
+            this.event.on('cancelAll', () => {
+                cancelTrigger()
+            })
+        ]
+        let eventOff = () => listeners.forEach(e => e.off())
+        let cancelTrigger = () => {
+            if (isCancel === false) {
+                if (isSending && waitCancel) {
+                    waitCancel()
+                }
+                isCancel = true
+                eventOff()
+            }
+        }
+        let onCancel = (cb: () => void) => {
+            waitCancel = cb
+        }
+
+        // =================
+        //
+        // main
+        //
+
+        let request = async() => {
+            let schema = this.translator.getValidate()
+            let output: any = null
+            let plugins = {} as any
+            let question = await this.translator.compile(data, {
+                schema
+            })
+            let messages: Message[] = [
+                {
+                    role: 'user',
+                    content: question.prompt
+                }
+            ]
+            for (let key in this.plugins) {
+                plugins[key] = {
+                    send: (data: any) => this.plugins[key].send({
+                        id,
+                        data
+                    })
+                }
+            }
+            await this.hook.notify('start', {
+                id,
+                data,
+                schema,
+                plugins,
+                messages,
+                setPreMessages: ms => {
+                    messages = [
+                        ...ms,
+                        {
+                            role: 'user',
+                            content: question.prompt
+                        }
+                    ]
+                },
+                changeMessages: ms => {
+                    messages = ms
+                }
+            })
+            await flow.asyncWhile(async ({ count, doBreak }) => {
+                if (count >= 10) {
+                    return doBreak()
+                }
+                let response = ''
+                let parseText = ''
+                let retryFlag = false
+                let lastUserMessage = messages.filter(e => e.role === 'user').slice(-1)[0]?.content || ''
+                try {
+                    await this.hook.notify('talkBefore', {
+                        id,
+                        data,
+                        messages,
+                        lastUserMessage
+                    })
+                    const sender = this.params.request(messages, {
+                        count,
+                        schema,
+                        onCancel,
+                        isRetry: retryFlag
+                    })
+                    if (isCancel) {
+                        if (waitCancel) {
+                            waitCancel()
+                        }
+                    } else {
+                        try {
+                            isSending = true
+                            response = await sender
+                            parseText = response
+                        } finally {
+                            isSending = false
+                        }
+                    }
+                    if (isCancel === false) {
+                        await this.hook.notify('talkAfter', {
+                            id,
+                            data,
+                            response,
+                            messages,
+                            parseText,
+                            lastUserMessage,
+                            changeParseText: text => {
+                                parseText = text
+                            }
+                        })
+                        output = (await this.translator.parse(parseText)).output
+                        await this.hook.notify('succeeded', {
+                            id,
+                            output
+                        })
+                    }
+                    await this.hook.notify('done', { id })
+                    doBreak()
+                } catch (error: any) {
+                    // 如果解析錯誤，可以選擇是否重新解讀
+                    if (error.isParserError) {
+                        await this.hook.notify('parseFailed', {
+                            id,
+                            error: error.error,
+                            count,
+                            response,
+                            messages,
+                            lastUserMessage,
+                            parserFails: error.parserFails,
+                            retry: () => {
+                                retryFlag = true
+                            },
+                            changeMessages: ms => {
+                                messages = ms
+                            }
+                        })
+                        if (retryFlag === false) {
+                            await this.hook.notify('done', { id })
+                            throw error
+                        }
+                    } else {
+                        await this.hook.notify('done', { id })
+                        throw error
+                    }
+                }
+            })
+            return output
+        }
+        const send = async() => {
+            try {
+                const result = await request()
+                return result
+            } finally {
+                eventOff()
+            }
+        }
+        return {
+            id,
+            request: send()
+        }
+    }
+
     /**
      * @zh 將請求發出至聊天機器人。
      * @en Send request to chatbot.
      */
 
     async request<T extends Translator<S, O>>(data: T['__schemeType']): Promise<T['__outputType']> {
-        this._install()
-        let id = flow.createUuid()
-        let output: any = null
-        let plugins = {} as any
-        let question = await this.translator.compile(data)
-        let messages: Message[] = [
-            {
-                role: 'user',
-                content: question.prompt
-            }
-        ]
-        for (let key in this.plugins) {
-            plugins[key] = {
-                send: (data: any) => this.plugins[key].send({
-                    id,
-                    data
-                })
-            }
-        }
-        await this.hook.notify('start', {
-            id,
-            data,
-            plugins,
-            messages,
-            setPreMessages: ms => {
-                messages = [
-                    ...ms,
-                    {
-                        role: 'user',
-                        content: question.prompt
-                    }
-                ]
-            },
-            changeMessages: ms => {
-                messages = ms
-            }
-        })
-        await flow.asyncWhile(async ({ count, doBreak }) => {
-            if (count >= 10) {
-                return doBreak()
-            }
-            let response = ''
-            let parseText = ''
-            let retryFlag = false
-            let lastUserMessage = messages.filter(e => e.role === 'user').slice(-1)[0]?.content || ''
-            try {
-                await this.hook.notify('talkBefore', {
-                    id,
-                    data,
-                    messages,
-                    lastUserMessage
-                })
-                response = await this.params.request(messages, {
-                    count,
-                    isRetry: retryFlag
-                })
-                parseText = response
-                await this.hook.notify('talkAfter', {
-                    id,
-                    data,
-                    response,
-                    messages,
-                    parseText,
-                    lastUserMessage,
-                    changeParseText: text => {
-                        parseText = text
-                    }
-                })
-                output = (await this.translator.parse(parseText)).output
-                await this.hook.notify('succeeded', {
-                    id,
-                    output
-                })
-                await this.hook.notify('done', { id })
-                doBreak()
-            } catch (error: any) {
-                // 如果解析錯誤，可以選擇是否重新解讀
-                if (error.isParserError) {
-                    await this.hook.notify('parseFailed', {
-                        id,
-                        error: error.error,
-                        count,
-                        response,
-                        messages,
-                        lastUserMessage,
-                        parserFails: error.parserFails,
-                        retry: () => {
-                            retryFlag = true
-                        },
-                        changeMessages: ms => {
-                            messages = ms
-                        }
-                    })
-                    if (retryFlag === false) {
-                        await this.hook.notify('done', { id })
-                        throw error
-                    }
-                } else {
-                    await this.hook.notify('done', { id })
-                    throw error
-                }
-            }
-        })
+        const { request } = this.requestWithId(data)
+        const output = await request
         return output
     }
 }
