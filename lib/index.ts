@@ -17,6 +17,7 @@ import { Translator } from './core/translator'
 import { TextParser } from './core/parser'
 import { ChatBroker } from './broker/chat'
 import { ChatBrokerPlugin } from './core/plugin'
+import { validateToJsonSchema } from './utils/validate'
 
 export const ctod = {
     OpenAI,
@@ -26,7 +27,8 @@ export const ctod = {
     ChatBroker,
     Translator,
     TextParser,
-    ChatBrokerPlugin
+    ChatBrokerPlugin,
+    validateToJsonSchema
 }
 
 module.exports = ctod

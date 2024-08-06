@@ -5,12 +5,16 @@ import { Llama3CppCompletion, Config } from './completion'
 export class Llama3Cpp {
     _axios = axios.create()
 
-    static createChatRequest(config: Partial<Config> | (() => Promise<Partial<Config>>)) {
+    static createChatRequest(params: {
+        config: Partial<Config> | (() => Promise<Partial<Config>>)
+        talkOptions?: any
+    }) {
         return async(messages: any[], { schema, onCancel }: any) => {
             const ll3cpp = new Llama3Cpp()
             const chat = ll3cpp.createCompletion()
-            chat.setConfig(typeof config === 'function' ? await config() : config)
+            chat.setConfig(typeof params.config === 'function' ? await params.config() : params.config)
             const { promise, cancel } = chat.talk({
+                options: params.talkOptions,
                 messages: messages,
                 response_format: {
                     type: 'json_object',
@@ -18,8 +22,8 @@ export class Llama3Cpp {
                 }
             })
             onCancel(cancel)
-            const text = await promise()
-            return text
+            const { message } = await promise()
+            return message
         }
     }
 

@@ -1,27 +1,22 @@
-import { ChatBroker, Llama3Cpp, templates } from '../lib/index'
+// eslint-disable-next-line @typescript-eslint/triple-slash-reference
+/// <reference path="../lib/shims.d.ts" />
+import { ChatBroker, Llama3Cpp, plugins } from '../lib/index'
 
-export const gameBroker = new ChatBroker({
+const gameDesignerBroker = new ChatBroker({
     input: yup => {
         return {
-            theme: yup.string(),
-            // 場景
-            scene: yup.string(),
-            // 人物
-            users: yup.array().of(yup.object({
-                name: yup.string().required(),
-                info: yup.string().required()
-            })).required(),
-            // 歷史
-            histories: yup.array().of(yup.object({
-                role: yup.string().required(),
-                message: yup.string().required()
-            })).required()
+            scene: yup.string()
         }
     },
     output: yup => {
         return {
             next: yup.array().of(yup.string().required()).required()
         }
+    },
+    plugins: {
+        log: plugins.PrintLogPlugin.use({
+            detail: true
+        })
     },
     install: ({ attach }) => {
         attach('start', async({ setPreMessages }) => {
@@ -41,17 +36,21 @@ export const gameBroker = new ChatBroker({
             ])
         })
     },
+    /**
+     * @zh createChatRequest 可以透過 output 自動推斷出要回傳的類型，不需要再額外提供型態
+     */
     request: Llama3Cpp.createChatRequest({
-        baseUrl: 'https://llama3.com'
+        config: {
+            baseUrl: 'http://localhost:12333'
+        }
     }),
-    question: async() => {
-        return templates.requireJsonResponse([
-            '今天小紅帽遇到了大野狼，大野狼要吃掉小紅帽，小紅帽要怎麼辦？給我三個下一步要發生的事件：'
-        ], {
-            next: {
-                desc: '下一段劇情的選項',
-                example: 'string[]'
-            }
-        })
+    question: async({ scene }) => {
+        return scene || '任意發揮'
     }
+})
+
+gameDesignerBroker.request({
+    scene: '今天小紅帽遇到了大野狼，大野狼要吃掉小紅帽，小紅帽要怎麼辦？給我三個下一步要發生的事件'
+}).then(result => {
+    console.log(result)
 })
