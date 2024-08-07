@@ -16,9 +16,9 @@ export class Llama3Cpp {
             const ll3cpp = new Llama3Cpp()
             const chat = ll3cpp.createCompletion()
             const config = typeof params.config === 'function' ? await params.config() : params.config
-            chat.setConfig(config)
             const info = params.jsonSchemaInfo ? json.jpjs(params.jsonSchemaInfo) : undefined
-            if (config.autoConvertTraditionalChinese && info) {
+            chat.setConfig(config)
+            if (chat.config.autoConvertTraditionalChinese && info) {
                 for (let key in info.desc) {
                     const d = info.desc[key]
                     if (typeof d === 'object' && d.description) {
