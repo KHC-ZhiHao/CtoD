@@ -1,6 +1,6 @@
 export * as plugins from './plugins'
 export * as templates from './templates'
-export { validateToJsonSchema } from './utils/validate'
+export { validateToJsonSchema, JsonSchemaInfo } from './utils/validate'
 export { OpenAI } from './service/openai'
 export { Llama3Cpp } from './service/llama3.cpp'
 export { TextParser } from './core/parser'

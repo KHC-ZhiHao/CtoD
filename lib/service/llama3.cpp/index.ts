@@ -1,5 +1,7 @@
 import axios, { AxiosInstance } from 'axios'
-import { validateToJsonSchema } from '../../utils/validate'
+import { json } from 'power-helper'
+import { sify } from 'chinese-conv'
+import { validateToJsonSchema, JsonSchemaInfo } from '../../utils/validate'
 import { Llama3CppCompletion, Config } from './completion'
 
 export class Llama3Cpp {
@@ -8,21 +10,35 @@ export class Llama3Cpp {
     static createChatRequest(params: {
         config: Partial<Config> | (() => Promise<Partial<Config>>)
         talkOptions?: any
+        jsonSchemaInfo?: JsonSchemaInfo
     }) {
         return async(messages: any[], { schema, onCancel }: any) => {
             const ll3cpp = new Llama3Cpp()
             const chat = ll3cpp.createCompletion()
-            chat.setConfig(typeof params.config === 'function' ? await params.config() : params.config)
-            const { task, cancel } = chat.talk({
+            const config = typeof params.config === 'function' ? await params.config() : params.config
+            chat.setConfig(config)
+            const info = params.jsonSchemaInfo ? json.jpjs(params.jsonSchemaInfo) : undefined
+            if (config.autoConvertTraditionalChinese && info) {
+                for (let key in info.desc) {
+                    const d = info.desc[key]
+                    if (typeof d === 'object' && d.description) {
+                        d.description = sify(d.description)
+                    }
+                    if (typeof d === 'string') {
+                        info.desc[key] = sify(d)
+                    }
+                }
+            }
+            const { run, cancel } = chat.talk({
                 options: params.talkOptions,
                 messages: messages,
                 response_format: {
                     type: 'json_object',
-                    schema: validateToJsonSchema(schema.output)
+                    schema: validateToJsonSchema(schema.output, info)
                 }
             })
             onCancel(cancel)
-            const { message } = await task()
+            const { message } = await run()
             return message
         }
     }

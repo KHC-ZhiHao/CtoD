@@ -1,4 +1,5 @@
 import { Llama3Cpp } from './index'
+import { flow } from 'power-helper'
 import { tify, sify } from 'chinese-conv'
 
 type Message = {
@@ -22,11 +23,31 @@ type Stream = {
 }
 
 class Requester {
-    streamAbortController = new AbortController()
-    isCalled = false
-    core: Llama3CppCompletion
+    private core: Llama3CppCompletion
+    private streamAbortControllers: {
+        id: string
+        controller: AbortController
+    }[] = []
+
     constructor(core: Llama3CppCompletion) {
         this.core = core
+    }
+
+    private createAbortController() {
+        const streamAbortController = new AbortController()
+        const streamAbortControllerId = flow.createUuid()
+        this.streamAbortControllers.push({
+            id: streamAbortControllerId,
+            controller: streamAbortController
+        })
+        return {
+            signal: streamAbortController.signal,
+            controllerId: streamAbortControllerId
+        }
+    }
+
+    private removeAbortController(streamAbortControllerId: string) {
+        this.streamAbortControllers = this.streamAbortControllers.filter(e => e.id !== streamAbortControllerId)
     }
 
     async stream(params: {
@@ -37,10 +58,11 @@ class Requester {
         onWarn: (error: any) => void
         onError: (error: any) => void
     }) {
-        if (this.isCalled) {
-            throw new Error('Requester is already called')
+        const { signal, controllerId } = this.createAbortController()
+        const end = () => {
+            this.removeAbortController(controllerId)
+            params.onEnd()
         }
-        this.isCalled = true
         const reader = async(response: Response) => {
             if (response.body) {
                 let reader = response.body.getReader()
@@ -70,7 +92,7 @@ class Requester {
                         done = true
                     }
                 }
-                params.onEnd()
+                end()
             } else {
                 params.onError(new Error('Body not found.'))
             }
@@ -78,44 +100,46 @@ class Requester {
         fetch(`${this.core.config.baseUrl}/${params.path}`, {
             method: 'POST',
             body: JSON.stringify(params.data),
-            signal: this.streamAbortController.signal,
+            signal,
             headers: {
                 'Content-Type': 'application/json',
                 ...this.core.config.headers
             }
-        }).then(reader).catch(error => {
-            if (error instanceof Error && error.message.includes('The user aborted a request')) {
-                params.onEnd()
-            } else {
-                params.onError(error)
-            }
         })
+            .then(reader)
+            .catch(error => {
+                if (error instanceof Error && error.message.includes('The user aborted a request')) {
+                    end()
+                } else {
+                    params.onError(error)
+                }
+            })
     }
 
     async fetch(params: {
         path: string
         data: any
     }) {
-        if (this.isCalled) {
-            throw new Error('Requester is already called')
-        }
-        this.isCalled = true
-        const result = await this.core.core._axios.post(`${this.core.config.baseUrl}/${params.path}`, params.data, {
-            signal: this.streamAbortController.signal,
-            headers: {
-                'Content-Type': 'application/json',
-                ...this.core.config.headers
+        const { signal, controllerId } = this.createAbortController()
+        try {
+            const result = await this.core.core._axios.post(`${this.core.config.baseUrl}/${params.path}`, params.data, {
+                signal,
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...this.core.config.headers
+                }
+            })
+            return {
+                data: result.data
             }
-        })
-        return {
-            data: result.data
+        } finally {
+            this.removeAbortController(controllerId)
         }
     }
 
     cancel() {
-        if (this.isCalled === true) {
-            this.streamAbortController.abort()
-        }
+        this.streamAbortControllers.forEach(e => e.controller.abort())
+        this.streamAbortControllers = []
     }
 
     export() {
@@ -164,7 +188,7 @@ export class Llama3CppCompletion {
         const requester = new Requester(this)
         return {
             ...requester.export(),
-            task: async(): Promise<{
+            run: async(): Promise<{
                 message: string
                 fullMessage: string
             }> => {
@@ -231,7 +255,7 @@ export class Llama3CppCompletion {
         const requester = new Requester(this)
         return {
             ...requester.export(),
-            task: async(): Promise<{
+            run: async(): Promise<{
                 message: string
             }> => {
                 const result = await requester.fetch({

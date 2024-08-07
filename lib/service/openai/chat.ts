@@ -112,6 +112,7 @@ export class OpenAIChat {
             'gpt-4-turbo-preview',
             'gpt-4-turbo',
             'gpt-4o',
+            'gpt-4o-mini',
             'gpt-3.5-turbo-1106'
         ].includes(this.config.model)
         const result = await this.openai._axios.post<ApiResponse>('https://api.openai.com/v1/chat/completions', {

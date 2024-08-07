@@ -32,15 +32,15 @@ export function validate<
  * @en Set the JSON Schema description, you can specify deep structures, such as user.name, user.level, etc.
  */
 
-type Info = {
+export type JsonSchemaInfo = {
     desc?: Record<string, string | {
         description?: string
         examples?: any
     }>
 }
 
-export const validateToJsonSchema = <T extends ValidateCallback<any>>(cb: T, info?: Info) => {
-    const bodySchemaBindDoc = (schema: ReturnType<typeof convertSchema>, doc: Info) => {
+export const validateToJsonSchema = <T extends ValidateCallback<any>>(cb: T, info?: JsonSchemaInfo) => {
+    const bodySchemaBindDoc = (schema: ReturnType<typeof convertSchema>, doc: JsonSchemaInfo) => {
         if (doc && doc.desc) {
             for (let key in doc.desc) {
                 if (schema.properties) {
