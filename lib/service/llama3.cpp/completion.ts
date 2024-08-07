@@ -162,20 +162,19 @@ export class Llama3CppCompletion {
         }
         const lastMessage = params.messages.at(-1) || ''
         const requester = new Requester(this)
-        const promise = requester.fetch({
-            path: 'completion',
-            data: {
-                ...(params.options || {}),
-                prompt: this.config.autoConvertTraditionalChinese ? sify(prompts.join('\n')) : prompts.join('\n')
-            }
-        })
         return {
             ...requester.export(),
-            promise: async(): Promise<{
+            task: async(): Promise<{
                 message: string
                 fullMessage: string
             }> => {
-                const result = await promise
+                const result = await requester.fetch({
+                    path: 'completion',
+                    data: {
+                        ...(params.options || {}),
+                        prompt: this.config.autoConvertTraditionalChinese ? sify(prompts.join('\n')) : prompts.join('\n')
+                    }
+                })
                 const message = this.config.autoConvertTraditionalChinese ? tify(result.data.content) : result.data.content
                 return {
                     message,
@@ -230,25 +229,24 @@ export class Llama3CppCompletion {
         }
     }) {
         const requester = new Requester(this)
-        const promise = requester.fetch({
-            path: 'v1/chat/completions',
-            data: {
-                ...(params.options || {}),
-                response_format: params.response_format,
-                messages: params.messages.map(e => {
-                    return {
-                        role: e.role,
-                        content: this.config.autoConvertTraditionalChinese ? sify(e.content) : e.content
-                    }
-                })
-            }
-        })
         return {
             ...requester.export(),
-            promise: async(): Promise<{
+            task: async(): Promise<{
                 message: string
             }> => {
-                const result = await promise
+                const result = await requester.fetch({
+                    path: 'v1/chat/completions',
+                    data: {
+                        ...(params.options || {}),
+                        response_format: params.response_format,
+                        messages: params.messages.map(e => {
+                            return {
+                                role: e.role,
+                                content: this.config.autoConvertTraditionalChinese ? sify(e.content) : e.content
+                            }
+                        })
+                    }
+                })
                 const content = result.data.choices[0].message.content || ''
                 return {
                     message: this.config.autoConvertTraditionalChinese ? tify(content) : content

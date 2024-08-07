@@ -1,6 +1,6 @@
 // eslint-disable-next-line @typescript-eslint/triple-slash-reference
 /// <reference path="../lib/shims.d.ts" />
-import { ChatBroker, OpenAI, templates } from '../lib/index'
+import { ChatBroker, OpenAI, templates, validateToJsonSchema } from '../lib/index'
 
 /**
  * @test npx ts-node ./examples/chat-demo.ts
@@ -24,23 +24,17 @@ const broker = new ChatBroker({
     },
     install: () => null,
     request: OpenAI.createChatRequest(API_KEY),
-    question: async({ indexs, question }) => {
-        return templates.requireJsonResponse([
+    question: async({ indexs, question }, { schema }) => {
+        return templates.requireJsonResponseWithJsonSchema([
             '我有以下索引',
             `${JSON.stringify(indexs)}`,
             `請幫我解析"${question}"可能是哪個索引`,
             '且相關性由高到低排序並給予分數，分數由 0 ~ 1'
-        ], {
-            indexs: {
-                desc: '由高到低排序的索引',
-                example: [
-                    {
-                        name: '索引名稱',
-                        score: '評比分數，數字顯示'
-                    }
-                ]
+        ], validateToJsonSchema(schema.output, {
+            desc: {
+                indexs: '由高到低排序的索引'
             }
-        })
+        }))
     }
 })
 

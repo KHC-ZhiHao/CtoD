@@ -13,7 +13,7 @@ export class Llama3Cpp {
             const ll3cpp = new Llama3Cpp()
             const chat = ll3cpp.createCompletion()
             chat.setConfig(typeof params.config === 'function' ? await params.config() : params.config)
-            const { promise, cancel } = chat.talk({
+            const { task, cancel } = chat.talk({
                 options: params.talkOptions,
                 messages: messages,
                 response_format: {
@@ -22,7 +22,7 @@ export class Llama3Cpp {
                 }
             })
             onCancel(cancel)
-            const { message } = await promise()
+            const { message } = await task()
             return message
         }
     }
