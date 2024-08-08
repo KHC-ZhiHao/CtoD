@@ -1,5 +1,5 @@
 import { ChatBrokerPlugin } from '../core/plugin';
-import { Hook, Log } from 'power-helper';
+import { Event, Hook, Log } from 'power-helper';
 import { Translator, TranslatorParams } from '../core/translator';
 import { ValidateCallback, ValidateCallbackOutputs } from '../utils/validate';
 declare type Message = {
@@ -19,6 +19,10 @@ export declare type ChatBrokerHooks<S extends ValidateCallback<any>, O extends V
             [K in keyof PS]: {
                 send: (data: PS[K]['__receiveData']) => void;
             };
+        };
+        schema: {
+            input: S;
+            output: O;
         };
         messages: Message[];
         setPreMessages: (messages: Message[]) => void;
@@ -84,6 +88,11 @@ export declare type ChatBrokerHooks<S extends ValidateCallback<any>, O extends V
 declare type RequestContext = {
     count: number;
     isRetry: boolean;
+    onCancel: (cb: () => void) => void;
+    schema: {
+        input: any;
+        output: any;
+    };
 };
 export declare type Params<S extends ValidateCallback<any>, O extends ValidateCallback<any>, C extends Record<string, any>, P extends ChatBrokerPlugin<any, any>, PS extends Record<string, ReturnType<P['use']>>> = Omit<TranslatorParams<S, O>, 'parsers'> & {
     name?: string;
@@ -99,13 +108,24 @@ export declare type Params<S extends ValidateCallback<any>, O extends ValidateCa
 export declare class ChatBroker<S extends ValidateCallback<any>, O extends ValidateCallback<any>, P extends ChatBrokerPlugin<any, any>, PS extends Record<string, ReturnType<P['use']>>, C extends ChatBrokerHooks<S, O, P, PS> = ChatBrokerHooks<S, O, P, PS>> {
     protected __hookType: C;
     protected log: Log;
-    protected hook: import("power-helper/dist/modules/hook").Hook<C>;
+    protected hook: Hook<C>;
     protected params: Params<S, O, C, P, PS>;
     protected plugins: PS;
     protected installed: boolean;
     protected translator: Translator<S, O>;
+    protected event: Event<{
+        cancel: {
+            requestId: string;
+        };
+        cancelAll: any;
+    }>;
     constructor(params: Params<S, O, C, P, PS>);
     protected _install(): any;
+    cancel(requestId?: string): Promise<void>;
+    requestWithId<T extends Translator<S, O>>(data: T['__schemeType']): {
+        id: string;
+        request: Promise<T['__outputType']>;
+    };
     /**
      * @zh 將請求發出至聊天機器人。
      * @en Send request to chatbot.

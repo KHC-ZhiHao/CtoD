@@ -1,6 +1,6 @@
 import { Translator } from './translator';
 import { ChatBrokerHooks } from '../broker/chat';
-import { Log, Hook } from 'power-helper';
+import { Log, Hook, Event } from 'power-helper';
 import { ValidateCallback, ValidateCallbackOutputs } from '../utils/validate';
 declare type BrokerHooks = ChatBrokerHooks<any, any, any, any>;
 declare type BrokerPluginParams<T extends ValidateCallback<any>, R extends ValidateCallback<any>> = {
@@ -20,7 +20,7 @@ declare type BrokerPluginParams<T extends ValidateCallback<any>, R extends Valid
     }) => void;
 };
 export declare class ChatBrokerPlugin<T extends ValidateCallback<any>, R extends ValidateCallback<any>> {
-    _event: import("power-helper/dist/modules/event").Event<Record<string, Record<string, any>>>;
+    _event: Event<Record<string, Record<string, any>>>;
     _params: BrokerPluginParams<T, R>;
     constructor(params: BrokerPluginParams<T, R>);
     use(params: ValidateCallbackOutputs<T>): {

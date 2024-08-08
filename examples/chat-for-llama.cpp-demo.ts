@@ -38,6 +38,7 @@ const gameDesignerBroker = new ChatBroker({
     },
     /**
      * @zh createChatRequest 可以透過 output 自動推斷出要回傳的類型，不需要再額外提供型態
+     * @en createChatRequest can infer the return type from output, no need to provide the type again
      */
     request: Llama3Cpp.createChatRequest({
         config: {

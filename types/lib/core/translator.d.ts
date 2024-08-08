@@ -20,7 +20,12 @@ export declare type TranslatorParams<S extends ValidateCallback<any>, O extends 
      * @zh 組合輸入資料成為提示文字。
      * @en Combine the input data into a prompt.
      */
-    question: (data: ValidateCallbackOutputs<S>) => Promise<string>;
+    question: (data: ValidateCallbackOutputs<S>, context: {
+        schema: {
+            input: S;
+            output: O;
+        };
+    }) => Promise<string>;
 };
 export declare class Translator<S extends ValidateCallback<any>, O extends ValidateCallback<any>> {
     private params;
@@ -31,12 +36,21 @@ export declare class Translator<S extends ValidateCallback<any>, O extends Valid
      * @zh 組合輸入資料成為提示文字。
      * @en Combine the input data into a prompt.
      */
-    compile(data: ValidateCallbackOutputs<S>): Promise<{
+    compile(data: ValidateCallbackOutputs<S>, context: {
+        schema: {
+            input: S;
+            output: O;
+        };
+    }): Promise<{
         scheme: ReturnType<S> extends infer T ? { [K in keyof T]: ReturnType<S>[K] extends {
             __outputType: any;
         } ? ReturnType<S>[K]["__outputType"] : unknown; } : never;
         prompt: string;
     }>;
+    getValidate(): {
+        input: S;
+        output: O;
+    };
     /**
      * @zh 將文字轉換成序列化資料。
      * @en Convert text to serialized data.

@@ -1,4 +1,5 @@
 import { ChatBrokerPlugin } from '../core/plugin';
+import { Event } from 'power-helper';
 declare type Events = {
     run: {
         id: string;
@@ -12,7 +13,7 @@ declare const _default: {
      * @zh 你可以監聽一些事件行為，例如還需要等待多少時間。
      * @en You can listen for some event behaviors, such as how long you still need to wait.
      */
-    event: import("power-helper/dist/modules/event").Event<Events>;
+    event: Event<Events>;
     /**
      * @zh 預設是每分鐘限制3次，你可以在設定中改變限制流量。
      * @en By default, the limit is 3 times per minute, and you can change the limit flow in the settings.

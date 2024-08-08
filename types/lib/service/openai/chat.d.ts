@@ -34,7 +34,7 @@ export declare type Config = {
      * @zh 選擇運行的模型，16k意味著能處理長度為 16,384 的文本，32k意味著能處理長度為 32768 的文本。
      * @en How many chat completion choices to generate for each input message.
      */
-    model: 'gpt-4' | 'gpt-3.5-turbo' | 'gpt-4-turbo' | 'gpt-4o';
+    model: 'gpt-4' | 'gpt-3.5-turbo' | 'gpt-4-turbo' | 'gpt-4o' | 'gpt-4o-mini';
     /**
      * @zh 冒險指數，數值由 0 ~ 2 之間，越低回應越穩定。
      * @en What sampling temperature to use, between 0 and 2. Higher values like 0.8 will make the output more random, while lower values like 0.2 will make it more focused and deterministic.
@@ -72,13 +72,24 @@ export declare class OpenAIChat {
      * @zh 進行對話
      * @en Talk to the AI
      */
-    talk(messages?: ChatGPTMessage[]): Promise<{
+    talk(messages?: ChatGPTMessage[], options?: {
+        abortController?: AbortController;
+    }): Promise<{
         id: string;
         text: string;
         newMessages: ChatGPTMessage[];
         isDone: boolean;
         apiReseponse: ApiResponse;
     }>;
+    talkStream(params: {
+        messages: any[];
+        onMessage: (message: string) => void;
+        onEnd: () => void;
+        onWarn: (warn: any) => void;
+        onError: (error: any) => void;
+    }): {
+        cancel: () => void;
+    };
     /**
      * @zh 開啟持續性對話
      */
