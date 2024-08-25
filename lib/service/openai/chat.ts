@@ -105,6 +105,8 @@ export class OpenAIChat {
      */
 
     async talk(messages: ChatGPTMessage[] = [], options?: {
+        /** 要 forceJsonFormat 為 true 才會生效 */
+        jsonSchema?: any
         abortController?: AbortController
     }) {
         const newMessages = json.jpjs(messages)
@@ -115,13 +117,23 @@ export class OpenAIChat {
             'gpt-4o-mini',
             'gpt-3.5-turbo-1106'
         ].includes(this.config.model)
+        let response_format: any = undefined
+        if (isSupportJson && this.config.forceJsonFormat) {
+            response_format = {
+                type: 'json_object'
+            }
+        }
+        if (isSupportJson && this.config.forceJsonFormat && options?.jsonSchema) {
+            response_format = {
+                type: 'json_schema',
+                json_schema: options.jsonSchema
+            }
+        }
         const result = await this.openai._axios.post<ApiResponse>('https://api.openai.com/v1/chat/completions', {
             model: this.config.model,
             n: this.config.n,
             messages: newMessages,
-            response_format: (isSupportJson === false || this.config.forceJsonFormat === false) ? undefined : {
-                type: 'json_object'
-            },
+            response_format,
             temperature: this.config.temperature
         }, {
             signal: options?.abortController?.signal,

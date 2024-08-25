@@ -1,7 +1,8 @@
+import axios, { AxiosInstance } from 'axios'
 import { OpenAIVision } from './vision'
 import { OpenAIChat, Config } from './chat'
 import { OpenAIImagesGeneration } from './images-generation'
-import axios, { AxiosInstance } from 'axios'
+import { validateToJsonSchema, JsonSchemaInfo } from '../../utils/validate'
 
 export class OpenAI {
     _axios = axios.create()
@@ -20,6 +21,33 @@ export class OpenAI {
             return text
         }
     }
+
+    static createChatRequestWithJsonSchema(params:{
+        apiKey: string | (() => Promise<string>),
+        config?: Partial<Config> | (() => Promise<Partial<Config>>)
+        jsonSchemaInfo?: JsonSchemaInfo
+    }) {
+        return async(messages: any[], { schema, onCancel }: any) => {
+            const openai = new OpenAI(typeof params.apiKey === 'string' ? params.apiKey : await params.apiKey())
+            const chat = openai.createChat()
+            const abortController = new AbortController()
+            if (params.config) {
+                chat.setConfig(typeof params.config === 'function' ? await params.config() : params.config)
+            }
+            onCancel(() => abortController.abort())
+            const jsonSchema = validateToJsonSchema(schema.output, params.jsonSchemaInfo)
+            const { text } = await chat.talk(messages, {
+                abortController,
+                jsonSchema: {
+                    name: 'data',
+                    strict: true,
+                    schema: jsonSchema
+                }
+            })
+            return text
+        }
+    }
+
 
     constructor(apiKey = '') {
         this._apiKey = apiKey

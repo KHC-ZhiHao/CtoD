@@ -63,7 +63,34 @@ export const validateToJsonSchema = <T extends ValidateCallback<any>>(cb: T, inf
         }
         return schema
     }
+    const removeAllDefault = (schema: any) => {
+        if (schema.default) {
+            delete schema.default
+        }
+        if (schema.properties) {
+            for (let key in schema.properties) {
+                if (schema.properties[key].default) {
+                    delete schema.properties[key].default
+                }
+                removeAllDefault(schema.properties[key])
+            }
+        }
+        if (schema.items) {
+            removeAllDefault(schema.items)
+        }
+    }
+    const addAllAdditionalProperties = (jsonSchema: any) => {
+        if (jsonSchema.type === 'object') {
+            jsonSchema.additionalProperties = false
+            for (const key in jsonSchema.properties) {
+                addAllAdditionalProperties(jsonSchema.properties[key])
+            }
+        } else if (jsonSchema.type === 'array') {
+            addAllAdditionalProperties(jsonSchema.items)
+        }
+    }
     const jsonSchema = convertSchema(Yup.object(cb(Yup)))
-    delete jsonSchema.default
+    removeAllDefault(jsonSchema)
+    addAllAdditionalProperties(jsonSchema)
     return info ? bodySchemaBindDoc(jsonSchema, info) : jsonSchema
 }

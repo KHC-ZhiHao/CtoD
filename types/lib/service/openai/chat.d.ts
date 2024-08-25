@@ -73,6 +73,8 @@ export declare class OpenAIChat {
      * @en Talk to the AI
      */
     talk(messages?: ChatGPTMessage[], options?: {
+        /** 要 forceJsonFormat 為 true 才會生效 */
+        jsonSchema?: any;
         abortController?: AbortController;
     }): Promise<{
         id: string;
