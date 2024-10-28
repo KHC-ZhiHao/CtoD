@@ -4,7 +4,7 @@ export default new ChatBrokerPlugin({
     name: 'print-log',
     params: yup => {
         return {
-            detail: yup.boolean().required().default(false)
+            detail: yup.boolean().default(false)
         }
     },
     receiveData: () => {

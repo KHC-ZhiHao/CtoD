@@ -1,5 +1,6 @@
 import { TextParser } from './parser'
 import { validate, ValidateCallback, ValidateCallbackOutputs } from '../utils/validate'
+import { ParserError } from '../utils/error'
 
 export type TranslatorParams<
     S extends ValidateCallback<any>,
@@ -29,7 +30,7 @@ export type TranslatorParams<
             input: S
             output: O
         }
-    }) => Promise<string>
+    }) => Promise<string | string[]>
 }
 
 export class Translator<
@@ -64,7 +65,7 @@ export class Translator<
         const prompt = await this.params.question(scheme, context)
         return {
             scheme,
-            prompt
+            prompt: Array.isArray(prompt) ? prompt.join('\n') : prompt
         }
     }
 
@@ -104,11 +105,7 @@ export class Translator<
                 parserFails
             }
         } catch (error) {
-            throw {
-                isParserError: true,
-                error,
-                parserFails
-            }
+            throw new ParserError(error, parserFails)
         }
     }
 }

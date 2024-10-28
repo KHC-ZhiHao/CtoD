@@ -1,6 +1,6 @@
 {
   "name": "ctod",
-  "version": "0.4.1",
+  "version": "0.5.0",
   "description": "CtoD Is Chat To Data Utils.",
   "main": "./dist/index.js",
   "scripts": {
@@ -59,7 +59,7 @@
     "chinese-conv": "^1.1.0",
     "handlebars": "^4.7.7",
     "json5": "^2.2.3",
-    "power-helper": "^0.7.6",
-    "yup": "^1.1.1"
+    "power-helper": "^0.7.9",
+    "yup": "^1.4.0"
   }
 }

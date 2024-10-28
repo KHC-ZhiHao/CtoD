@@ -3,7 +3,7 @@
  * @en A plugin based on printing log.
  */
 export declare const PrintLogPlugin: import("..").ChatBrokerPlugin<(yup: typeof import("yup")) => {
-    detail: import("yup").BooleanSchema<boolean, import("yup").AnyObject, false, "d">;
+    detail: import("yup").BooleanSchema<boolean | undefined, import("yup").AnyObject, false, "d">;
 }, () => {}>;
 /**
  * @zh 當解析失敗時，會自動重試的對話。

@@ -3568,10 +3568,10 @@ pkg-dir@^4.1.0, pkg-dir@^4.2.0:
   dependencies:
     find-up "^4.0.0"
 
-power-helper@^0.7.6:
-  version "0.7.6"
-  resolved "https://registry.yarnpkg.com/power-helper/-/power-helper-0.7.6.tgz#ff786ef208c80cac06f9a6afb2653a761c019e63"
-  integrity sha512-G6+57eCb+EPSWFPW9cbexnQxxClewbp2K9rrUpQn9B8eKWWCJbhsvSl9bnDKn+o+bAx9vgNMt4UBEGIIuh1c+A==
+power-helper@^0.7.9:
+  version "0.7.9"
+  resolved "https://registry.yarnpkg.com/power-helper/-/power-helper-0.7.9.tgz#b513dbbc5a877e0acbc09fb1a9f533a2ffb7127d"
+  integrity sha512-+P7REP7e/vjD5PwptlDVB4RCWi0tRl+WpFx5rTCFCdy9yGaSGOoNn8AKOovFSWfFQMfCkv1jNODqDHJpFGZWMg==
 
 prelude-ls@^1.2.1:
   version "1.2.1"
@@ -4589,10 +4589,10 @@ yocto-queue@^0.1.0:
   resolved "https://registry.yarnpkg.com/yocto-queue/-/yocto-queue-0.1.0.tgz#0294eb3dee05028d31ee1a5fa2c556a6aaf10a1b"
   integrity sha512-rVksvsnNCdJ/ohGc6xgPwyN8eheCxsiLM8mxuE/t/mOVqJewPuO1miLpTHQiRgTKCLexL4MeAFVagts7HmNZ2Q==
 
-yup@^1.1.1:
-  version "1.1.1"
-  resolved "https://registry.yarnpkg.com/yup/-/yup-1.1.1.tgz#49dbcf5ae7693ed0a36ed08a9e9de0a09ac18e6b"
-  integrity sha512-KfCGHdAErqFZWA5tZf7upSUnGKuTOnsI3hUsLr7fgVtx+DK04NPV01A68/FslI4t3s/ZWpvXJmgXhd7q6ICnag==
+yup@^1.4.0:
+  version "1.4.0"
+  resolved "https://registry.yarnpkg.com/yup/-/yup-1.4.0.tgz#898dcd660f9fb97c41f181839d3d65c3ee15a43e"
+  integrity sha512-wPbgkJRCqIf+OHyiTBQoJiP5PFuAXaWiJK6AmYkzQAh5/c2K9hzSApBZG5wV9KoKSePF7sAxmNSvh/13YHkFDg==
   dependencies:
     property-expr "^2.0.5"
     tiny-case "^1.0.3"

@@ -2,7 +2,6 @@ import { AxiosInstance } from 'axios';
 import { OpenAIVision } from './vision';
 import { OpenAIChat, Config } from './chat';
 import { OpenAIImagesGeneration } from './images-generation';
-import { JsonSchemaInfo } from '../../utils/validate';
 export declare class OpenAI {
     _axios: AxiosInstance;
     _apiKey: string;
@@ -10,7 +9,6 @@ export declare class OpenAI {
     static createChatRequestWithJsonSchema(params: {
         apiKey: string | (() => Promise<string>);
         config?: Partial<Config> | (() => Promise<Partial<Config>>);
-        jsonSchemaInfo?: JsonSchemaInfo;
     }): (messages: any[], { schema, onCancel }: any) => Promise<string>;
     constructor(apiKey?: string);
     /**

@@ -49,6 +49,11 @@ export declare type ChatBrokerHooks<S extends ValidateCallback<any>, O extends V
         messages: Message[];
         parseText: string;
         lastUserMessage: string;
+        /**
+         * @zh 宣告解析失敗
+         * @en Declare parsing failure
+         */
+        parseFail: (error: any) => void;
         changeParseText: (text: string) => void;
     };
     /**
@@ -98,7 +103,7 @@ export declare type Params<S extends ValidateCallback<any>, O extends ValidateCa
     name?: string;
     plugins?: PS | (() => PS);
     request: (messages: Message[], context: RequestContext) => Promise<string>;
-    install: (context: {
+    install?: (context: {
         log: Log;
         attach: Hook<C>['attach'];
         attachAfter: Hook<C>['attachAfter'];

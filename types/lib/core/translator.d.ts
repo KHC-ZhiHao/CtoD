@@ -25,7 +25,7 @@ export declare type TranslatorParams<S extends ValidateCallback<any>, O extends 
             input: S;
             output: O;
         };
-    }) => Promise<string>;
+    }) => Promise<string | string[]>;
 };
 export declare class Translator<S extends ValidateCallback<any>, O extends ValidateCallback<any>> {
     private params;

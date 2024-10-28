@@ -1,7 +1,6 @@
 import axios, { AxiosInstance } from 'axios'
-import { json } from 'power-helper'
 import { sify } from 'chinese-conv'
-import { validateToJsonSchema, JsonSchemaInfo } from '../../utils/validate'
+import { validateToJsonSchema } from '../../utils/validate'
 import { Llama3CppCompletion, Config } from './completion'
 
 export class Llama3Cpp {
@@ -10,31 +9,22 @@ export class Llama3Cpp {
     static createChatRequest(params: {
         config: Partial<Config> | (() => Promise<Partial<Config>>)
         talkOptions?: any
-        jsonSchemaInfo?: JsonSchemaInfo
     }) {
         return async(messages: any[], { schema, onCancel }: any) => {
             const ll3cpp = new Llama3Cpp()
             const chat = ll3cpp.createCompletion()
             const config = typeof params.config === 'function' ? await params.config() : params.config
-            const info = params.jsonSchemaInfo ? json.jpjs(params.jsonSchemaInfo) : undefined
             chat.setConfig(config)
-            if (chat.config.autoConvertTraditionalChinese && info) {
-                for (let key in info.desc) {
-                    const d = info.desc[key]
-                    if (typeof d === 'object' && d.description) {
-                        d.description = sify(d.description)
-                    }
-                    if (typeof d === 'string') {
-                        info.desc[key] = sify(d)
-                    }
-                }
+            let formatSchema = validateToJsonSchema(schema.output)
+            if (chat.config.autoConvertTraditionalChinese) {
+                formatSchema = JSON.parse(sify(JSON.stringify(formatSchema)))
             }
             const { run, cancel } = chat.talk({
                 options: params.talkOptions,
                 messages: messages,
                 response_format: {
                     type: 'json_object',
-                    schema: validateToJsonSchema(schema.output, info)
+                    schema: formatSchema
                 }
             })
             onCancel(cancel)

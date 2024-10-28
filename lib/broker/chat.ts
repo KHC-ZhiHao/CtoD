@@ -3,6 +3,7 @@ import { ChatBrokerPlugin } from '../core/plugin'
 import { Event, flow, Hook, Log } from 'power-helper'
 import { Translator, TranslatorParams } from '../core/translator'
 import { ValidateCallback, ValidateCallbackOutputs } from '../utils/validate'
+import { ParserError } from '../utils/error'
 
 type Message = {
     role: 'system' | 'user' | 'assistant'
@@ -63,6 +64,11 @@ export type ChatBrokerHooks<
         messages: Message[]
         parseText: string
         lastUserMessage: string
+        /**
+         * @zh 宣告解析失敗
+         * @en Declare parsing failure
+         */
+        parseFail: (error: any) => void
         changeParseText: (text: string) => void
     }
 
@@ -123,7 +129,7 @@ export type Params<
     name?: string
     plugins?: PS | (() => PS)
     request: (messages: Message[], context: RequestContext) => Promise<string>
-    install: (context: {
+    install?: (context: {
         log: Log
         attach: Hook<C>['attach']
         attachAfter: Hook<C>['attachAfter']
@@ -172,7 +178,6 @@ export class ChatBroker<
                 attachAfter: this.hook.attachAfter.bind(this.hook),
                 translator: this.translator
             }
-            this.params.install(context)
             if (this.params.plugins) {
                 this.plugins = typeof this.params.plugins === 'function' ? this.params.plugins() : this.params.plugins
                 for (let key in this.plugins) {
@@ -183,6 +188,7 @@ export class ChatBroker<
                     })
                 }
             }
+            this.params.install?.(context)
         }
     }
 
@@ -322,6 +328,9 @@ export class ChatBroker<
                             messages,
                             parseText,
                             lastUserMessage,
+                            parseFail: (error) => {
+                                throw new ParserError(error, [])
+                            },
                             changeParseText: text => {
                                 parseText = text
                             }
@@ -336,7 +345,7 @@ export class ChatBroker<
                     doBreak()
                 } catch (error: any) {
                     // 如果解析錯誤，可以選擇是否重新解讀
-                    if (error.isParserError) {
+                    if (error instanceof ParserError) {
                         await this.hook.notify('parseFailed', {
                             id,
                             error: error.error,

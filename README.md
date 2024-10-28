@@ -21,11 +21,11 @@
 
 ## 摘要
 
-本工具是利用聊天機器人能夠讀懂自然語言的特性，將我們的需求與資料透過口語化的方式交付給他處理，並要求回應可序列化格式，例如：JSON。
+本工具是利用聊天機器人能夠讀懂自然語言的特性，將我們的需求與資料透過口語化的方式交付給他處理，並要求回應 JSON。
 
-在對話過程中，本工具採用 [yup](https://github.com/jquense/yup) 來驗證請求與回復資料是否符合預期，以確保一致性，只要保持這個互動模式，就可以利用在 API 串接或是自動化系統上。
+在對話過程中，採用 [yup](https://github.com/jquense/yup) 來驗證請求與回復資料是否符合預期，以確保一致性，只要保持這個互動模式，就可以利用在 API 串接或是自動化系統上。
 
-我們還附帶支援 `OpenAI` 的相關服務。
+我們還附帶支援 `OpenAI` 與 `Llama3` 的相關服務。
 
 ## 安裝
 
@@ -49,51 +49,51 @@ yarn add ctod
 
 ```ts
 import { ChatBroker, OpenAI, templates } from 'ctod'
-
+    
 const broker = new ChatBroker({
     /** 驗證輸入資料 */
-    input: yup => {
+    input(yup) {
         return {
-            indexs: yup.array(yup.string()).required(),
+            indexs: yup.array(yup.string().required()).required(),
             question: yup.string().required()
         }
     },
     /** 驗證輸出資料 */
-    output: yup => {
+    output(yup) {
+        const item = yup.object({
+            name: yup.string().description('索引名稱').required(),
+            score: yup.number().description('評比分數').required()
+        }).required()
         return {
-            indexs: yup.array(yup.object({
-                name: yup.string().required(),
-                score: yup.number().required()
-            })).required()
+            indexs: yup.array(item).description('由高到低排序的索引').required()
         }
     },
     /** 初始化系統，通常來植入或掛鉤生命週期 */
-    install: () => {},
+    install({ attach }) {
+        attach('start', async({ setPreMessages }) => {
+            setPreMessages([
+                {
+                    role: 'system',
+                    content: '你現在是一位擅長分類索引的藥師'
+                }
+            ])
+        })
+    },
     /** 定義發送請求的接口 */
-    request: async(messages) => {
-        const openai = new OpenAI(API_KEY)
-        const chat = openai.createChat()
-        const { text } = await chat.talk(messages)
-        return text
-    }
+    request: OpenAI.createChatRequestWithJsonSchema({
+        apiKey: API_KEY,
+        config: {
+            model: 'gpt-4o-mini'
+        }
+    }),
     /** 組裝與定義我們要向機器人發出的請求 */
     question: async({ indexs, question }) => {
-        return templates.requireJsonResponse([
+        return [
             '我有以下索引',
             `${JSON.stringify(indexs)}`,
             `請幫我解析"${question}"可能是哪個索引`,
             '且相關性由高到低排序並給予分數，分數由 0 ~ 1'
-        ], {
-            indexs: {
-                desc: '由高到低排序的索引',
-                example: [
-                    {
-                        name: '索引名稱',
-                        score: '評比分數，數字顯示'
-                    }
-                ]
-            }
-        })
+        ]
     }
 })
 
@@ -210,3 +210,12 @@ const broker = new ChatBroker({
 
 1. 支援 llama3.cpp server service
 2. 新增 yup to json scheme。
+
+### 0.5.x
+
+移除了 JSON Schema Info 的支援，而是透過 [yup-to-json-schema](https://github.com/sodaru/yup-to-json-schema) 進行生成資料格式。
+
+由於 `yup-to-json-schema` 的延伸套件要使用 `yup.string().description()` 方法需要進行全域註冊，在此我們提供了 `bindYupToJsonSchemaToYup` 這個方法，讓使用者可以自行決定是否要進行註冊。
+
+1. 可以在 question 中回應 array，會透過 join 進行合併。
+2. 可以省略 install 參數了。
