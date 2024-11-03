@@ -3,7 +3,7 @@
 <h1 align="center">CtoD</h1>
 <h3 align="center">Chat To Data</h3>
 
-<p align="center">
+<h6 align="center">
     <a href="https://www.npmjs.com/package/ctod">
         <img src="https://img.shields.io/npm/v/ctod.svg">
     </a>
@@ -11,7 +11,7 @@
         <img src="https://img.shields.io/github/stars/KHC-ZhiHao/ctod.svg?style=social">
     </a>
     <br>
-</p>
+</h6>
 
 <br>
 
