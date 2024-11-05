@@ -1,6 +1,6 @@
 // eslint-disable-next-line @typescript-eslint/triple-slash-reference
 /// <reference path="../lib/shims.d.ts" />
-import { ChatBroker, OpenAI, plugins, bindYupToJsonSchemaToYup } from '../lib/index'
+import { ChatBroker, OpenAI, plugins } from '../lib/index'
 
 /**
  * @test npx ts-node ./examples/chat-demo.ts
@@ -16,11 +16,23 @@ const broker = new ChatBroker({
     },
     output: yup => {
         const item = yup.object({
-            name: yup.string().description('索引名稱').required(),
-            score: yup.number().description('評比分數').required()
+            name: yup.string().required().meta({
+                jsonSchema: {
+                    description: '索引名稱'
+                }
+            }),
+            score: yup.number().required().meta({
+                jsonSchema: {
+                    description: '評比分數'
+                }
+            })
         }).required()
         return {
-            indexs: yup.array(item).description('由高到低排序的索引').required()
+            indexs: yup.array(item).required().meta({
+                jsonSchema: {
+                    description: '由高到低排序的索引'
+                }
+            })
         }
     },
     plugins: {
@@ -54,8 +66,6 @@ const broker = new ChatBroker({
     }
 })
 
-
-bindYupToJsonSchemaToYup()
 broker.request({
     indexs: ['胃痛', '腰痛', '頭痛', '喉嚨痛', '四肢疼痛'],
     question: '喝咖啡，吃甜食，胃食道逆流'

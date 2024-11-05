@@ -1,4 +1,4 @@
-declare type TextParserParams = {
+type TextParserParams = {
     /**
      * @zh 解讀器名字。
      * @en The name of the parser.

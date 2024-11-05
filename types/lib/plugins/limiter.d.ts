@@ -1,6 +1,6 @@
 import { ChatBrokerPlugin } from '../core/plugin';
 import { Event } from 'power-helper';
-declare type Events = {
+type Events = {
     run: {
         id: string;
     };

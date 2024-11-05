@@ -1,6 +1,6 @@
 export * as plugins from './plugins'
 export * as templates from './templates'
-export { validateToJsonSchema } from './utils/validate'
+export { validateToJsonSchema, definedYupSchema } from './utils/validate'
 export { OpenAI } from './service/openai'
 export { Llama3Cpp } from './service/llama3.cpp'
 export { TextParser } from './core/parser'
@@ -17,21 +17,7 @@ import { Translator } from './core/translator'
 import { TextParser } from './core/parser'
 import { ChatBroker } from './broker/chat'
 import { ChatBrokerPlugin } from './core/plugin'
-import { validateToJsonSchema } from './utils/validate'
-import { extendSchema } from '@sodaru/yup-to-json-schema'
-import { addMethod, Schema } from 'yup'
-
-
-/**
- * @see https://github.com/sodaru/yup-to-json-schema?tab=readme-ov-file#extend-the-schema
- */
-
-export const bindYupToJsonSchemaToYup = () => {
-    extendSchema({
-        Schema,
-        addMethod
-    })
-}
+import { validateToJsonSchema, definedYupSchema } from './utils/validate'
 
 export const ctod = {
     OpenAI,
@@ -42,8 +28,8 @@ export const ctod = {
     Translator,
     TextParser,
     ChatBrokerPlugin,
-    validateToJsonSchema,
-    bindYupToJsonSchemaToYup
+    definedYupSchema,
+    validateToJsonSchema
 }
 
 module.exports = ctod

@@ -1,15 +1,15 @@
 import { Llama3Cpp } from './index';
-declare type Message = {
+type Message = {
     role: string;
     content: string;
 };
-declare type Options = any;
-export declare type Config = {
+type Options = any;
+export type Config = {
     baseUrl: string;
     headers: Record<string, string>;
     autoConvertTraditionalChinese: boolean;
 };
-declare type Stream = {
+type Stream = {
     onMessage: (data: {
         message: string;
     }) => void;

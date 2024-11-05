@@ -1,4 +1,4 @@
-declare type JsonResponseFormat = {
+type JsonResponseFormat = {
     desc: string;
     example: any;
 };

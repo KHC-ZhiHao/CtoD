@@ -1,4 +1,4 @@
-declare type ParserFail = {
+type ParserFail = {
     name: string;
     error: any;
 };

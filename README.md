@@ -61,11 +61,23 @@ const broker = new ChatBroker({
     /** 驗證輸出資料 */
     output(yup) {
         const item = yup.object({
-            name: yup.string().description('索引名稱').required(),
-            score: yup.number().description('評比分數').required()
+            name: yup.string().required().meta({
+                jsonSchema: {
+                    description: '索引名稱'
+                }
+            }),
+            score: yup.number().required().meta({
+                jsonSchema: {
+                    description: '評比分數'
+                }
+            })
         }).required()
         return {
-            indexs: yup.array(item).description('由高到低排序的索引').required()
+            indexs: yup.array(item).required().meta({
+                jsonSchema: {
+                    description: '由高到低排序的索引'
+                }
+            })
         }
     },
     /** 初始化系統，通常來植入或掛鉤生命週期 */
@@ -219,3 +231,17 @@ const broker = new ChatBroker({
 
 1. 可以在 question 中回應 array，會透過 join 進行合併。
 2. 可以省略 install 參數了。
+
+### 0.6.x
+
+`bindYupToJsonSchemaToYup` 有一些依賴問題已經被移除，改用以下方案取代：
+
+```ts
+yup.array(item).required().meta({
+    jsonSchema: {
+        description: '由高到低排序的索引'
+    }
+})
+```
+
+1. 新增了 definedYupSchema 讓建立複雜的 Output 更加容易。

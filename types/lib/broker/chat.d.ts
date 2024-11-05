@@ -2,12 +2,12 @@ import { ChatBrokerPlugin } from '../core/plugin';
 import { Event, Hook, Log } from 'power-helper';
 import { Translator, TranslatorParams } from '../core/translator';
 import { ValidateCallback, ValidateCallbackOutputs } from '../utils/validate';
-declare type Message = {
+type Message = {
     role: 'system' | 'user' | 'assistant';
     name?: string;
     content: string;
 };
-export declare type ChatBrokerHooks<S extends ValidateCallback<any>, O extends ValidateCallback<any>, P extends ChatBrokerPlugin<any, any>, PS extends Record<string, ReturnType<P['use']>>> = {
+export type ChatBrokerHooks<S extends ValidateCallback<any>, O extends ValidateCallback<any>, P extends ChatBrokerPlugin<any, any>, PS extends Record<string, ReturnType<P['use']>>> = {
     /**
      * @zh 第一次聊天的時候觸發
      * @en Triggered when chatting for the first time
@@ -90,7 +90,7 @@ export declare type ChatBrokerHooks<S extends ValidateCallback<any>, O extends V
         id: string;
     };
 };
-declare type RequestContext = {
+type RequestContext = {
     count: number;
     isRetry: boolean;
     onCancel: (cb: () => void) => void;
@@ -99,7 +99,7 @@ declare type RequestContext = {
         output: any;
     };
 };
-export declare type Params<S extends ValidateCallback<any>, O extends ValidateCallback<any>, C extends Record<string, any>, P extends ChatBrokerPlugin<any, any>, PS extends Record<string, ReturnType<P['use']>>> = Omit<TranslatorParams<S, O>, 'parsers'> & {
+export type Params<S extends ValidateCallback<any>, O extends ValidateCallback<any>, C extends Record<string, any>, P extends ChatBrokerPlugin<any, any>, PS extends Record<string, ReturnType<P['use']>>> = Omit<TranslatorParams<S, O>, 'parsers'> & {
     name?: string;
     plugins?: PS | (() => PS);
     request: (messages: Message[], context: RequestContext) => Promise<string>;

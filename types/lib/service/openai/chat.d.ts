@@ -1,11 +1,11 @@
 import { OpenAI } from './index';
 import { PromiseResponseType } from '../../types';
-export declare type ChatGPTMessage = {
+export type ChatGPTMessage = {
     role: 'system' | 'user' | 'assistant';
     name?: string;
     content: string;
 };
-declare type ApiResponse = {
+type ApiResponse = {
     id: string;
     object: string;
     created: number;
@@ -24,7 +24,7 @@ declare type ApiResponse = {
         total_tokens: number;
     };
 };
-export declare type Config = {
+export type Config = {
     /**
      * @zh 一次回應數量
      * @en How many chat completion choices to generate for each input message.
@@ -106,5 +106,5 @@ export declare class OpenAIChat {
         nextTalk: (prompt: string | string[]) => Promise<any>;
     }>;
 }
-export declare type OpenAIChatTalkResponse = PromiseResponseType<OpenAIChat['talk']>;
+export type OpenAIChatTalkResponse = PromiseResponseType<OpenAIChat['talk']>;
 export {};

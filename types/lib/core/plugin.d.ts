@@ -2,8 +2,8 @@ import { Translator } from './translator';
 import { ChatBrokerHooks } from '../broker/chat';
 import { Log, Hook, Event } from 'power-helper';
 import { ValidateCallback, ValidateCallbackOutputs } from '../utils/validate';
-declare type BrokerHooks = ChatBrokerHooks<any, any, any, any>;
-declare type BrokerPluginParams<T extends ValidateCallback<any>, R extends ValidateCallback<any>> = {
+type BrokerHooks = ChatBrokerHooks<any, any, any, any>;
+type BrokerPluginParams<T extends ValidateCallback<any>, R extends ValidateCallback<any>> = {
     name: string;
     params: T;
     receiveData: R;

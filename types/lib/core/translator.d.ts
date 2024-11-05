@@ -1,6 +1,6 @@
 import { TextParser } from './parser';
 import { ValidateCallback, ValidateCallbackOutputs } from '../utils/validate';
-export declare type TranslatorParams<S extends ValidateCallback<any>, O extends ValidateCallback<any>> = {
+export type TranslatorParams<S extends ValidateCallback<any>, O extends ValidateCallback<any>> = {
     /**
      * @zh 輸入的資料格式。
      * @en The input data format.

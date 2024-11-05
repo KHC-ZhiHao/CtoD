@@ -1,6 +1,6 @@
 import { OpenAI } from './index';
 import { PromiseResponseType } from '../../types';
-declare type ImageContent = {
+type ImageContent = {
     type: 'image_url' | 'text';
     text?: string;
     image_url?: {
@@ -8,12 +8,12 @@ declare type ImageContent = {
         detail?: string;
     };
 };
-declare type VisionMessage = {
+type VisionMessage = {
     role: 'system' | 'user' | 'assistant';
     name?: string;
     content: string | ImageContent[];
 };
-declare type ApiResponse = {
+type ApiResponse = {
     id: string;
     object: string;
     created: number;
@@ -34,7 +34,7 @@ declare type ApiResponse = {
         index: number;
     }>;
 };
-export declare type Config = {
+export type Config = {
     /**
      * @zh 選擇運行的模型。
      * @en How many chat completion choices to generate for each input message.
@@ -70,5 +70,5 @@ export declare class OpenAIVision {
         apiReseponse: ApiResponse;
     }>;
 }
-export declare type OpenAIChatVisionResponse = PromiseResponseType<OpenAIVision['view']>;
+export type OpenAIChatVisionResponse = PromiseResponseType<OpenAIVision['view']>;
 export {};

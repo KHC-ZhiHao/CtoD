@@ -24,7 +24,9 @@ export default {
     externalsPresets: {
         node: true
     },
-    externals: [nodeExternals()],
+    externals: [
+        nodeExternals()
+    ],
     plugins: [
         new ESLintPlugin({
             files: 'lib/**/*.ts',

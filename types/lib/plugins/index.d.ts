@@ -11,7 +11,7 @@ export declare const PrintLogPlugin: import("..").ChatBrokerPlugin<(yup: typeof 
  */
 export declare const RetryPlugin: import("..").ChatBrokerPlugin<(yup: typeof import("yup")) => {
     retry: import("yup").NumberSchema<number, import("yup").AnyObject, 1, "d">;
-    printWarn: import("yup").BooleanSchema<boolean, import("yup").AnyObject, true, "d">;
+    printWarn: import("yup").BooleanSchema<NonNullable<boolean | undefined>, import("yup").AnyObject, true, "d">;
 }, () => {}>;
 /**
  * @zh 限制使用流量，這個 plugin 可以有效讓所有對話不會再限制內同時發送，可用於在開發過程中遭遇伺服器因頻率過高而阻擋請求。

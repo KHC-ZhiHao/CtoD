@@ -1,11 +1,11 @@
 import { OpenAI } from './index';
-declare type ApiResponse = {
+type ApiResponse = {
     created: string;
     data: {
         b64_json: string;
     }[];
 };
-declare type Config = {
+type Config = {
     /**
      * @zh 模型，支援 dall-e-2 和 dall-e-3
      * @en Model, support dall-e-2 and dall-e-3

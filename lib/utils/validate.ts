@@ -26,6 +26,10 @@ export function validate<
     }
 }
 
+export const definedYupSchema = <T extends ValidateCallback<any>>(cb: T) => {
+    return cb(Yup)
+}
+
 export const validateToJsonSchema = <T extends ValidateCallback<any>>(cb: T) => {
     const removeAllDefault = (schema: any) => {
         if (schema.default) {
