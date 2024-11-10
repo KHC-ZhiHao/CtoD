@@ -1,6 +1,6 @@
 export * as plugins from './plugins';
 export * as templates from './templates';
-export { validateToJsonSchema, definedYupSchema } from './utils/validate';
+export { validateToJsonSchema, defineYupSchema } from './utils/validate';
 export { OpenAI } from './service/openai';
 export { Llama3Cpp } from './service/llama3.cpp';
 export { TextParser } from './core/parser';
@@ -25,9 +25,7 @@ export declare const ctod: {
     Translator: typeof Translator;
     TextParser: typeof TextParser;
     ChatBrokerPlugin: typeof ChatBrokerPlugin;
-    definedYupSchema: <T extends import("./utils/validate").ValidateCallback<any>>(cb: T) => {
-        [x: string]: any;
-    };
+    defineYupSchema: <T extends Record<string, import("yup").Schema<any, any, any, "">>>(cb: import("./utils/validate").ValidateCallback<T>) => T;
     validateToJsonSchema: <T_1 extends import("./utils/validate").ValidateCallback<any>>(cb: T_1) => import("json-schema").JSONSchema7;
 };
 export default ctod;

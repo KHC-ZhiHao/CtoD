@@ -1,6 +1,6 @@
 export * as plugins from './plugins'
 export * as templates from './templates'
-export { validateToJsonSchema, definedYupSchema } from './utils/validate'
+export { validateToJsonSchema, defineYupSchema } from './utils/validate'
 export { OpenAI } from './service/openai'
 export { Llama3Cpp } from './service/llama3.cpp'
 export { TextParser } from './core/parser'
@@ -17,7 +17,7 @@ import { Translator } from './core/translator'
 import { TextParser } from './core/parser'
 import { ChatBroker } from './broker/chat'
 import { ChatBrokerPlugin } from './core/plugin'
-import { validateToJsonSchema, definedYupSchema } from './utils/validate'
+import { validateToJsonSchema, defineYupSchema } from './utils/validate'
 
 export const ctod = {
     OpenAI,
@@ -28,7 +28,7 @@ export const ctod = {
     Translator,
     TextParser,
     ChatBrokerPlugin,
-    definedYupSchema,
+    defineYupSchema,
     validateToJsonSchema
 }
 

@@ -8,11 +8,20 @@ export class OpenAI {
     _axios = axios.create()
     _apiKey = ''
 
-    static createChatRequest(apiKey: string | (() => Promise<string>), config: Partial<Config> | (() => Promise<Partial<Config>>) = {}) {
+    static createChatRequest(
+        apiKey: string | (() => Promise<string>),
+        config: Partial<Config> | (() => Promise<Partial<Config>>) = {},
+        options?: {
+            axios?: AxiosInstance
+        }    
+    ) {
         return async(messages: any[], { onCancel }: any) => {
             const openai = new OpenAI(typeof apiKey === 'string' ? apiKey : await apiKey())
             const chat = openai.createChat()
             const abortController = new AbortController()
+            if (options && options.axios) {
+                openai.setAxios(options.axios)
+            }
             chat.setConfig(typeof config === 'function' ? await config() : config)
             onCancel(() => abortController.abort())
             const { text } = await chat.talk(messages, {
@@ -23,6 +32,7 @@ export class OpenAI {
     }
 
     static createChatRequestWithJsonSchema(params:{
+        axios?: AxiosInstance,
         apiKey: string | (() => Promise<string>),
         config?: Partial<Config> | (() => Promise<Partial<Config>>)
     }) {
@@ -32,6 +42,9 @@ export class OpenAI {
             const abortController = new AbortController()
             if (params.config) {
                 chat.setConfig(typeof params.config === 'function' ? await params.config() : params.config)
+            }
+            if (params.axios) {
+                openai.setAxios(params.axios)
             }
             onCancel(() => abortController.abort())
             const jsonSchema = validateToJsonSchema(schema.output)

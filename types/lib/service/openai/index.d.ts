@@ -5,8 +5,11 @@ import { OpenAIImagesGeneration } from './images-generation';
 export declare class OpenAI {
     _axios: AxiosInstance;
     _apiKey: string;
-    static createChatRequest(apiKey: string | (() => Promise<string>), config?: Partial<Config> | (() => Promise<Partial<Config>>)): (messages: any[], { onCancel }: any) => Promise<string>;
+    static createChatRequest(apiKey: string | (() => Promise<string>), config?: Partial<Config> | (() => Promise<Partial<Config>>), options?: {
+        axios?: AxiosInstance;
+    }): (messages: any[], { onCancel }: any) => Promise<string>;
     static createChatRequestWithJsonSchema(params: {
+        axios?: AxiosInstance;
         apiKey: string | (() => Promise<string>);
         config?: Partial<Config> | (() => Promise<Partial<Config>>);
     }): (messages: any[], { schema, onCancel }: any) => Promise<string>;

@@ -244,4 +244,4 @@ yup.array(item).required().meta({
 })
 ```
 
-1. 新增了 definedYupSchema 讓建立複雜的 Output 更加容易。
+1. 新增了 defineYupSchema 讓建立複雜的 Output 更加容易。

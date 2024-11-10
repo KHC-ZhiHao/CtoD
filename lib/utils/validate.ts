@@ -26,7 +26,7 @@ export function validate<
     }
 }
 
-export const definedYupSchema = <T extends ValidateCallback<any>>(cb: T) => {
+export const defineYupSchema = <T extends Record<string, Schema>>(cb: ValidateCallback<T>): T => {
     return cb(Yup)
 }
 
