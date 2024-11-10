@@ -1,4 +1,4 @@
-import axios, { AxiosInstance } from 'axios'
+import axios from 'axios'
 import { OpenAIVision } from './vision'
 import { OpenAIChat, Config } from './chat'
 import { OpenAIImagesGeneration } from './images-generation'
@@ -12,7 +12,7 @@ export class OpenAI {
         apiKey: string | (() => Promise<string>),
         config: Partial<Config> | (() => Promise<Partial<Config>>) = {},
         options?: {
-            axios?: AxiosInstance
+            axios?: any
         }    
     ) {
         return async(messages: any[], { onCancel }: any) => {
@@ -32,9 +32,9 @@ export class OpenAI {
     }
 
     static createChatRequestWithJsonSchema(params:{
-        axios?: AxiosInstance,
+        axios?: any,
         apiKey: string | (() => Promise<string>),
-        config?: Partial<Config> | (() => Promise<Partial<Config>>)
+        config?: Partial<Pick<Config, 'model' | 'temperature'>> | (() => Promise<Partial<Pick<Config, 'model' | 'temperature'>>>)
     }) {
         return async(messages: any[], { schema, onCancel }: any) => {
             const openai = new OpenAI(typeof params.apiKey === 'string' ? params.apiKey : await params.apiKey())
@@ -70,7 +70,7 @@ export class OpenAI {
      * @en If you need to set axios, please use this method.
      */
 
-    setAxios(axios: AxiosInstance) {
+    setAxios(axios: any) {
         this._axios = axios
     }
 
