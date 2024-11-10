@@ -25,7 +25,9 @@ export type ChatBrokerHooks<S extends ValidateCallback<any>, O extends ValidateC
             output: O;
         };
         messages: Message[];
-        setPreMessages: (messages: Message[]) => void;
+        setPreMessages: (messages: (Omit<Message, 'content'> & {
+            content: string | string[];
+        })[]) => void;
         changeMessages: (messages: Message[]) => void;
     };
     /**

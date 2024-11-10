@@ -36,7 +36,7 @@ export type ChatBrokerHooks<
             output: O
         }
         messages: Message[]
-        setPreMessages: (messages: Message[]) => void
+        setPreMessages: (messages: (Omit<Message, 'content'> & { content: string | string[] })[]) => void
         changeMessages: (messages: Message[]) => void
     }
 
@@ -274,8 +274,14 @@ export class ChatBroker<
                 plugins,
                 messages,
                 setPreMessages: ms => {
+                    const newMessage = ms.map(e => {
+                        return {
+                            ...e,
+                            content: Array.isArray(e.content) ? e.content.join('\n') : e.content
+                        }
+                    })
                     messages = [
-                        ...ms,
+                        ...newMessage,
                         {
                             role: 'user',
                             content: question.prompt
