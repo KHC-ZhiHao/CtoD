@@ -5,8 +5,8 @@ import { Translator, TranslatorParams } from '../core/translator'
 import { ValidateCallback, ValidateCallbackOutputs } from '../utils/validate'
 import { ParserError } from '../utils/error'
 
-type Message = {
-    role: 'system' | 'user' | 'assistant'
+export type Message = {
+    role: 'system' | 'user' | 'assistant' | (string & Record<string, unknown>)
     name?: string
     content: string
 }
@@ -26,18 +26,20 @@ export type ChatBrokerHooks<
     start: {
         id: string
         data: ValidateCallbackOutputs<S>
+        metadata: Map<string, any>
         plugins: {
             [K in keyof PS]: {
                 send: (data: PS[K]['__receiveData']) => void
             }
         }
         schema: {
-            input: S
+            input?: S
             output: O
         }
         messages: Message[]
         setPreMessages: (messages: (Omit<Message, 'content'> & { content: string | string[] })[]) => void
         changeMessages: (messages: Message[]) => void
+        changeOutputSchema: (output: O) => void
     }
 
     /**
@@ -49,6 +51,7 @@ export type ChatBrokerHooks<
         id: string
         data: ValidateCallbackOutputs<S>
         messages: Message[]
+        metadata: Map<string, any>
         lastUserMessage: string
     }
 
@@ -63,6 +66,7 @@ export type ChatBrokerHooks<
         response: any
         messages: Message[]
         parseText: string
+        metadata: Map<string, any>
         lastUserMessage: string
         /**
          * @zh 宣告解析失敗
@@ -79,6 +83,7 @@ export type ChatBrokerHooks<
 
     succeeded: {
         id: string
+        metadata: Map<string, any>
         output: ValidateCallbackOutputs<O>
     }
 
@@ -93,6 +98,7 @@ export type ChatBrokerHooks<
         retry: () => void
         count: number
         response: any
+        metadata: Map<string, any>
         parserFails: { name: string, error: any }[]
         messages: Message[]
         lastUserMessage: string
@@ -106,12 +112,15 @@ export type ChatBrokerHooks<
 
     done: {
         id: string
+        metadata: Map<string, any>
     }
 }
 
-type RequestContext = {
+export type RequestContext = {
+    id: string
     count: number
     isRetry: boolean
+    metadata: Map<string, any>
     onCancel: (cb: () => void) => void
     schema: {
         input: any
@@ -250,15 +259,18 @@ export class ChatBroker<
             let schema = this.translator.getValidate()
             let output: any = null
             let plugins = {} as any
+            let metadata = new Map()
             let question = await this.translator.compile(data, {
                 schema
             })
-            let messages: Message[] = [
-                {
+            let preMessages: Message[] = []
+            let messages: Message[] = []
+            if (question.prompt) {
+                messages.push({
                     role: 'user',
                     content: question.prompt
-                }
-            ]
+                })
+            }
             for (let key in this.plugins) {
                 plugins[key] = {
                     send: (data: any) => this.plugins[key].send({
@@ -273,27 +285,29 @@ export class ChatBroker<
                 schema,
                 plugins,
                 messages,
+                metadata,
                 setPreMessages: ms => {
-                    const newMessage = ms.map(e => {
+                    preMessages = ms.map(e => {
                         return {
                             ...e,
                             content: Array.isArray(e.content) ? e.content.join('\n') : e.content
                         }
                     })
-                    messages = [
-                        ...newMessage,
-                        {
-                            role: 'user',
-                            content: question.prompt
-                        }
-                    ]
                 },
                 changeMessages: ms => {
                     messages = ms
+                },
+                changeOutputSchema: output => {
+                    this.translator.changeOutputSchema(output)
+                    schema = this.translator.getValidate()
                 }
             })
+            messages = [
+                ...preMessages,
+                ...messages
+            ]
             await flow.asyncWhile(async ({ count, doBreak }) => {
-                if (count >= 10) {
+                if (count >= 99) {
                     return doBreak()
                 }
                 let response = ''
@@ -305,12 +319,15 @@ export class ChatBroker<
                         id,
                         data,
                         messages,
+                        metadata,
                         lastUserMessage
                     })
                     const sender = this.params.request(messages, {
+                        id,
                         count,
                         schema,
                         onCancel,
+                        metadata,
                         isRetry: retryFlag
                     })
                     if (isCancel) {
@@ -333,6 +350,7 @@ export class ChatBroker<
                             response,
                             messages,
                             parseText,
+                            metadata,
                             lastUserMessage,
                             parseFail: (error) => {
                                 throw new ParserError(error, [])
@@ -344,10 +362,14 @@ export class ChatBroker<
                         output = (await this.translator.parse(parseText)).output
                         await this.hook.notify('succeeded', {
                             id,
-                            output
+                            output,
+                            metadata
                         })
                     }
-                    await this.hook.notify('done', { id })
+                    await this.hook.notify('done', {
+                        id,
+                        metadata
+                    })
                     doBreak()
                 } catch (error: any) {
                     // 如果解析錯誤，可以選擇是否重新解讀
@@ -358,6 +380,7 @@ export class ChatBroker<
                             count,
                             response,
                             messages,
+                            metadata,
                             lastUserMessage,
                             parserFails: error.parserFails,
                             retry: () => {
@@ -368,11 +391,17 @@ export class ChatBroker<
                             }
                         })
                         if (retryFlag === false) {
-                            await this.hook.notify('done', { id })
+                            await this.hook.notify('done', {
+                                id,
+                                metadata
+                            })
                             throw error
                         }
                     } else {
-                        await this.hook.notify('done', { id })
+                        await this.hook.notify('done', {
+                            id,
+                            metadata
+                        })
                         throw error
                     }
                 }

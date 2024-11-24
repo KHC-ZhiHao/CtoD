@@ -10,7 +10,7 @@ export type TranslatorParams<
      * @zh 輸入的資料格式。
      * @en The input data format.
      */
-    input: S
+    input?: S
     /**
      * @zh 輸出的資料格式。
      * @en The output data format. 
@@ -25,9 +25,9 @@ export type TranslatorParams<
      * @zh 組合輸入資料成為提示文字。
      * @en Combine the input data into a prompt.
      */
-    question: (data: ValidateCallbackOutputs<S>, context: {
+    question?: (data: ValidateCallbackOutputs<S>, context: {
         schema: {
-            input: S
+            input?: S
             output: O
         }
     }) => Promise<string | string[]>
@@ -57,12 +57,12 @@ export class Translator<
 
     async compile(data: ValidateCallbackOutputs<S>, context: {
         schema: {
-            input: S
+            input?: S
             output: O
         }
     }) {
-        const scheme = validate(data, this.params.input)
-        const prompt = await this.params.question(scheme, context)
+        const scheme = this.params.input ? validate(data, this.params.input) : data
+        const prompt = this.params.question ? await this.params.question(scheme, context) : ''
         return {
             scheme,
             prompt: Array.isArray(prompt) ? prompt.join('\n') : prompt
@@ -74,6 +74,10 @@ export class Translator<
             input: this.params.input,
             output: this.params.output
         }
+    }
+
+    changeOutputSchema(schema: O) {
+        this.params.output = schema
     }
 
     /**

@@ -3,14 +3,14 @@
 import { ChatBroker, OpenAI, plugins } from '../lib/index'
 
 /**
- * @test npx ts-node ./examples/chat-demo.ts
+ * @test npx esno ./examples/chat-demo.ts
  */
 
 const API_KEY = ''
 const broker = new ChatBroker({
     input: yup => {
         return {
-            indexs: yup.array(yup.string().required()).required(),
+            indexes: yup.array(yup.string().required()).required(),
             question: yup.string().required()
         }
     },
@@ -28,7 +28,7 @@ const broker = new ChatBroker({
             })
         }).required()
         return {
-            indexs: yup.array(item).required().meta({
+            indexes: yup.array(item).required().meta({
                 jsonSchema: {
                     description: '由高到低排序的索引'
                 }
@@ -56,10 +56,10 @@ const broker = new ChatBroker({
             model: 'gpt-4o-mini'
         }
     }),
-    question: async({ indexs, question }) => {
+    question: async({ indexes, question }) => {
         return [
             '我有以下索引',
-            `${JSON.stringify(indexs)}`,
+            `${JSON.stringify(indexes)}`,
             `請幫我解析"${question}"可能是哪個索引`,
             '且相關性由高到低排序並給予分數，分數由 0 ~ 1'
         ]
@@ -67,10 +67,10 @@ const broker = new ChatBroker({
 })
 
 broker.request({
-    indexs: ['胃痛', '腰痛', '頭痛', '喉嚨痛', '四肢疼痛'],
+    indexes: ['胃痛', '腰痛', '頭痛', '喉嚨痛', '四肢疼痛'],
     question: '喝咖啡，吃甜食，胃食道逆流'
 }).then(e => {
-    console.log('輸出結果：', e.indexs)
+    console.log('輸出結果：', e.indexes)
     /*
         [
             {
