@@ -2,8 +2,8 @@ import { ChatBrokerPlugin } from '../core/plugin';
 import { Event, Hook, Log } from 'power-helper';
 import { Translator, TranslatorParams } from '../core/translator';
 import { ValidateCallback, ValidateCallbackOutputs } from '../utils/validate';
-type Message = {
-    role: 'system' | 'user' | 'assistant';
+export type Message = {
+    role: 'system' | 'user' | 'assistant' | (string & Record<string, unknown>);
     name?: string;
     content: string;
 };
@@ -15,13 +15,14 @@ export type ChatBrokerHooks<S extends ValidateCallback<any>, O extends ValidateC
     start: {
         id: string;
         data: ValidateCallbackOutputs<S>;
+        metadata: Map<string, any>;
         plugins: {
             [K in keyof PS]: {
                 send: (data: PS[K]['__receiveData']) => void;
             };
         };
         schema: {
-            input: S;
+            input?: S;
             output: O;
         };
         messages: Message[];
@@ -29,6 +30,7 @@ export type ChatBrokerHooks<S extends ValidateCallback<any>, O extends ValidateC
             content: string | string[];
         })[]) => void;
         changeMessages: (messages: Message[]) => void;
+        changeOutputSchema: (output: O) => void;
     };
     /**
      * @zh 發送聊天訊息給機器人前觸發
@@ -38,6 +40,7 @@ export type ChatBrokerHooks<S extends ValidateCallback<any>, O extends ValidateC
         id: string;
         data: ValidateCallbackOutputs<S>;
         messages: Message[];
+        metadata: Map<string, any>;
         lastUserMessage: string;
     };
     /**
@@ -50,6 +53,7 @@ export type ChatBrokerHooks<S extends ValidateCallback<any>, O extends ValidateC
         response: any;
         messages: Message[];
         parseText: string;
+        metadata: Map<string, any>;
         lastUserMessage: string;
         /**
          * @zh 宣告解析失敗
@@ -64,6 +68,7 @@ export type ChatBrokerHooks<S extends ValidateCallback<any>, O extends ValidateC
      */
     succeeded: {
         id: string;
+        metadata: Map<string, any>;
         output: ValidateCallbackOutputs<O>;
     };
     /**
@@ -76,6 +81,7 @@ export type ChatBrokerHooks<S extends ValidateCallback<any>, O extends ValidateC
         retry: () => void;
         count: number;
         response: any;
+        metadata: Map<string, any>;
         parserFails: {
             name: string;
             error: any;
@@ -90,11 +96,14 @@ export type ChatBrokerHooks<S extends ValidateCallback<any>, O extends ValidateC
      */
     done: {
         id: string;
+        metadata: Map<string, any>;
     };
 };
-type RequestContext = {
+export type RequestContext = {
+    id: string;
     count: number;
     isRetry: boolean;
+    metadata: Map<string, any>;
     onCancel: (cb: () => void) => void;
     schema: {
         input: any;
@@ -139,4 +148,3 @@ export declare class ChatBroker<S extends ValidateCallback<any>, O extends Valid
      */
     request<T extends Translator<S, O>>(data: T['__schemeType']): Promise<T['__outputType']>;
 }
-export {};

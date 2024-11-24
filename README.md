@@ -15,15 +15,11 @@
 
 <br>
 
-## Online Playground
-
-[Chat Of Requirement(織語)](https://cor.metalsheep.com/) 是為了 CtoD 建構的展示工具，你可以在這個工具中建構你與調適你的模板。
-
 ## 摘要
 
-本工具是利用聊天機器人能夠讀懂自然語言的特性，將我們的需求與資料透過口語化的方式交付給他處理，並要求回應 JSON。
+現在我們頻繁的有透過口語化的方式交付任務 LLM 處理並要求回應 JSON 的需求，透過 CtoD 你可以讓這個模式有架構化的進行。
 
-在對話過程中，採用 [yup](https://github.com/jquense/yup) 來驗證請求與回復資料是否符合預期，以確保一致性，只要保持這個互動模式，就可以利用在 API 串接或是自動化系統上。
+在對話過程中，CtoD 採用 [yup](https://github.com/jquense/yup) 來驗證請求與回復資料是否符合預期，以確保一致性，只要保持這個互動模式，就可以利用在 API 串接或是自動化系統上。
 
 我們還附帶支援 `OpenAI` 與 `Llama3` 的相關服務。
 
@@ -45,43 +41,23 @@ yarn add ctod
 
 這個例子示範如何將藥物索引與客戶需求傳遞給聊天機器人，並返回最適合的結果，開發人員可以利用索引結果去資料庫搜尋最適合的藥物給消費者：
 
-> 關於型態定義，這裡有個有趣的議題，必須將 input 與 output 優先宣告才能讓型態正常運作。
-
 ```ts
-import { ChatBroker, OpenAI, templates } from 'ctod'
+import { CtoD, OpenAI } from 'ctod'
     
-const broker = new ChatBroker({
-    /** 驗證輸入資料 */
-    input(yup) {
-        return {
-            indexs: yup.array(yup.string().required()).required(),
-            question: yup.string().required()
+const ctod = new CtoD({
+    request: OpenAI.createChatRequestWithJsonSchema({
+        apiKey: 'YOUR_API_KEY',
+        config: {
+            model: 'gpt-4o'
         }
-    },
-    /** 驗證輸出資料 */
-    output(yup) {
-        const item = yup.object({
-            name: yup.string().required().meta({
-                jsonSchema: {
-                    description: '索引名稱'
-                }
-            }),
-            score: yup.number().required().meta({
-                jsonSchema: {
-                    description: '評比分數'
-                }
-            })
-        }).required()
-        return {
-            indexs: yup.array(item).required().meta({
-                jsonSchema: {
-                    description: '由高到低排序的索引'
-                }
-            })
-        }
-    },
-    /** 初始化系統，通常來植入或掛鉤生命週期 */
-    install({ attach }) {
+    })
+})
+
+const brokerBuilder = ctod.createBrokerBuilder<{
+    indexes: string[]
+    question: string
+}>({
+    install: ({ attach }) => {
         attach('start', async({ setPreMessages }) => {
             setPreMessages([
                 {
@@ -90,30 +66,48 @@ const broker = new ChatBroker({
                 }
             ])
         })
-    },
-    /** 定義發送請求的接口 */
-    request: OpenAI.createChatRequestWithJsonSchema({
-        apiKey: API_KEY,
-        config: {
-            model: 'gpt-4o-mini'
+    }
+})
+
+const broker = brokerBuilder.create(async({ yup, data, setMessages }) => {
+    const { indexes, question } = data
+    setMessages([
+        {
+            role: 'user',
+            content: [
+                '我有以下索引',
+                `${JSON.stringify(indexes)}`,
+                `請幫我解析"${question}"可能是哪個索引`,
+                '且相關性由高到低排序並給予分數，分數由 0 ~ 1'
+            ]
         }
-    }),
-    /** 組裝與定義我們要向機器人發出的請求 */
-    question: async({ indexs, question }) => {
-        return [
-            '我有以下索引',
-            `${JSON.stringify(indexs)}`,
-            `請幫我解析"${question}"可能是哪個索引`,
-            '且相關性由高到低排序並給予分數，分數由 0 ~ 1'
-        ]
+    ])
+    const item = yup.object({
+        name: yup.string().required().meta({
+            jsonSchema: {
+                description: '索引名稱'
+            }
+        }),
+        score: yup.number().required().meta({
+            jsonSchema: {
+                description: '評比分數'
+            }
+        })
+    }).required()
+    return {
+        indexes: yup.array(item).required().meta({
+            jsonSchema: {
+                description: '由高到低排序的索引'
+            }
+        })
     }
 })
 
 broker.request({
-    indexs: ['胃痛', '腰痛', '頭痛', '喉嚨痛', '四肢疼痛'],
+    indexes: ['胃痛', '腰痛', '頭痛', '喉嚨痛', '四肢疼痛'],
     question: '喝咖啡，吃甜食，胃食道逆流'
 }).then(e => {
-    console.log('輸出結果：', e.indexs)
+    console.log('輸出結果：', e.indexes)
     /*
         [
             {
@@ -127,7 +121,10 @@ broker.request({
             ...
         ]
      */
+}).catch(error => {
+    console.error('Error:', error)
 })
+
 ```
 
 ##  Plugin
@@ -187,24 +184,26 @@ const broker = new ChatBroker({
         backup: backupPlugin.use({
             sendUrl: 'https://api/backup'
         })
-    },
-    // 以下方案也可以運行
-    // plugins: () => {
-    //     return {
-    //         backup: backupPlugin.use({
-    //             sendUrl: 'https://api/backup'
-    //         })
-    //     }
-    // },
+    }
+})
+
+const ctod = new CtoD({
     // ...
+    plugins: () => {
+        return {
+            backup: backupPlugin.use({
+                sendUrl: 'https://api/backup'
+            })
+        }
+    }
 })
 ```
 
 ## Examples
 
-[基礎用法 - 藥物查詢功能](./examples/chat-demo.ts)
+[基礎用法 - 藥物查詢功能](./examples/basic.ts)
 
-[進階用法 - 請 AI COSPLAY](./examples//plugin-demo.ts)
+[進階用法 - 請 AI COSPLAY](./examples/plugin.ts)
 
 ## Other
 
@@ -212,25 +211,9 @@ const broker = new ChatBroker({
 
 ## Version History
 
-### 0.3.x
+### 0.7.x
 
-為了支援更多平台與自建服務，我們捨棄了完全為了 ChatGPT 客制化的接口，這樣也能完整保持 Broker 與 Plugin 的一致性。
-
-### 0.4.x
-
-主要是支援 llama3.cpp 或者是其他自建服務上流程的調整。
-
-1. 支援 llama3.cpp server service
-2. 新增 yup to json scheme。
-
-### 0.5.x
-
-移除了 JSON Schema Info 的支援，而是透過 [yup-to-json-schema](https://github.com/sodaru/yup-to-json-schema) 進行生成資料格式。
-
-由於 `yup-to-json-schema` 的延伸套件要使用 `yup.string().description()` 方法需要進行全域註冊，在此我們提供了 `bindYupToJsonSchemaToYup` 這個方法，讓使用者可以自行決定是否要進行註冊。
-
-1. 可以在 question 中回應 array，會透過 join 進行合併。
-2. 可以省略 install 參數了。
+感謝當今的模型對於json schema的支援，我們不再需要繁瑣的宣告，因此新增了透過註冊 CtoD 的方式來簡化流程。 
 
 ### 0.6.x
 
@@ -245,3 +228,23 @@ yup.array(item).required().meta({
 ```
 
 1. 新增了 defineYupSchema 讓建立複雜的 Output 更加容易。
+
+### 0.5.x
+
+移除了 JSON Schema Info 的支援，而是透過 [yup-to-json-schema](https://github.com/sodaru/yup-to-json-schema) 進行生成資料格式。
+
+由於 `yup-to-json-schema` 的延伸套件要使用 `yup.string().description()` 方法需要進行全域註冊，在此我們提供了 `bindYupToJsonSchemaToYup` 這個方法，讓使用者可以自行決定是否要進行註冊。
+
+1. 可以在 question 中回應 array，會透過 join 進行合併。
+2. 可以省略 install 參數了。
+
+### 0.4.x
+
+主要是支援 llama3.cpp 或者是其他自建服務上流程的調整。
+
+1. 支援 llama3.cpp server service
+2. 新增 yup to json scheme。
+
+### 0.3.x
+
+為了支援更多平台與自建服務，我們捨棄了完全為了 ChatGPT 客制化的接口，這樣也能完整保持 Broker 與 Plugin 的一致性。

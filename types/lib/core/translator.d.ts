@@ -5,7 +5,7 @@ export type TranslatorParams<S extends ValidateCallback<any>, O extends Validate
      * @zh 輸入的資料格式。
      * @en The input data format.
      */
-    input: S;
+    input?: S;
     /**
      * @zh 輸出的資料格式。
      * @en The output data format.
@@ -20,9 +20,9 @@ export type TranslatorParams<S extends ValidateCallback<any>, O extends Validate
      * @zh 組合輸入資料成為提示文字。
      * @en Combine the input data into a prompt.
      */
-    question: (data: ValidateCallbackOutputs<S>, context: {
+    question?: (data: ValidateCallbackOutputs<S>, context: {
         schema: {
-            input: S;
+            input?: S;
             output: O;
         };
     }) => Promise<string | string[]>;
@@ -38,19 +38,18 @@ export declare class Translator<S extends ValidateCallback<any>, O extends Valid
      */
     compile(data: ValidateCallbackOutputs<S>, context: {
         schema: {
-            input: S;
+            input?: S;
             output: O;
         };
     }): Promise<{
-        scheme: ReturnType<S> extends infer T ? { [K in keyof T]: ReturnType<S>[K] extends {
-            __outputType: any;
-        } ? ReturnType<S>[K]["__outputType"] : unknown; } : never;
+        scheme: ValidateCallbackOutputs<S, ReturnType<S>>;
         prompt: string;
     }>;
     getValidate(): {
-        input: S;
+        input: S | undefined;
         output: O;
     };
+    changeOutputSchema(schema: O): void;
     /**
      * @zh 將文字轉換成序列化資料。
      * @en Convert text to serialized data.
@@ -58,7 +57,7 @@ export declare class Translator<S extends ValidateCallback<any>, O extends Valid
     parse(text: string): Promise<{
         output: ReturnType<O> extends infer T ? { [K in keyof T]: ReturnType<O>[K] extends {
             __outputType: any;
-        } ? ReturnType<O>[K]["__outputType"] : unknown; } : never;
+        } ? ReturnType<O>[K]["__outputType"] : ReturnType<O>[K]; } : never;
         parserName: string;
         parserFails: {
             name: string;

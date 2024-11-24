@@ -1,15 +1,17 @@
 // eslint-disable-next-line @typescript-eslint/triple-slash-reference
 /// <reference path="../lib/shims.d.ts" />
 
+import fs from 'fs'
 import { flow } from 'power-helper'
 import { prompt } from 'inquirer'
-import { OpenAI, ChatBroker, plugins, ChatBrokerPlugin, templates } from '../lib'
+import { CtoD, ChatBrokerPlugin, plugins, OpenAI } from '../lib/index'
 
 /**
- * @invoke npx ts-node ./examples/plugin-demo.ts
+ * @test npx esno ./examples/plugin.ts
  */
 
-const API_KEY = ''
+const apiKey = fs.readFileSync('./.api-key', 'utf-8').trim()
+
 const characterPlugin = new ChatBrokerPlugin({
     name: 'character',
     params: () => {
@@ -20,12 +22,12 @@ const characterPlugin = new ChatBrokerPlugin({
             character: yup.string().required()
         }
     },
-    onInstall: ({ receive, attach }) => {
+    onInstall: ({ receive, attachAfter }) => {
         const characters = new Map<string, string>()
         receive(({ id, data }) => {
             characters.set(id, data.character)
         })
-        attach('start', async({ id, setPreMessages }) => {
+        attachAfter('start', async({ id, setPreMessages }) => {
             const character = characters.get(id)
             setPreMessages([
                 {
@@ -38,7 +40,7 @@ const characterPlugin = new ChatBrokerPlugin({
                 }
             ])
         })
-        attach('done', async({ id }) => {
+        attachAfter('done', async({ id }) => {
             characters.delete(id)
         })
     }
@@ -59,24 +61,28 @@ flow.run(async () => {
             default: '你最好的朋友是誰？'
         }
     ])
-    const broker = new ChatBroker({
-        input: yup => {
+
+    const ctod = new CtoD({
+        plugins: () => {
             return {
-                action: yup.string().required(),
-                character: yup.string().required(),
+                character: characterPlugin.use({}),
+                log: plugins.PrintLogPlugin.use({
+                    detail: true
+                })
             }
         },
-        output: yup => {
-            return {
-                message: yup.string().required()
+        request: OpenAI.createChatRequestWithJsonSchema({
+            apiKey,
+            config: {
+                model: 'gpt-4o'
             }
-        },
-        plugins: {
-            character: characterPlugin.use({}),
-            print: plugins.PrintLogPlugin.use({
-                detail: false
-            })
-        },
+        })
+    })
+
+    const brokerBuilder = ctod.createBrokerBuilder<{
+        action: string
+        character: string
+    }>({
         install: ({ attach }) => {
             attach('start', async({ data, plugins }) => {
                 plugins.character.send({
@@ -84,26 +90,28 @@ flow.run(async () => {
                 })
             })
         },
-        request: OpenAI.createChatRequest(API_KEY, {
-            model: 'gpt-4'
-        }),
-        question: async ({ action }) => {
-            return templates.requireJsonResponse([
-                '請基於你的角色個性，並依據以下指令進行回應：',
-                action
-            ], {
-                message: {
-                    desc: '回應內容',
-                    example: 'string'
-                }
-            })
+    })
+
+    const broker = brokerBuilder.create(async({ yup, setMessages }) => {
+        setMessages([
+            {
+                role: 'user',
+                content: [
+                    '請基於你的角色個性，並依據以下指令進行回應：',
+                    action
+                ]
+            }
+        ])
+        return {
+            message: yup.string().required()
         }
     })
     try {
-        await broker.request({
+        const { message } = await broker.request({
             action,
             character
         })
+        console.log(message)
     } catch (error: any) {
         console.error('Error:', error?.response?.data?.error?.message ?? error)
     }

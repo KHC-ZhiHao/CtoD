@@ -2,7 +2,7 @@ import fs from 'fs'
 import { CtoD, OpenAI } from '../lib/index'
 
 /**
- * @test npx esno ./examples/chat-demo-with-define.ts
+ * @test npx esno ./examples/basic.ts
  */
 
 const apiKey = fs.readFileSync('./.api-key', 'utf-8').trim()

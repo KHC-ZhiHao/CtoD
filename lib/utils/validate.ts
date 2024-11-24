@@ -10,7 +10,7 @@ export type ValidateCallbackOutputs<
     T extends ValidateCallback<any>,
     R = ReturnType<T>
 > = {
-    [K in keyof R]: R[K] extends { '__outputType': any } ? R[K]['__outputType'] : unknown
+    [K in keyof R]: R[K] extends { '__outputType': any } ? R[K]['__outputType'] : R[K]
 }
 
 export function definedValidateSchema<T extends ValidateCallback<any>>(cb: T): T {
@@ -22,7 +22,7 @@ export function validate<
     R = ReturnType<T>
 >(target: any, schemaCallback: T) {
     return Yup.object(schemaCallback(Yup)).required().validateSync(target || {}) as {
-        [K in keyof R]: R[K] extends { '__outputType': any } ? R[K]['__outputType'] : unknown
+        [K in keyof R]: R[K] extends { '__outputType': any } ? R[K]['__outputType'] : R[K]
     }
 }
 

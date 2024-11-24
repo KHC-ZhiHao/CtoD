@@ -1,23 +1,22 @@
 // eslint-disable-next-line @typescript-eslint/triple-slash-reference
 /// <reference path="../lib/shims.d.ts" />
-import { ChatBroker, Llama3Cpp, plugins } from '../lib/index'
+import { CtoD, Llama3Cpp } from '../lib/index'
 
-const gameDesignerBroker = new ChatBroker({
-    input: yup => {
-        return {
-            scene: yup.string()
+/**
+ * @test npx esno ./examples/llama.cpp.ts
+ */
+
+const ctod = new CtoD({
+    request: Llama3Cpp.createChatRequest({
+        config: {
+            baseUrl: 'http://localhost:12333'
         }
-    },
-    output: yup => {
-        return {
-            next: yup.array().of(yup.string().required()).required()
-        }
-    },
-    plugins: {
-        log: plugins.PrintLogPlugin.use({
-            detail: true
-        })
-    },
+    })
+})
+
+const brokerBuilder = ctod.createBrokerBuilder<{
+    scene: string
+}>({
     install: ({ attach }) => {
         attach('start', async({ setPreMessages }) => {
             setPreMessages([
@@ -35,23 +34,23 @@ const gameDesignerBroker = new ChatBroker({
                 }
             ])
         })
-    },
-    /**
-     * @zh createChatRequest 可以透過 output 自動推斷出要回傳的類型，不需要再額外提供型態
-     * @en createChatRequest can infer the return type from output, no need to provide the type again
-     */
-    request: Llama3Cpp.createChatRequest({
-        config: {
-            baseUrl: 'http://localhost:12333'
-        }
-    }),
-    question: async({ scene }) => {
-        return scene || '任意發揮'
     }
 })
 
-gameDesignerBroker.request({
+const broker = brokerBuilder.create(async({ yup, data, setMessages }) => {
+    setMessages([
+        {
+            role: 'user',
+            content: data.scene || '任意發揮'
+        }
+    ])
+    return {
+        next: yup.array().of(yup.string().required()).required()
+    }
+})
+
+broker.request({
     scene: '今天小紅帽遇到了大野狼，大野狼要吃掉小紅帽，小紅帽要怎麼辦？給我三個下一步要發生的事件'
 }).then(result => {
-    console.log(result)
+    console.log(result.next)
 })
