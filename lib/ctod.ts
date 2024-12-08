@@ -62,7 +62,7 @@ export class CtoD<
                                     changeOutputSchema(() => schema)
                                 })
                             },
-                            plugins: this.params.plugins?.(),
+                            plugins: this.params.plugins ? (() => this.params.plugins!()) : undefined,
                             request: this.params.request
                         })
             }
