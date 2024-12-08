@@ -1,5 +1,5 @@
 import fs from 'fs'
-import { CtoD, OpenAI } from '../lib/index'
+import { CtoD, OpenAI, plugins } from '../lib/index'
 
 /**
  * @test npx esno ./examples/basic.ts
@@ -8,6 +8,14 @@ import { CtoD, OpenAI } from '../lib/index'
 const apiKey = fs.readFileSync('./.api-key', 'utf-8').trim()
 
 const ctod = new CtoD({
+    plugins: () => {
+        return {
+            retry: plugins.RetryPlugin.use({
+                retry: 3,
+                printWarn: true
+            })
+        }
+    },
     request: OpenAI.createChatRequestWithJsonSchema({
         apiKey,
         config: {

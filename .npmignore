@@ -1,4 +1,5 @@
-lib
-examples
 logo.ai
 logo.png
+.api-key
+.output
+.nyc_output
