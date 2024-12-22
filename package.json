@@ -5,10 +5,7 @@
   "main": "./dist/index.js",
   "type": "module",
   "scripts": {
-    "eslint": "eslint ./lib --fix",
-    "esbuild": "node ./esbuild.mjs",
-    "tsc": "tsc --declaration --emitDeclarationOnly",
-    "build": "yarn tsc && yarn esbuild"
+    "build": "tsc --declaration --emitDeclarationOnly && node ./esbuild.mjs"
   },
   "types": "./types/lib",
   "repository": {
@@ -62,7 +59,7 @@
     "chinese-conv": "^3.2.2",
     "handlebars": "^4.7.7",
     "json5": "^2.2.3",
-    "power-helper": "^0.7.9",
+    "power-helper": "^0.8.0",
     "yup": "^1.4.0"
   }
 }

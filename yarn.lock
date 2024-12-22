@@ -3302,10 +3302,10 @@ pkg-dir@^4.1.0:
   dependencies:
     find-up "^4.0.0"
 
-power-helper@^0.7.9:
-  version "0.7.9"
-  resolved "https://registry.yarnpkg.com/power-helper/-/power-helper-0.7.9.tgz#b513dbbc5a877e0acbc09fb1a9f533a2ffb7127d"
-  integrity sha512-+P7REP7e/vjD5PwptlDVB4RCWi0tRl+WpFx5rTCFCdy9yGaSGOoNn8AKOovFSWfFQMfCkv1jNODqDHJpFGZWMg==
+power-helper@^0.8.0:
+  version "0.8.0"
+  resolved "https://registry.yarnpkg.com/power-helper/-/power-helper-0.8.0.tgz#295ab44e7fa098be0ffa50d8cfc3823cd4c1557b"
+  integrity sha512-PGYVm4EG7WAYNMRcr1g9Df++kRj16VPeP5BDyZTO7fTkHL5UIN0cx6C8fHo7icq034DH4Fa6S8S92dWf+sh+RQ==
 
 prelude-ls@^1.2.1:
   version "1.2.1"
