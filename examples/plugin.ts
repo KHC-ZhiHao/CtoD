@@ -1,6 +1,3 @@
-// eslint-disable-next-line @typescript-eslint/triple-slash-reference
-/// <reference path="../lib/shims.d.ts" />
-
 import fs from 'fs'
 import { flow } from 'power-helper'
 import { prompt } from 'inquirer'

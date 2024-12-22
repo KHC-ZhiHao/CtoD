@@ -1,6 +1,6 @@
 import { Llama3Cpp } from './index'
 import { flow } from 'power-helper'
-import { tify, sify } from 'chinese-conv'
+import { tify, sify } from 'chinese-conv/dist'
 
 type Message = {
     role: string
