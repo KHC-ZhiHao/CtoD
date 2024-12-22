@@ -5,7 +5,7 @@ export type ValidateCallback<T extends Record<string, Schema>> = (_yup: typeof Y
 };
 export type ValidateCallbackOutputs<T extends ValidateCallback<any>, R = ReturnType<T>> = {
     [K in keyof R]: R[K] extends {
-        '__outputType': any;
+        __outputType: any;
     } ? R[K]['__outputType'] : R[K];
 };
 export declare function definedValidateSchema<T extends ValidateCallback<any>>(cb: T): T;

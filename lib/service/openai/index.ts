@@ -13,7 +13,7 @@ export class OpenAI {
         config: Partial<Config> | (() => Promise<Partial<Config>>) = {},
         options?: {
             axios?: any
-        }    
+        }
     ) {
         return async(messages: any[], { onCancel }: any) => {
             const openai = new OpenAI(typeof apiKey === 'string' ? apiKey : await apiKey())
@@ -31,9 +31,9 @@ export class OpenAI {
         }
     }
 
-    static createChatRequestWithJsonSchema(params:{
-        axios?: any,
-        apiKey: string | (() => Promise<string>),
+    static createChatRequestWithJsonSchema(params: {
+        axios?: any
+        apiKey: string | (() => Promise<string>)
         config?: Partial<Pick<Config, 'model' | 'temperature'>> | (() => Promise<Partial<Pick<Config, 'model' | 'temperature'>>>)
     }) {
         return async(messages: any[], { schema, onCancel }: any) => {
@@ -59,7 +59,6 @@ export class OpenAI {
             return text
         }
     }
-
 
     constructor(apiKey = '') {
         this._apiKey = apiKey

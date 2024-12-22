@@ -110,7 +110,7 @@ export class OpenAIChat {
         abortController?: AbortController
     }) {
         const newMessages = json.jpjs(messages)
-        const isSupportJson =  [
+        const isSupportJson = [
             'gpt-4-turbo-preview',
             'gpt-4-turbo',
             'gpt-4o',
@@ -159,17 +159,17 @@ export class OpenAIChat {
 
     talkStream(params: {
         messages: any[]
-        onMessage: (message: string) => void
+        onMessage: (_message: string) => void
         onEnd: () => void
-        onWarn: (warn: any) => void
-        onError: (error: any) => void
+        onWarn: (_warn: any) => void
+        onError: (_error: any) => void
     }) {
         const controller = new AbortController()
         fetch('https://api.openai.com/v1/chat/completions', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                Authorization: `Bearer ${this.openai._apiKey}`
+                'Authorization': `Bearer ${this.openai._apiKey}`
             },
             body: JSON.stringify({
                 model: this.config.model,
@@ -178,12 +178,11 @@ export class OpenAIChat {
             }),
             signal: controller.signal
         }).then(async response => {
-            // eslint-disable-next-line no-undef
             const reader = response.body?.pipeThrough(new TextDecoderStream()).getReader()
             if (!reader) {
                 throw new Error('Can not get reader')
             }
-            // eslint-disable-next-line no-constant-condition
+
             while (true) {
                 const { value, done } = await reader.read()
                 if (done) {

@@ -39,7 +39,7 @@ export class CtoD<
                     P,
                     PS,
                     ChatBrokerHooks<() => I, () => O, P, PS>
-                        >({
+                >({
                             output: () => ({} as any),
                             install: (context) => {
                                 params?.install?.(context)
@@ -62,7 +62,7 @@ export class CtoD<
                                     changeOutputSchema(() => schema)
                                 })
                             },
-                            plugins: this.params.plugins ? (() => this.params.plugins!()) : undefined,
+                            plugins: this.params.plugins ? () => this.params.plugins!() : undefined,
                             request: this.params.request
                         })
             }

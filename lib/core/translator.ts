@@ -13,7 +13,7 @@ export type TranslatorParams<
     input?: S
     /**
      * @zh 輸出的資料格式。
-     * @en The output data format. 
+     * @en The output data format.
      */
     output: O
     /**
@@ -46,6 +46,7 @@ export class Translator<
     get __schemeType(): ValidateCallbackOutputs<S> {
         return null as any
     }
+
     get __outputType(): ValidateCallbackOutputs<O> {
         return null as any
     }

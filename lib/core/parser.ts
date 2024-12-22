@@ -3,7 +3,7 @@ import JSON5 from 'json5'
 type TextParserParams = {
     /**
      * @zh 解讀器名字。
-     * @en The name of the parser. 
+     * @en The name of the parser.
      */
     name: string
     /**
@@ -43,7 +43,7 @@ export class TextParser {
 
     /**
      * @zh 解讀器名字。
-     * @en The name of the parser. 
+     * @en The name of the parser.
      */
 
     get name() {

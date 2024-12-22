@@ -201,7 +201,7 @@ const ctod = new CtoD({
 
 ## Examples
 
-[基礎用法 - 藥物查詢功能](./examples/basic.ts)
+[基礎用法 - 藥物查詢功能](./examples/openai.ts)
 
 [進階用法 - 請 AI COSPLAY](./examples/plugin.ts)
 

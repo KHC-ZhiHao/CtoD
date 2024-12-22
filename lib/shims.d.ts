@@ -1,4 +1,4 @@
 declare module 'chinese-conv' {
-    export function tify(text: string): string
-    export function sify(text: string): string
+    export function tify(_text: string): string
+    export function sify(_text: string): string
 }

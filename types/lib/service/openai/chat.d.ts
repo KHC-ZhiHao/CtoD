@@ -85,10 +85,10 @@ export declare class OpenAIChat {
     }>;
     talkStream(params: {
         messages: any[];
-        onMessage: (message: string) => void;
+        onMessage: (_message: string) => void;
         onEnd: () => void;
-        onWarn: (warn: any) => void;
-        onError: (error: any) => void;
+        onWarn: (_warn: any) => void;
+        onError: (_error: any) => void;
     }): {
         cancel: () => void;
     };

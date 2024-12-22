@@ -248,7 +248,7 @@ export class Llama3CppCompletion {
         options?: Options
         messages: Message[]
         response_format?: {
-            type: 'json_object',
+            type: 'json_object'
             schema: any
         }
     }) {
