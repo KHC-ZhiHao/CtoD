@@ -1,7 +1,7 @@
 import { OpenAIVision } from './vision';
 import { OpenAIChat, Config } from './chat';
 import { OpenAIImagesGeneration } from './images-generation';
-export declare class OpenAI {
+export declare class OpenAICtodService {
     _axios: import("axios").AxiosInstance;
     _apiKey: string;
     static createChatRequest(apiKey: string | (() => Promise<string>), config?: Partial<Config> | (() => Promise<Partial<Config>>), options?: {

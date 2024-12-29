@@ -211,6 +211,11 @@ const ctod = new CtoD({
 
 ## Version History
 
+### 0.8.x
+
+1. 正規化 Service 的命名
+2. 新增 Google Service 的支援
+
 ### 0.7.x
 
 感謝當今的模型對於json schema的支援，我們不再需要繁瑣的宣告，因此新增了透過註冊 CtoD 的方式來簡化流程。 

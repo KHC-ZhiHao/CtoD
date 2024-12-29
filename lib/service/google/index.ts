@@ -1,8 +1,70 @@
 import { validateToJsonSchema } from '../../utils/validate'
+import { GoogleMessage, GoogleChat } from './chat'
 import type { GoogleGenerativeAI } from '@google/generative-ai'
 
-export class Google {
-    static createChatRequest(params: {
+type GPTContent = {
+    type: 'image_url' | 'text'
+    text?: string
+    image_url?: {
+        url: string
+        detail?: string
+    }
+}
+
+type GPTMessage = {
+    role: 'system' | 'user' | 'assistant'
+    content: string | GPTContent[]
+}
+
+export class GoogleCtodService {
+    generativeAI: GoogleGenerativeAI
+
+    constructor(generativeAI: GoogleGenerativeAI) {
+        this.generativeAI = generativeAI
+    }
+
+    static chatGPTMessageToGoogleChatMessage(messages: GPTMessage[]): GoogleMessage[] {
+        const contentToParts = (content: string | GPTMessage['content']): GoogleMessage['parts'] => {
+            if (typeof content === 'string') {
+                return [
+                    {
+                        text: content
+                    }
+                ]
+            } else if (Array.isArray(content)) {
+                return content.map(({ type, image_url, text }): GoogleMessage['parts'][number] => {
+                    if (type === 'image_url') {
+                        return {
+                            inlineData: {
+                                data: image_url?.url || '',
+                                mimeType: 'image/jpeg'
+                            }
+                        }
+                    } else {
+                        return {
+                            text: text || ''
+                        }
+                    }
+                })
+            }
+            return []
+        }
+        return messages.map((message) => {
+            if (message.role === 'user' || message.role === 'system') {
+                return {
+                    role: 'user',
+                    parts: contentToParts(message.content)
+                }
+            } else {
+                return {
+                    role: 'model',
+                    parts: contentToParts(message.content)
+                }
+            }
+        })
+    }
+
+    static createChatRequestWithJsonSchema(params: {
         googleGenerativeAI: GoogleGenerativeAI
         model: string
     }) {
@@ -27,29 +89,13 @@ export class Google {
                 }
             })
             const result = await model.generateContent({
-                contents: messages.map((message) => {
-                    if (message.role === 'user' || message.role === 'system') {
-                        return {
-                            role: 'user',
-                            parts: [
-                                {
-                                    text: message.content
-                                }
-                            ]
-                        }
-                    } else {
-                        return {
-                            role: 'model',
-                            parts: [
-                                {
-                                    text: message.content
-                                }
-                            ]
-                        }
-                    }
-                })
+                contents: GoogleCtodService.chatGPTMessageToGoogleChatMessage(messages)
             })
             return result.response.text()
         }
+    }
+
+    createChat() {
+        return new GoogleChat(this)
     }
 }

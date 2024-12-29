@@ -1,4 +1,4 @@
-import { OpenAI } from './index';
+import { OpenAICtodService } from './index';
 import { PromiseResponseType } from '../../types';
 export type ChatGPTMessage = {
     role: 'system' | 'user' | 'assistant';
@@ -31,10 +31,10 @@ export type Config = {
      */
     n: number;
     /**
-     * @zh 選擇運行的模型，16k意味著能處理長度為 16,384 的文本，32k意味著能處理長度為 32768 的文本。
-     * @en How many chat completion choices to generate for each input message.
+     * @zh 選擇運行的模型，建議: 'gpt-4' | 'gpt-3.5-turbo' | 'gpt-4-turbo' | 'gpt-4o' | 'gpt-4o-mini' | 'o1-preview' | 'o1' | 'o1-mini'
+     * @en What model to use, recommended: 'gpt-4' | 'gpt-3.5-turbo' | 'gpt-4-turbo' | 'gpt-4o' | 'gpt-4o-mini' | 'o1-preview' | 'o1' | 'o1-mini'
      */
-    model: 'gpt-4' | 'gpt-3.5-turbo' | 'gpt-4-turbo' | 'gpt-4o' | 'gpt-4o-mini' | 'o1-preview' | 'o1' | 'o1-mini';
+    model: string;
     /**
      * @zh 冒險指數，數值由 0 ~ 2 之間，越低回應越穩定。
      * @en What sampling temperature to use, between 0 and 2. Higher values like 0.8 will make the output more random, while lower values like 0.2 will make it more focused and deterministic.
@@ -52,9 +52,9 @@ export type Config = {
     maxTokens?: number;
 };
 export declare class OpenAIChat {
-    openai: OpenAI;
+    openai: OpenAICtodService;
     config: Config;
-    constructor(openai: OpenAI);
+    constructor(openai: OpenAICtodService);
     /**
      * @zh 改變對話的一些設定
      * @en Change some settings of the conversation
@@ -81,7 +81,7 @@ export declare class OpenAIChat {
         text: string;
         newMessages: ChatGPTMessage[];
         isDone: boolean;
-        apiReseponse: ApiResponse;
+        apiResponse: ApiResponse;
     }>;
     talkStream(params: {
         messages: any[];
@@ -101,7 +101,7 @@ export declare class OpenAIChat {
             text: string;
             newMessages: ChatGPTMessage[];
             isDone: boolean;
-            apiReseponse: ApiResponse;
+            apiResponse: ApiResponse;
         };
         nextTalk: (prompt: string | string[]) => Promise<any>;
     }>;

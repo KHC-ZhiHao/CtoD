@@ -1,8 +1,8 @@
 import { AxiosInstance } from 'axios';
 import { Llama3CppCompletion, Config } from './completion';
-export declare class Llama3Cpp {
+export declare class Llama3CppCtodService {
     _axios: AxiosInstance;
-    static createChatRequest(params: {
+    static createChatRequestWithJsonSchema(params: {
         config: Partial<Config> | (() => Promise<Partial<Config>>);
         talkOptions?: any;
     }): (messages: any[], { schema, onCancel }: any) => Promise<string>;

@@ -1,4 +1,4 @@
-import { Llama3Cpp } from './index';
+import { Llama3CppCtodService } from './index';
 type Message = {
     role: string;
     content: string;
@@ -18,9 +18,9 @@ type Stream = {
     onError?: (error: any) => void;
 };
 export declare class Llama3CppCompletion {
-    core: Llama3Cpp;
+    core: Llama3CppCtodService;
     config: Config;
-    constructor(core: Llama3Cpp);
+    constructor(core: Llama3CppCtodService);
     setConfig(config: Partial<Config>): void;
     completion(params: {
         options?: Options;

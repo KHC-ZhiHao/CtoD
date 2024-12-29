@@ -3,15 +3,15 @@ import { sify } from 'chinese-conv/dist'
 import { validateToJsonSchema } from '../../utils/validate'
 import { Llama3CppCompletion, Config } from './completion'
 
-export class Llama3Cpp {
+export class Llama3CppCtodService {
     _axios = axios.create()
 
-    static createChatRequest(params: {
+    static createChatRequestWithJsonSchema(params: {
         config: Partial<Config> | (() => Promise<Partial<Config>>)
         talkOptions?: any
     }) {
         return async(messages: any[], { schema, onCancel }: any) => {
-            const ll3cpp = new Llama3Cpp()
+            const ll3cpp = new Llama3CppCtodService()
             const chat = ll3cpp.createCompletion()
             const config = typeof params.config === 'function' ? await params.config() : params.config
             chat.setConfig(config)

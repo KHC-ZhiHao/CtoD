@@ -1,4 +1,4 @@
-import { OpenAI } from './index';
+import { OpenAICtodService } from './index';
 type ApiResponse = {
     created: string;
     data: {
@@ -20,7 +20,7 @@ type Config = {
 export declare class OpenAIImagesGeneration {
     private openai;
     private config;
-    constructor(openai: OpenAI);
+    constructor(openai: OpenAICtodService);
     /**
      * @zh 改變對話的一些設定
      * @en Change some settings of the conversation

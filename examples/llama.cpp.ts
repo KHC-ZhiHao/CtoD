@@ -1,11 +1,11 @@
-import { CtoD, Llama3Cpp } from '../lib/index'
+import { CtoD, Llama3CppCtodService } from '../lib/index'
 
 /**
  * @test npx esno ./examples/llama.cpp.ts
  */
 
 const ctod = new CtoD({
-    request: Llama3Cpp.createChatRequest({
+    request: Llama3CppCtodService.createChatRequestWithJsonSchema({
         config: {
             baseUrl: 'http://localhost:12333'
         }

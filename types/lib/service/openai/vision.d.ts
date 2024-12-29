@@ -1,4 +1,4 @@
-import { OpenAI } from './index';
+import { OpenAICtodService } from './index';
 import { PromiseResponseType } from '../../types';
 type ImageContent = {
     type: 'image_url' | 'text';
@@ -8,7 +8,7 @@ type ImageContent = {
         detail?: string;
     };
 };
-type VisionMessage = {
+export type VisionMessage = {
     role: 'system' | 'user' | 'assistant';
     name?: string;
     content: string | ImageContent[];
@@ -52,9 +52,9 @@ export type Config = {
     maxTokens?: number;
 };
 export declare class OpenAIVision {
-    openai: OpenAI;
+    openai: OpenAICtodService;
     config: Config;
-    constructor(openai: OpenAI);
+    constructor(openai: OpenAICtodService);
     /**
      * @zh 改變對話的一些設定
      * @en Change some settings of the conversation
@@ -67,7 +67,7 @@ export declare class OpenAIVision {
     view(messages: VisionMessage[]): Promise<{
         id: string;
         text: string;
-        apiReseponse: ApiResponse;
+        apiResponse: ApiResponse;
     }>;
 }
 export type OpenAIChatVisionResponse = PromiseResponseType<OpenAIVision['view']>;

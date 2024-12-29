@@ -1,4 +1,4 @@
-import { Llama3Cpp } from './index'
+import { Llama3CppCtodService } from './index'
 import { flow } from 'power-helper'
 import { tify, sify } from 'chinese-conv/dist'
 
@@ -150,14 +150,14 @@ class Requester {
 }
 
 export class Llama3CppCompletion {
-    core: Llama3Cpp
+    core: Llama3CppCtodService
     config: Config = {
         baseUrl: '',
         headers: {},
         autoConvertTraditionalChinese: true
     }
 
-    constructor(core: Llama3Cpp) {
+    constructor(core: Llama3CppCtodService) {
         this.core = core
     }
 

@@ -1,4 +1,4 @@
-import { OpenAI } from './index'
+import { OpenAICtodService } from './index'
 import { PromiseResponseType } from '../../types'
 
 type ImageContent = {
@@ -10,7 +10,7 @@ type ImageContent = {
     }
 }
 
-type VisionMessage = {
+export type VisionMessage = {
     role: 'system' | 'user' | 'assistant'
     name?: string
     content: string | ImageContent[]
@@ -57,14 +57,14 @@ export type Config = {
 }
 
 export class OpenAIVision {
-    openai: OpenAI
+    openai: OpenAICtodService
     config: Config = {
         model: 'gpt-4-vision-preview',
         maxTokens: undefined,
         temperature: 1
     }
 
-    constructor(openai: OpenAI) {
+    constructor(openai: OpenAICtodService) {
         this.openai = openai
     }
 
@@ -103,7 +103,7 @@ export class OpenAIVision {
         return {
             id: result?.data.id as string,
             text: message.content as string,
-            apiReseponse: result.data
+            apiResponse: result.data
         }
     }
 }

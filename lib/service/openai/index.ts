@@ -4,7 +4,7 @@ import { OpenAIChat, Config } from './chat'
 import { OpenAIImagesGeneration } from './images-generation'
 import { validateToJsonSchema } from '../../utils/validate'
 
-export class OpenAI {
+export class OpenAICtodService {
     _axios = axios.create()
     _apiKey = ''
 
@@ -16,7 +16,7 @@ export class OpenAI {
         }
     ) {
         return async(messages: any[], { onCancel }: any) => {
-            const openai = new OpenAI(typeof apiKey === 'string' ? apiKey : await apiKey())
+            const openai = new OpenAICtodService(typeof apiKey === 'string' ? apiKey : await apiKey())
             const chat = openai.createChat()
             const abortController = new AbortController()
             if (options && options.axios) {
@@ -37,7 +37,7 @@ export class OpenAI {
         config?: Partial<Pick<Config, 'model' | 'temperature'>> | (() => Promise<Partial<Pick<Config, 'model' | 'temperature'>>>)
     }) {
         return async(messages: any[], { schema, onCancel }: any) => {
-            const openai = new OpenAI(typeof params.apiKey === 'string' ? params.apiKey : await params.apiKey())
+            const openai = new OpenAICtodService(typeof params.apiKey === 'string' ? params.apiKey : await params.apiKey())
             const chat = openai.createChat()
             const abortController = new AbortController()
             if (params.config) {

@@ -1,7 +1,7 @@
 import fs from 'fs'
 import { flow } from 'power-helper'
 import { prompt } from 'inquirer'
-import { CtoD, ChatBrokerPlugin, plugins, OpenAI } from '../lib/index'
+import { CtoD, ChatBrokerPlugin, plugins, OpenAICtodService } from '../lib/index'
 
 /**
  * @test npx esno ./examples/plugin.ts
@@ -68,7 +68,7 @@ flow.run(async () => {
                 })
             }
         },
-        request: OpenAI.createChatRequestWithJsonSchema({
+        request: OpenAICtodService.createChatRequestWithJsonSchema({
             apiKey,
             config: {
                 model: 'gpt-4o'

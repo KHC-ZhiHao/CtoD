@@ -1,10 +1,13 @@
+import fs from 'fs'
 import { GoogleGenerativeAI } from '@google/generative-ai'
-import { CtoD, Google, plugins } from '../lib/index'
+import { CtoD, GoogleCtodService, plugins } from '../lib/index'
 
 /**
  * @test npx esno ./examples/google.ts
  * 要使用 google generative ai 必須手動安裝 '@google/generative-ai' 套件
  */
+
+const apiKey = fs.readFileSync('./.google-api-key', 'utf-8').trim()
 
 const ctod = new CtoD({
     plugins: () => {
@@ -15,8 +18,8 @@ const ctod = new CtoD({
             })
         }
     },
-    request: Google.createChatRequest({
-        googleGenerativeAI: new GoogleGenerativeAI(''),
+    request: GoogleCtodService.createChatRequestWithJsonSchema({
+        googleGenerativeAI: new GoogleGenerativeAI(apiKey),
         model: 'gemini-1.5-flash'
     })
 })

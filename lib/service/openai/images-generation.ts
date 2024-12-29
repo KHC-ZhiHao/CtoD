@@ -1,4 +1,4 @@
-import { OpenAI } from './index'
+import { OpenAICtodService } from './index'
 
 type ApiResponse = {
     created: string
@@ -21,13 +21,13 @@ type Config = {
 }
 
 export class OpenAIImagesGeneration {
-    private openai: OpenAI
+    private openai: OpenAICtodService
     private config: Config = {
         model: 'dall-e-2',
         size: '1024x1024'
     }
 
-    constructor(openai: OpenAI) {
+    constructor(openai: OpenAICtodService) {
         this.openai = openai
     }
 

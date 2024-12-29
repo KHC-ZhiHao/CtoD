@@ -1,5 +1,5 @@
 import fs from 'fs'
-import { CtoD, OpenAI, plugins } from '../lib/index'
+import { CtoD, OpenAICtodService, plugins } from '../lib/index'
 
 /**
  * @test npx esno ./examples/openai.ts
@@ -16,7 +16,7 @@ const ctod = new CtoD({
             })
         }
     },
-    request: OpenAI.createChatRequestWithJsonSchema({
+    request: OpenAICtodService.createChatRequestWithJsonSchema({
         apiKey,
         config: {
             model: 'gpt-4o'
