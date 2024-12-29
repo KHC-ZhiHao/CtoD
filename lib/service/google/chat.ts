@@ -79,6 +79,11 @@ export class GoogleChat {
         }
     }
 
+    /**
+     * @zh 進行對話，並且以串流的方式輸出
+     * @en Talk to the AI and output in a streaming way
+     */
+
     talkStream(params: {
         messages: GoogleMessage[]
         onMessage: (_message: string) => void

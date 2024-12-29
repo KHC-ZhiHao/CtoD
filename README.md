@@ -21,7 +21,7 @@
 
 在對話過程中，CtoD 採用 [yup](https://github.com/jquense/yup) 來驗證請求與回復資料是否符合預期，以確保一致性，只要保持這個互動模式，就可以利用在 API 串接或是自動化系統上。
 
-我們還附帶支援 `OpenAI` 與 `Llama3` 的相關服務。
+我們還附帶支援 `OpenAI`, `Google`, `Llama3` 等相關 LLM 服務。
 
 ## 安裝
 
@@ -42,10 +42,10 @@ yarn add ctod
 這個例子示範如何將藥物索引與客戶需求傳遞給聊天機器人，並返回最適合的結果，開發人員可以利用索引結果去資料庫搜尋最適合的藥物給消費者：
 
 ```ts
-import { CtoD, OpenAI } from 'ctod'
+import { CtoD, OpenAICtodService } from 'ctod'
     
 const ctod = new CtoD({
-    request: OpenAI.createChatRequestWithJsonSchema({
+    request: OpenAICtodService.createChatRequestWithJsonSchema({
         apiKey: 'YOUR_API_KEY',
         config: {
             model: 'gpt-4o'
@@ -131,14 +131,14 @@ broker.request({
 
 雖然 Broker 本身已經能夠處理大部分的事務，但透過 Plugin 可以協助改善複雜的流程，幫助專案工程化。
 
-每次發送請求時，Broker 會觸發一系列的生命週期，你可以從[原始碼](./lib/broker/chat.ts)中了解每個生命週期的參數與行為，並對其行為進行加工。
+每次發送請求時，Broker 會觸發一系列的生命週期，你可以從[原始碼](./lib/broker/openai.ts)中了解每個生命週期的參數與行為，並對其行為進行加工。
 
 現在，假設我們想要設計一個插件，它會在每次對話結束時將訊息備份到伺服器上：
 
 ```ts
 import axios from 'axios'
-import { ChatBroker, ChatBrokerPlugin } from 'ctod'
-const backupPlugin = new ChatBrokerPlugin({
+import { CtoDPlugin } from 'ctod'
+const backupPlugin = new CtoDPlugin({
     name: 'backup-plugin',
     // 定義參數為 sendUrl
     params: yup => {
@@ -174,15 +174,6 @@ const backupPlugin = new ChatBrokerPlugin({
         attach('done', async({ id }) => {
             await axios.post(params.sendUrl, store.get(id))
             store.delete(id)
-        })
-    }
-})
-
-const broker = new ChatBroker({
-    // ...
-    plugins: {
-        backup: backupPlugin.use({
-            sendUrl: 'https://api/backup'
         })
     }
 })

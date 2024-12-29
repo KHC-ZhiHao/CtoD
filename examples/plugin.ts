@@ -1,7 +1,7 @@
 import fs from 'fs'
 import { flow } from 'power-helper'
 import { prompt } from 'inquirer'
-import { CtoD, ChatBrokerPlugin, plugins, OpenAICtodService } from '../lib/index'
+import { CtoD, CtoDPlugin, plugins, OpenAICtodService } from '../lib/index'
 
 /**
  * @test npx esno ./examples/plugin.ts
@@ -9,7 +9,7 @@ import { CtoD, ChatBrokerPlugin, plugins, OpenAICtodService } from '../lib/index
 
 const apiKey = fs.readFileSync('./.api-key', 'utf-8').trim()
 
-const characterPlugin = new ChatBrokerPlugin({
+const characterPlugin = new CtoDPlugin({
     name: 'character',
     params: () => {
         return {}

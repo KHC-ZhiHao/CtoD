@@ -10,6 +10,7 @@ export { GoogleCtodService } from './service/google'
 export { TextParser } from './core/parser'
 export { ChatBroker } from './broker/chat'
 export { ChatBrokerPlugin } from './core/plugin'
+export { ChatBrokerPlugin as CtoDPlugin } from './core/plugin'
 export { Translator } from './core/translator'
 
 export type { ValidateCallback } from './utils/validate'

@@ -34,10 +34,13 @@ export class GoogleCtodService {
             } else if (Array.isArray(content)) {
                 return content.map(({ type, image_url, text }): GoogleMessage['parts'][number] => {
                     if (type === 'image_url') {
+                        // base64
+                        const url = image_url?.url || ''
+                        const mimeType = url.includes('data:image/png') ? 'image/png' : 'image/jpeg'
                         return {
                             inlineData: {
-                                data: image_url?.url || '',
-                                mimeType: 'image/jpeg'
+                                data: url.split('base64,')[1] || '',
+                                mimeType
                             }
                         }
                     } else {
