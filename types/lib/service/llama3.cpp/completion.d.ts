@@ -18,6 +18,7 @@ type Stream = {
     onError?: (error: any) => void;
 };
 export declare class Llama3CppCompletion {
+    private getProp;
     core: Llama3CppCtodService;
     config: Config;
     constructor(core: Llama3CppCtodService);

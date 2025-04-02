@@ -1,6 +1,7 @@
 import { Llama3CppCtodService } from './index'
-import { flow } from 'power-helper'
+import { flow, Once } from 'power-helper'
 import { tify, sify } from 'chinese-conv/dist'
+import { Template } from '@huggingface/jinja'
 
 type Message = {
     role: string
@@ -52,7 +53,7 @@ class Requester {
 
     async stream(params: {
         path: string
-        data: any
+        data: Record<string, any> | (() => Promise<any>)
         onMessage: (data: any) => void
         onEnd: () => void
         onWarn: (error: any) => void
@@ -99,7 +100,7 @@ class Requester {
         }
         fetch(`${this.core.config.baseUrl}/${params.path}`, {
             method: 'POST',
-            body: JSON.stringify(params.data),
+            body: JSON.stringify(typeof params.data === 'function' ? (await params.data()) : params.data),
             signal,
             headers: {
                 'Content-Type': 'application/json',
@@ -150,6 +151,18 @@ class Requester {
 }
 
 export class Llama3CppCompletion {
+    private getProp = new Once({
+        handler: async() => {
+            const url = `${this.config.baseUrl}/props`
+            const { data: props } = await this.core._axios.get<{
+                chat_template: string
+                bos_token: string
+                eos_token: string
+            }>(url, {})
+            return props
+        }
+    })
+
     core: Llama3CppCtodService
     config: Config = {
         baseUrl: '',
@@ -172,18 +185,6 @@ export class Llama3CppCompletion {
         options?: Options
         messages: Message[]
     }) {
-        const prompts: string[] = []
-        for (let { role, content } of params.messages) {
-            if (role === 'system') {
-                prompts.push(`<|start_header_id|>system<|end_header_id|>\n\n${content}\n\n`)
-            }
-            if (role === 'user') {
-                prompts.push(`<|start_header_id|>user<|end_header_id|>\n\n${content?.replaceAll('\n', '\\n') ?? ''}`)
-            }
-            if (role === 'assistant') {
-                prompts.push('<|start_header_id|>assistant<|end_header_id|>\n\n' + content)
-            }
-        }
         const lastMessage = params.messages.at(-1) || ''
         const requester = new Requester(this)
         return {
@@ -192,11 +193,17 @@ export class Llama3CppCompletion {
                 message: string
                 fullMessage: string
             }> => {
+                const props = await this.getProp.run()
+                const template = new Template(props.chat_template)
+                const prompt = template.render({
+                    bos_token: props.bos_token,
+                    messages: params.messages
+                }).slice(0, props.eos_token.length * -1 - 1)
                 const result = await requester.fetch({
                     path: 'completion',
                     data: {
                         ...(params.options || {}),
-                        prompt: this.config.autoConvertTraditionalChinese ? sify(prompts.join('\n')) : prompts.join('\n')
+                        prompt: this.config.autoConvertTraditionalChinese ? sify(prompt) : prompt
                     }
                 })
                 const message = this.config.autoConvertTraditionalChinese ? tify(result.data.content) : result.data.content
@@ -212,18 +219,6 @@ export class Llama3CppCompletion {
         messages: Message[]
         options?: Options
     }) {
-        const prompts: string[] = []
-        for (let { role, content } of params.messages) {
-            if (role === 'system') {
-                prompts.push(`<|start_header_id|>system<|end_header_id|>\n\n${content}\n\n`)
-            }
-            if (role === 'user') {
-                prompts.push(`<|start_header_id|>user<|end_header_id|>\n\n${content?.replaceAll('\n', '\\n') ?? ''}`)
-            }
-            if (role === 'assistant') {
-                prompts.push('<|start_header_id|>assistant<|end_header_id|>\n\n' + content)
-            }
-        }
         const requester = new Requester(this)
         requester.stream({
             path: 'completion',
@@ -235,10 +230,18 @@ export class Llama3CppCompletion {
             },
             onWarn: params.onWarn || (() => null),
             onError: params.onError || (() => null),
-            data: {
-                ...(params.options || {}),
-                prompt: this.config.autoConvertTraditionalChinese ? sify(prompts.join('\n')) : prompts.join('\n'),
-                stream: true
+            data: async() => {
+                const props = await this.getProp.run()
+                const template = new Template(props.chat_template)
+                const prompt = template.render({
+                    bos_token: props.bos_token,
+                    messages: params.messages
+                }).slice(0, props.eos_token.length * -1 - 1)
+                return {
+                    ...(params.options || {}),
+                    prompt: this.config.autoConvertTraditionalChinese ? sify(prompt) : prompt,
+                    stream: true
+                }
             }
         })
         return requester.export()

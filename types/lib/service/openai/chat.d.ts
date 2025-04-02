@@ -31,8 +31,8 @@ export type Config = {
      */
     n: number;
     /**
-     * @zh 選擇運行的模型，建議: 'gpt-4' | 'gpt-3.5-turbo' | 'gpt-4-turbo' | 'gpt-4o' | 'gpt-4o-mini' | 'o1-preview' | 'o1' | 'o1-mini'
-     * @en What model to use, recommended: 'gpt-4' | 'gpt-3.5-turbo' | 'gpt-4-turbo' | 'gpt-4o' | 'gpt-4o-mini' | 'o1-preview' | 'o1' | 'o1-mini'
+     * @zh 選擇運行的模型'
+     * @en The model to use for this chat completion.
      */
     model: string;
     /**

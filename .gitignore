@@ -6,6 +6,7 @@ package-lock.json
 .key
 .output
 .api-key
+.anthropic-api-key
 .google-api-key
 invoke
 demo

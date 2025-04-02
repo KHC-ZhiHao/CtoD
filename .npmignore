@@ -4,3 +4,4 @@ logo.png
 .output
 .nyc_output
 .google-api-key
+.anthropic-api-key

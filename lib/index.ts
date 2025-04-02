@@ -6,6 +6,7 @@ export { validateToJsonSchema, defineYupSchema } from './utils/validate'
 export { OpenAICtodService } from './service/openai'
 export { Llama3CppCtodService } from './service/llama3.cpp'
 export { GoogleCtodService } from './service/google'
+export { AnthropicCtodService } from './service/anthropic'
 
 export { TextParser } from './core/parser'
 export { ChatBroker } from './broker/chat'
