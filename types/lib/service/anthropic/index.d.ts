@@ -5,7 +5,7 @@ export declare class AnthropicCtodService {
     constructor(anthropicSdk: Anthropic);
     static createChatRequestWithJsonSchema(params: {
         anthropicSdk: Anthropic;
-        config?: Config;
+        config?: Partial<Config>;
     }): (messages: any[], { schema }: any) => Promise<string>;
     createChat(): AnthropicChat;
 }
