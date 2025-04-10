@@ -17,7 +17,7 @@ export type Config = {
 }
 
 type Stream = {
-    onMessage: (data: { message: string }) => void
+    onMessage: (message: string) => void
     onEnd?: () => void
     onWarn?: (error: any) => void
     onError?: (error: any) => void
@@ -224,9 +224,8 @@ export class Llama3CppCompletion {
             path: 'completion',
             onEnd: params.onEnd || (() => null),
             onMessage: e => {
-                params.onMessage({
-                    message: this.config.autoConvertTraditionalChinese ? tify(e.content) : e.content
-                })
+                const message = this.config.autoConvertTraditionalChinese ? tify(e.content) : e.content
+                params.onMessage(message)
             },
             onWarn: params.onWarn || (() => null),
             onError: params.onError || (() => null),
@@ -293,9 +292,8 @@ export class Llama3CppCompletion {
             onMessage: e => {
                 let content = e.choices[0].delta.content
                 if (content) {
-                    params.onMessage({
-                        message: this.config.autoConvertTraditionalChinese ? tify(content) : content
-                    })
+                    const message = this.config.autoConvertTraditionalChinese ? tify(content) : content
+                    params.onMessage(message)
                 }
             },
             onWarn: params.onWarn || (() => null),

@@ -10,9 +10,7 @@ export type Config = {
     autoConvertTraditionalChinese: boolean;
 };
 type Stream = {
-    onMessage: (data: {
-        message: string;
-    }) => void;
+    onMessage: (message: string) => void;
     onEnd?: () => void;
     onWarn?: (error: any) => void;
     onError?: (error: any) => void;
