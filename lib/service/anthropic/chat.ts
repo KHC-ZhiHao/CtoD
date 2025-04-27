@@ -41,7 +41,7 @@ export class AnthropicChat {
 
     private translateMessages(messages: any[]) {
         return {
-            system: messages.find(e => e.role === 'system')?.content[0].text,
+            system: messages.find(e => e.role === 'system').content,
             messages: messages.filter(e => e.role !== 'system')
         }
     }
@@ -113,12 +113,13 @@ export class AnthropicChat {
         onWarn: (_warn: any) => void
         onError: (_error: any) => void
     }) {
+        let stream: Extract<Awaited<ReturnType<typeof anthropic.messages.create>>, { controller: any }> | null = null
         const anthropic = this.anthropic.anthropicSdk
         const { onMessage, onEnd, onError } = params
         const { messages, system } = this.translateMessages(params.messages)
         const performStreamedChat = async () => {
             try {
-                const stream = await anthropic.messages.create({
+                stream = await anthropic.messages.create({
                     model: this.config.model,
                     max_tokens: this.config.maxTokens,
                     system: system,
@@ -138,7 +139,14 @@ export class AnthropicChat {
         }
         performStreamedChat()
         return {
-            cancel: () => null
+            cancel: () => {
+                const int = setInterval(() => {
+                    if (stream && stream.controller) {
+                        stream.controller.abort()
+                        clearInterval(int)
+                    }
+                }, 10)
+            }
         }
     }
 }

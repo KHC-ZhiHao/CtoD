@@ -46,7 +46,7 @@ export declare class AnthropicChat {
         onWarn: (_warn: any) => void;
         onError: (_error: any) => void;
     }): {
-        cancel: () => null;
+        cancel: () => void;
     };
 }
 export type AnthropicChatTalkResponse = PromiseResponseType<AnthropicChat['talk']>;

@@ -91,6 +91,9 @@ export class GoogleChat {
         onWarn: (_warn: any) => void
         onError: (_error: any) => void
     }) {
+        const state = {
+            controller: new AbortController()
+        }
         const model = this.google.generativeAI.getGenerativeModel({
             model: this.config.model
         })
@@ -98,17 +101,32 @@ export class GoogleChat {
             contents: params.messages
         }
         model
-            .generateContentStream(context)
+            .generateContentStream(context, {
+                signal: state.controller.signal
+            })
             .then(async({ stream }) => {
-                for await (const chunk of stream) {
-                    const chunkText = chunk.text()
-                    params.onMessage(chunkText)
+                try {
+                    for await (const chunk of stream) {
+                        const chunkText = chunk.text()
+                        params.onMessage(chunkText)
+                    }
+                    params.onEnd()
+                } catch (error) {
+                    if (state.controller.signal.aborted) {
+                        params.onEnd()
+                    } else {
+                        throw error
+                    }
                 }
-                params.onEnd()
             })
             .catch((error) => {
                 params.onError(error)
             })
+        return {
+            cancel: () => {
+                state.controller.abort()
+            }
+        }
     }
 }
 

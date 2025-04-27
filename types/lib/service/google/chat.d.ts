@@ -56,7 +56,9 @@ export declare class GoogleChat {
         onEnd: () => void;
         onWarn: (_warn: any) => void;
         onError: (_error: any) => void;
-    }): void;
+    }): {
+        cancel: () => void;
+    };
 }
 export type GoogleChatTalkResponse = PromiseResponseType<GoogleChat['talk']>;
 export {};

@@ -19,7 +19,7 @@ type GPTMessage = {
 export class GoogleCtodService {
     generativeAI: GoogleGenerativeAI
 
-    constructor(generativeAI: GoogleGenerativeAI) {
+    constructor(generativeAI: any) {
         this.generativeAI = generativeAI
     }
 
@@ -68,7 +68,7 @@ export class GoogleCtodService {
     }
 
     static createChatRequestWithJsonSchema(params: {
-        googleGenerativeAI: GoogleGenerativeAI
+        googleGenerativeAI: any
         model: string
     }) {
         const removeAdditionalProperties = (schema: any) => {
