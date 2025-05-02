@@ -41,7 +41,7 @@ export class AnthropicChat {
 
     private translateMessages(messages: any[]) {
         return {
-            system: messages.find(e => e.role === 'system').content,
+            system: messages.find(e => e.role === 'system')?.content,
             messages: messages.filter(e => e.role !== 'system')
         }
     }
