@@ -1,6 +1,6 @@
 import { Llama3CppCtodService } from './index'
 import { flow, Once } from 'power-helper'
-import { tify, sify } from 'chinese-conv/dist'
+import { tify, sify } from '../../utils/chinese-conv'
 import { Template } from '@huggingface/jinja'
 
 type Message = {

@@ -10,6 +10,7 @@
     "baseUrl": ".",
     "outDir": "dist",
     "rootDir": ".",
+    "resolveJsonModule": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
     "lib": [

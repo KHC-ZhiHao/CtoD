@@ -1,5 +1,5 @@
 import axios, { AxiosInstance } from 'axios'
-import { sify } from 'chinese-conv/dist'
+import { sify } from '../../utils/chinese-conv'
 import { validateToJsonSchema } from '../../utils/validate'
 import { Llama3CppCompletion, Config } from './completion'
 
