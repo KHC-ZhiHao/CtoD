@@ -1,6 +1,6 @@
 {
   "name": "ctod",
-  "version": "0.8.8",
+  "version": "0.8.9",
   "description": "CtoD Is Chat To Data Utils.",
   "main": "./dist/index.js",
   "type": "module",
@@ -57,7 +57,6 @@
     "@huggingface/jinja": "^0.3.3",
     "@sodaru/yup-to-json-schema": "^2.0.1",
     "axios": "^1.4.0",
-    "opencc": "^1.1.8",
     "handlebars": "^4.7.7",
     "json5": "^2.2.3",
     "power-helper": "^0.8.2",
