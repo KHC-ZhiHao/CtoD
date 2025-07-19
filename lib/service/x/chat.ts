@@ -1,8 +1,7 @@
 import { json } from 'power-helper'
-import { OpenAICtodService } from './index'
-import { PromiseResponseType } from '../../types'
+import { XCtodService } from './index'
 
-export type ChatGPTMessage = {
+export type XMessage = {
     role: 'system' | 'user' | 'assistant'
     name?: string
     content: string
@@ -56,18 +55,18 @@ export type Config = {
     maxTokens?: number
 }
 
-export class OpenAIChat {
-    openai: OpenAICtodService
+export class XChat {
+    xAi: XCtodService
     config: Config = {
         n: 1,
-        model: 'gpt-4o',
+        model: 'grok-3',
         temperature: 1,
         maxTokens: undefined,
         forceJsonFormat: true
     }
 
-    constructor(openai: OpenAICtodService) {
-        this.openai = openai
+    constructor(xAi: XCtodService) {
+        this.xAi = xAi
     }
 
     /**
@@ -80,56 +79,29 @@ export class OpenAIChat {
     }
 
     /**
-     * @zh 檢視內容是否符合 OpenAI 的審查
-     * @en View content for OpenAI moderation
-     */
-
-    async moderations(input: string) {
-        const result = await this.openai._axios.post<any>(`${this.openai._baseUrl}/v1/moderations`, {
-            input: input
-        }, {
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${this.openai._apiKey}`
-            }
-        })
-        return {
-            isSafe: result.data.results?.[0]?.flagged === false,
-            result: result.data
-        }
-    }
-
-    /**
      * @zh 進行對話
      * @en Talk to the AI
      */
 
-    async talk(messages: ChatGPTMessage[] = [], options?: {
+    async talk(messages: XMessage[] = [], options?: {
         /** 要 forceJsonFormat 為 true 才會生效 */
         jsonSchema?: any
         abortController?: AbortController
     }) {
         const newMessages = json.jpjs(messages)
-        const isSupportJson = [
-            'gpt-4-turbo-preview',
-            'gpt-4-turbo',
-            'gpt-4o',
-            'gpt-4o-mini',
-            'gpt-3.5-turbo-1106'
-        ].includes(this.config.model)
         let response_format: any = undefined
-        if (isSupportJson && this.config.forceJsonFormat) {
+        if (this.config.forceJsonFormat) {
             response_format = {
                 type: 'json_object'
             }
         }
-        if (isSupportJson && this.config.forceJsonFormat && options?.jsonSchema) {
+        if (this.config.forceJsonFormat && options?.jsonSchema) {
             response_format = {
                 type: 'json_schema',
                 json_schema: options.jsonSchema
             }
         }
-        const result = await this.openai._axios.post<ApiResponse>(`${this.openai._baseUrl}/v1/chat/completions`, {
+        const result = await this.xAi._axios.post<ApiResponse>('https://api.x.ai/v1/chat/completions', {
             model: this.config.model,
             n: this.config.n,
             messages: newMessages,
@@ -139,7 +111,7 @@ export class OpenAIChat {
             signal: options?.abortController?.signal,
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${this.openai._apiKey}`
+                'Authorization': `Bearer ${this.xAi._apiKey}`
             }
         })
         const choices = result.data.choices || []
@@ -165,11 +137,11 @@ export class OpenAIChat {
         onError: (_error: any) => void
     }) {
         const controller = new AbortController()
-        fetch(`${this.openai._baseUrl}/v1/chat/completions`, {
+        fetch('https://api.x.ai/v1/chat/completions', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${this.openai._apiKey}`
+                'Authorization': `Bearer ${this.xAi._apiKey}`
             },
             body: JSON.stringify({
                 model: this.config.model,
@@ -178,11 +150,14 @@ export class OpenAIChat {
             }),
             signal: controller.signal
         }).then(async response => {
+            if (!response.ok) {
+                const errorText = await response.text()
+                throw new Error(`Error: ${errorText}`)
+            }
             const reader = response.body?.pipeThrough(new TextDecoderStream()).getReader()
             if (!reader) {
                 throw new Error('Can not get reader')
             }
-
             while (true) {
                 const { value, done } = await reader.read()
                 if (done) {
@@ -225,7 +200,7 @@ export class OpenAIChat {
      * @zh 開啟持續性對話
      */
 
-    async keepTalk(prompt: string | string[], oldMessages: ChatGPTMessage[] = []) {
+    async keepTalk(prompt: string | string[], oldMessages: XMessage[] = []) {
         const result = await this.talk([
             ...oldMessages,
             {
@@ -239,5 +214,3 @@ export class OpenAIChat {
         }
     }
 }
-
-export type OpenAIChatTalkResponse = PromiseResponseType<OpenAIChat['talk']>

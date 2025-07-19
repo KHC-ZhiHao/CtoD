@@ -202,6 +202,11 @@ const ctod = new CtoD({
 
 ## Version History
 
+### 0.9.x
+
+1. OpenAI 的 API 更新，現在可以透過 `setBaseUrl` 方法來設定 baseUrl。
+2. 新增 X Ai Service 的支援
+
 ### 0.8.x
 
 1. 正規化 Service 的命名

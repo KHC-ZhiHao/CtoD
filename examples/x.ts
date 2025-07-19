@@ -1,11 +1,11 @@
 import fs from 'fs'
-import { CtoD, OpenAICtodService, plugins } from '../lib/index'
+import { CtoD, XCtodService, plugins } from '../lib/index'
 
 /**
- * @test npx esno ./examples/openai.ts
+ * @test npx esno ./examples/x.ts
  */
 
-const apiKey = fs.readFileSync('./.openai-api-key', 'utf-8').trim()
+const apiKey = fs.readFileSync('./.x-api-key', 'utf-8').trim()
 
 const ctod = new CtoD({
     plugins: () => {
@@ -16,10 +16,10 @@ const ctod = new CtoD({
             })
         }
     },
-    request: OpenAICtodService.createChatRequestWithJsonSchema({
+    request: XCtodService.createChatRequestWithJsonSchema({
         apiKey,
         config: {
-            model: 'gpt-4o'
+            model: 'grok-4-latest',
         }
     })
 })

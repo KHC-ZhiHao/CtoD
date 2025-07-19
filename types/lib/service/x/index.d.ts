@@ -1,13 +1,10 @@
-import { OpenAIVision } from './vision';
-import { OpenAIChat, Config } from './chat';
-import { OpenAIImagesGeneration } from './images-generation';
-export declare class OpenAICtodService {
+import { XChat, Config } from './chat';
+import { XImagesGeneration } from './images-generation';
+export declare class XCtodService {
     _axios: import("axios").AxiosInstance;
     _apiKey: string;
-    _baseUrl: string;
     static createChatRequest(apiKey: string | (() => Promise<string>), config?: Partial<Config> | (() => Promise<Partial<Config>>), options?: {
         axios?: any;
-        baseUrl?: string;
     }): (messages: any[], { onCancel }: any) => Promise<string>;
     static createChatRequestWithJsonSchema(params: {
         axios?: any;
@@ -21,16 +18,10 @@ export declare class OpenAICtodService {
      */
     setAxios(axios: any): void;
     /**
-     * @zh 如果你有需要特別設定 baseUrl，請使用這方法。
-     * @en If you need to set baseUrl, please use this method.
-     */
-    setBaseUrl(baseUrl: string): void;
-    /**
      * @zh 設定 api key。
      * @en Set api key.
      */
     setConfiguration(apiKey: string): void;
-    createChat(): OpenAIChat;
-    createVision(): OpenAIVision;
-    createImagesGeneration(): OpenAIImagesGeneration;
+    createChat(): XChat;
+    createImagesGeneration(): XImagesGeneration;
 }

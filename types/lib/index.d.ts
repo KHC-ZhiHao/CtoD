@@ -6,6 +6,7 @@ export { OpenAICtodService } from './service/openai';
 export { Llama3CppCtodService } from './service/llama3.cpp';
 export { GoogleCtodService } from './service/google';
 export { AnthropicCtodService } from './service/anthropic';
+export { XCtodService } from './service/x';
 export { TextParser } from './core/parser';
 export { ChatBroker } from './broker/chat';
 export { ChatBrokerPlugin } from './core/plugin';

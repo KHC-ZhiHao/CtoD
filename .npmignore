@@ -5,3 +5,5 @@ logo.png
 .nyc_output
 .google-api-key
 .anthropic-api-key
+.x-api-key
+.openai-api-key

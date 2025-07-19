@@ -1,33 +1,25 @@
 import axios from 'axios'
-import { OpenAIVision } from './vision'
-import { OpenAIChat, Config } from './chat'
-import { OpenAIImagesGeneration } from './images-generation'
+import { XChat, Config } from './chat'
+import { XImagesGeneration } from './images-generation'
 import { validateToJsonSchema } from '../../utils/validate'
 
-export class OpenAICtodService {
+export class XCtodService {
     _axios = axios.create()
     _apiKey = ''
-    _baseUrl = 'https://api.openai.com'
 
     static createChatRequest(
         apiKey: string | (() => Promise<string>),
         config: Partial<Config> | (() => Promise<Partial<Config>>) = {},
         options?: {
             axios?: any
-            baseUrl?: string
         }
     ) {
         return async(messages: any[], { onCancel }: any) => {
-            const openai = new OpenAICtodService(typeof apiKey === 'string' ? apiKey : await apiKey())
-            const chat = openai.createChat()
+            const xAi = new XCtodService(typeof apiKey === 'string' ? apiKey : await apiKey())
+            const chat = xAi.createChat()
             const abortController = new AbortController()
-            if (options) {
-                if (options.axios) {
-                    openai.setAxios(options.axios)
-                }
-                if (options.baseUrl) {
-                    openai.setBaseUrl(options.baseUrl)
-                }
+            if (options && options.axios) {
+                xAi.setAxios(options.axios)
             }
             chat.setConfig(typeof config === 'function' ? await config() : config)
             onCancel(() => abortController.abort())
@@ -44,14 +36,14 @@ export class OpenAICtodService {
         config?: Partial<Pick<Config, 'model' | 'temperature'>> | (() => Promise<Partial<Pick<Config, 'model' | 'temperature'>>>)
     }) {
         return async(messages: any[], { schema, onCancel }: any) => {
-            const openai = new OpenAICtodService(typeof params.apiKey === 'string' ? params.apiKey : await params.apiKey())
-            const chat = openai.createChat()
+            const xAi = new XCtodService(typeof params.apiKey === 'string' ? params.apiKey : await params.apiKey())
+            const chat = xAi.createChat()
             const abortController = new AbortController()
             if (params.config) {
                 chat.setConfig(typeof params.config === 'function' ? await params.config() : params.config)
             }
             if (params.axios) {
-                openai.setAxios(params.axios)
+                xAi.setAxios(params.axios)
             }
             onCancel(() => abortController.abort())
             const jsonSchema = validateToJsonSchema(schema.output)
@@ -81,15 +73,6 @@ export class OpenAICtodService {
     }
 
     /**
-     * @zh 如果你有需要特別設定 baseUrl，請使用這方法。
-     * @en If you need to set baseUrl, please use this method.
-     */
-
-    setBaseUrl(baseUrl: string) {
-        this._baseUrl = baseUrl
-    }
-
-    /**
      * @zh 設定 api key。
      * @en Set api key.
      */
@@ -99,14 +82,10 @@ export class OpenAICtodService {
     }
 
     createChat() {
-        return new OpenAIChat(this)
-    }
-
-    createVision() {
-        return new OpenAIVision(this)
+        return new XChat(this)
     }
 
     createImagesGeneration() {
-        return new OpenAIImagesGeneration(this)
+        return new XImagesGeneration(this)
     }
 }

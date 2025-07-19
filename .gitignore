@@ -8,5 +8,7 @@ package-lock.json
 .api-key
 .anthropic-api-key
 .google-api-key
+.x-api-key
+.openai-api-key
 invoke
 demo

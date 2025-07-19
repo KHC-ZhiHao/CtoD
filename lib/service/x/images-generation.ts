@@ -1,4 +1,4 @@
-import { OpenAICtodService } from './index'
+import { XCtodService } from './index'
 
 type ApiResponse = {
     created: string
@@ -9,26 +9,20 @@ type ApiResponse = {
 
 type Config = {
     /**
-     * @zh 模型，支援 dall-e-2 和 dall-e-3
-     * @en Model, support dall-e-2 and dall-e-3
+     * @zh 模型，支援 grok-2-image
+     * @en Model, support grok-2-image
      */
-    model: 'dall-e-2' | 'dall-e-3'
-    /**
-     * @zh 解析度，例如 1024x1024
-     * @en Resolution, for example 1024x1024
-     */
-    size: `${number}x${number}`
+    model: 'grok-2-image'
 }
 
-export class OpenAIImagesGeneration {
-    private openai: OpenAICtodService
+export class XImagesGeneration {
+    private xAi: XCtodService
     private config: Config = {
-        model: 'dall-e-2',
-        size: '1024x1024'
+        model: 'grok-2-image'
     }
 
-    constructor(openai: OpenAICtodService) {
-        this.openai = openai
+    constructor(xAi: XCtodService) {
+        this.xAi = xAi
     }
 
     /**
@@ -46,17 +40,16 @@ export class OpenAIImagesGeneration {
      */
 
     async create(prompt: string) {
-        const result = await this.openai._axios.post<ApiResponse>(`${this.openai._baseUrl}/v1/images/generations`, {
+        const result = await this.xAi._axios.post<ApiResponse>('https://api.x.ai/v1/images/generations', {
             prompt,
             n: 1,
-            size: this.config.size,
             model: this.config.model,
             response_format: 'b64_json'
         }, {
             timeout: 1000 * 60 * 5,
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${this.openai._apiKey}`
+                'Authorization': `Bearer ${this.xAi._apiKey}`
             }
         })
         return result.data

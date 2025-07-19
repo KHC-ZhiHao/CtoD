@@ -83,7 +83,7 @@ export class OpenAIVision {
      */
 
     async view(messages: VisionMessage[]) {
-        const result = await this.openai._axios.post<ApiResponse>('https://api.openai.com/v1/chat/completions', {
+        const result = await this.openai._axios.post<ApiResponse>(`${this.openai._baseUrl}/v1/chat/completions`, {
             model: this.config.model,
             n: 1,
             messages,
