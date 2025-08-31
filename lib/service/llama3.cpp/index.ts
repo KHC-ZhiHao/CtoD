@@ -1,5 +1,5 @@
 import axios, { AxiosInstance } from 'axios'
-import { sify } from '../../utils/chinese-conv'
+import { s2t, t2s } from '../../utils/chinese-conv'
 import { validateToJsonSchema } from '../../utils/validate'
 import { Llama3CppCompletion, Config } from './completion'
 
@@ -17,7 +17,7 @@ export class Llama3CppCtodService {
             chat.setConfig(config)
             let formatSchema = validateToJsonSchema(schema.output)
             if (chat.config.autoConvertTraditionalChinese) {
-                formatSchema = JSON.parse(sify(JSON.stringify(formatSchema)))
+                formatSchema = JSON.parse(t2s(JSON.stringify(formatSchema)))
             }
             const { run, cancel } = chat.talk({
                 options: params.talkOptions,
@@ -29,7 +29,7 @@ export class Llama3CppCtodService {
             })
             onCancel(cancel)
             const { message } = await run()
-            return message
+            return chat.config.autoConvertTraditionalChinese ? s2t(message) : message
         }
     }
 

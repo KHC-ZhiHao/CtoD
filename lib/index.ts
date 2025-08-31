@@ -1,5 +1,6 @@
 export * as plugins from './plugins'
 export * as templates from './templates'
+export * as chineseConverter from './utils/chinese-conv'
 export { CtoD } from './ctod'
 export { validateToJsonSchema, defineYupSchema } from './utils/validate'
 

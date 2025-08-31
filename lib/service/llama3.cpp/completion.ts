@@ -1,6 +1,6 @@
 import { Llama3CppCtodService } from './index'
 import { flow, Once } from 'power-helper'
-import { tify, sify } from '../../utils/chinese-conv'
+import { s2t, t2s } from '../../utils/chinese-conv'
 import { Template } from '@huggingface/jinja'
 
 type Message = {
@@ -203,10 +203,10 @@ export class Llama3CppCompletion {
                     path: 'completion',
                     data: {
                         ...(params.options || {}),
-                        prompt: this.config.autoConvertTraditionalChinese ? sify(prompt) : prompt
+                        prompt: this.config.autoConvertTraditionalChinese ? t2s(prompt) : prompt
                     }
                 })
-                const message = this.config.autoConvertTraditionalChinese ? tify(result.data.content) : result.data.content
+                const message = this.config.autoConvertTraditionalChinese ? s2t(result.data.content) : result.data.content
                 return {
                     message,
                     fullMessage: `${lastMessage}${message}`
@@ -224,7 +224,7 @@ export class Llama3CppCompletion {
             path: 'completion',
             onEnd: params.onEnd || (() => null),
             onMessage: e => {
-                const message = this.config.autoConvertTraditionalChinese ? tify(e.content) : e.content
+                const message = this.config.autoConvertTraditionalChinese ? s2t(e.content) : e.content
                 params.onMessage(message)
             },
             onWarn: params.onWarn || (() => null),
@@ -238,7 +238,7 @@ export class Llama3CppCompletion {
                 }).slice(0, props.eos_token.length * -1 - 1)
                 return {
                     ...(params.options || {}),
-                    prompt: this.config.autoConvertTraditionalChinese ? sify(prompt) : prompt,
+                    prompt: this.config.autoConvertTraditionalChinese ? t2s(prompt) : prompt,
                     stream: true
                 }
             }
@@ -268,14 +268,14 @@ export class Llama3CppCompletion {
                         messages: params.messages.map(e => {
                             return {
                                 role: e.role,
-                                content: this.config.autoConvertTraditionalChinese ? sify(e.content) : e.content
+                                content: this.config.autoConvertTraditionalChinese ? t2s(e.content) : e.content
                             }
                         })
                     }
                 })
                 const content = result.data.choices[0].message.content || ''
                 return {
-                    message: this.config.autoConvertTraditionalChinese ? tify(content) : content
+                    message: this.config.autoConvertTraditionalChinese ? s2t(content) : content
                 }
             }
         }
@@ -292,7 +292,7 @@ export class Llama3CppCompletion {
             onMessage: e => {
                 let content = e.choices[0].delta.content
                 if (content) {
-                    const message = this.config.autoConvertTraditionalChinese ? tify(content) : content
+                    const message = this.config.autoConvertTraditionalChinese ? s2t(content) : content
                     params.onMessage(message)
                 }
             },
@@ -304,7 +304,7 @@ export class Llama3CppCompletion {
                 messages: params.messages.map(e => {
                     return {
                         role: e.role,
-                        content: this.config.autoConvertTraditionalChinese ? sify(e.content) : e.content
+                        content: this.config.autoConvertTraditionalChinese ? t2s(e.content) : e.content
                     }
                 })
             }
