@@ -7,6 +7,7 @@ export class Llama3CppCtodService {
     _axios = axios.create()
 
     static createChatRequestWithJsonSchema(params: {
+        axios?: AxiosInstance
         config: Partial<Config> | (() => Promise<Partial<Config>>)
         talkOptions?: any
     }) {
@@ -16,6 +17,9 @@ export class Llama3CppCtodService {
             const config = typeof params.config === 'function' ? await params.config() : params.config
             chat.setConfig(config)
             let formatSchema = validateToJsonSchema(schema.output)
+            if (params.axios) {
+                ll3cpp.setAxios(params.axios)
+            }
             if (chat.config.autoConvertTraditionalChinese) {
                 formatSchema = JSON.parse(t2s(JSON.stringify(formatSchema)))
             }
