@@ -10,7 +10,7 @@ export declare class XCtodService {
         axios?: any;
         apiKey: string | (() => Promise<string>);
         config?: Partial<Pick<Config, 'model' | 'temperature'>> | (() => Promise<Partial<Pick<Config, 'model' | 'temperature'>>>);
-    }): (messages: any[], { schema, onCancel }: any) => Promise<string>;
+    }): (messages: any[], { schema, abortController }: any) => Promise<string>;
     constructor(apiKey?: string);
     /**
      * @zh 如果你有需要特別設定 axios，請使用這方法。

@@ -104,6 +104,7 @@ export type RequestContext = {
     count: number;
     isRetry: boolean;
     metadata: Map<string, any>;
+    abortController: AbortController;
     onCancel: (cb: () => void) => void;
     schema: {
         input: any;

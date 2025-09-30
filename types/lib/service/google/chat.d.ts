@@ -23,6 +23,8 @@ export type Config = {
      * @en What model to use.
      */
     model: string;
+    maxTokens: number;
+    temperature: number;
 };
 export declare class GoogleChat {
     google: GoogleCtodService;

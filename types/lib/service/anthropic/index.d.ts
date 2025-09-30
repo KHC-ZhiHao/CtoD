@@ -19,7 +19,7 @@ export declare class AnthropicCtodService {
     static createChatRequestWithJsonSchema(params: {
         anthropicSdk: any;
         config?: Partial<Config>;
-    }): (messages: any[], { schema }: any) => Promise<string>;
+    }): (messages: any[], { schema, abortController }: any) => Promise<string>;
     createChat(): AnthropicChat;
 }
 export {};

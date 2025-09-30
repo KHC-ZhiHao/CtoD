@@ -17,10 +17,9 @@ export class OpenAICtodService {
             baseUrl?: string
         }
     ) {
-        return async(messages: any[], { onCancel }: any) => {
+        return async(messages: any[], { abortController }: any) => {
             const openai = new OpenAICtodService(typeof apiKey === 'string' ? apiKey : await apiKey())
             const chat = openai.createChat()
-            const abortController = new AbortController()
             if (options) {
                 if (options.axios) {
                     openai.setAxios(options.axios)
@@ -30,7 +29,6 @@ export class OpenAICtodService {
                 }
             }
             chat.setConfig(typeof config === 'function' ? await config() : config)
-            onCancel(() => abortController.abort())
             const { text } = await chat.talk(messages, {
                 abortController
             })

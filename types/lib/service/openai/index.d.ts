@@ -8,7 +8,7 @@ export declare class OpenAICtodService {
     static createChatRequest(apiKey: string | (() => Promise<string>), config?: Partial<Config> | (() => Promise<Partial<Config>>), options?: {
         axios?: any;
         baseUrl?: string;
-    }): (messages: any[], { onCancel }: any) => Promise<string>;
+    }): (messages: any[], { abortController }: any) => Promise<string>;
     static createChatRequestWithJsonSchema(params: {
         axios?: any;
         apiKey: string | (() => Promise<string>);

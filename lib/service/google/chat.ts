@@ -28,12 +28,16 @@ export type Config = {
      * @en What model to use.
      */
     model: string
+    maxTokens: number
+    temperature: number
 }
 
 export class GoogleChat {
     google: GoogleCtodService
     config: Config = {
-        model: 'gemini-1.5-flash'
+        model: 'gemini-2.0-flash',
+        maxTokens: 1024,
+        temperature: 0.7
     }
 
     constructor(google: GoogleCtodService) {
@@ -60,7 +64,11 @@ export class GoogleChat {
             model: this.config.model
         })
         const result = await model.generateContent({
-            contents: newMessages
+            contents: newMessages,
+            generationConfig: {
+                temperature: this.config.temperature,
+                maxOutputTokens: this.config.maxTokens
+            }
         })
         const text = result.response.text()
         return {
@@ -97,11 +105,14 @@ export class GoogleChat {
         const model = this.google.generativeAI.getGenerativeModel({
             model: this.config.model
         })
-        const context = {
-            contents: params.messages
-        }
         model
-            .generateContentStream(context, {
+            .generateContentStream({
+                contents: params.messages,
+                generationConfig: {
+                    temperature: this.config.temperature,
+                    maxOutputTokens: this.config.maxTokens,
+                }
+            }, {
                 signal: state.controller.signal
             })
             .then(async({ stream }) => {

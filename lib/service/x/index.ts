@@ -35,17 +35,15 @@ export class XCtodService {
         apiKey: string | (() => Promise<string>)
         config?: Partial<Pick<Config, 'model' | 'temperature'>> | (() => Promise<Partial<Pick<Config, 'model' | 'temperature'>>>)
     }) {
-        return async(messages: any[], { schema, onCancel }: any) => {
+        return async(messages: any[], { schema, abortController }: any) => {
             const xAi = new XCtodService(typeof params.apiKey === 'string' ? params.apiKey : await params.apiKey())
             const chat = xAi.createChat()
-            const abortController = new AbortController()
             if (params.config) {
                 chat.setConfig(typeof params.config === 'function' ? await params.config() : params.config)
             }
             if (params.axios) {
                 xAi.setAxios(params.axios)
             }
-            onCancel(() => abortController.abort())
             const jsonSchema = validateToJsonSchema(schema.output)
             const { text } = await chat.talk(messages, {
                 abortController,

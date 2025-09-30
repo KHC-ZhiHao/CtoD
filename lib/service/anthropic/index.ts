@@ -15,6 +15,7 @@ type GPTMessage = {
     role: string
     content: string | GPTContent[]
 }
+
 export class AnthropicCtodService {
     anthropicSdk: Anthropic
 
@@ -57,9 +58,11 @@ export class AnthropicCtodService {
         const anthropic = new AnthropicCtodService(params.anthropicSdk)
         const chat = anthropic.createChat()
         chat.setConfig(params.config || {})
-        return async (messages: any[], { schema }: any) => {
+        return async (messages: any[], { schema, abortController }: any) => {
             const jsonSchema = validateToJsonSchema(schema.output)
-            const content = await chat.chatAndStructure(messages, jsonSchema)
+            const content = await chat.chatAndStructure(messages, jsonSchema, {
+                abortController
+            })
             return content
         }
     }

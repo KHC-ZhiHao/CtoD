@@ -1,13 +1,10 @@
-import fs from 'fs'
-import { GoogleGenerativeAI } from '@google/generative-ai'
-import { CtoD, GoogleCtodService, plugins } from '../lib/index'
+import { BedrockRuntimeClient, InvokeModelCommand } from '@aws-sdk/client-bedrock-runtime'
+import { CtoD, validateToJsonSchema, AnthropicChatDataGenerator, plugins } from '../lib/index'
 
 /**
- * @test npx esno ./examples/google.ts
- * 要使用 google generative ai 必須手動安裝 '@google/generative-ai' 套件
+ * @test npx esno ./examples/aws-bedrock
+ * 必須手動安裝 '@aws-sdk/client-bedrock-runtime' 套件
  */
-
-const apiKey = fs.readFileSync('./.google-api-key', 'utf-8').trim()
 
 const ctod = new CtoD({
     plugins: () => {
@@ -18,11 +15,36 @@ const ctod = new CtoD({
             })
         }
     },
-    request: GoogleCtodService.createChatRequestWithJsonSchema({
-        googleGenerativeAI: new GoogleGenerativeAI(apiKey),
-        config: {},
-        model: 'gemini-1.5-flash'
-    })
+    request: async (message, { abortController, schema }) => {
+        const dataGenerator = new AnthropicChatDataGenerator(() => {
+            return {
+                model: '',
+                maxTokens: 8192,
+                temperature: 0.7
+            }
+        })
+        const client = new BedrockRuntimeClient({
+            region: 'us-east-1'
+        })
+        const jsonSchema = validateToJsonSchema(schema.output)
+        const body = dataGenerator.createChatAndStructureBody(message, jsonSchema)
+        const input = {
+            modelId: 'apac.anthropic.claude-sonnet-4-20250514-v1:0',
+            contentType: 'application/json',
+            accept: 'application/json',
+            body: JSON.stringify({
+                ...body,
+                model: undefined, // anthropic model 由 modelId 決定
+                anthropic_version: 'bedrock-2023-05-31',
+            })
+        }
+        const command = new InvokeModelCommand(input)
+        const response = await client.send(command, {
+            abortSignal: abortController.signal
+        })
+        const result = JSON.parse(new TextDecoder().decode(response.body))
+        return dataGenerator.parseChatAndStructureResult(result)
+    }
 })
 
 const brokerBuilder = ctod.createBrokerBuilder<{
@@ -30,7 +52,7 @@ const brokerBuilder = ctod.createBrokerBuilder<{
     question: string
 }>({
     install: ({ attach }) => {
-        attach('start', async({ setPreMessages }) => {
+        attach('start', async ({ setPreMessages }) => {
             setPreMessages([
                 {
                     role: 'system',
@@ -41,7 +63,7 @@ const brokerBuilder = ctod.createBrokerBuilder<{
     }
 })
 
-const broker = brokerBuilder.create(async({ yup, data, setMessages }) => {
+const broker = brokerBuilder.create(async ({ yup, data, setMessages }) => {
     const { indexes, question } = data
     setMessages([
         {

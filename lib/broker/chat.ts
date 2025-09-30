@@ -121,6 +121,7 @@ export type RequestContext = {
     count: number
     isRetry: boolean
     metadata: Map<string, any>
+    abortController: AbortController
     onCancel: (cb: () => void) => void
     schema: {
         input: any
@@ -220,6 +221,7 @@ export class ChatBroker<
         let waitCancel = null as (() => void) | null
         let isCancel = false
         let isSending = false
+        let abortController = new AbortController()
 
         // =================
         //
@@ -242,12 +244,15 @@ export class ChatBroker<
                 if (isSending && waitCancel) {
                     waitCancel()
                 }
+                abortController.abort()
                 isCancel = true
                 eventOff()
             }
         }
         let onCancel = (cb: () => void) => {
-            waitCancel = cb
+            waitCancel = () => {
+                cb()
+            }
         }
 
         // =================
@@ -328,12 +333,14 @@ export class ChatBroker<
                         schema,
                         onCancel,
                         metadata,
+                        abortController,
                         isRetry: retryFlag
                     })
                     if (isCancel) {
                         if (waitCancel) {
                             waitCancel()
                         }
+                        abortController.abort()
                     } else {
                         try {
                             isSending = true

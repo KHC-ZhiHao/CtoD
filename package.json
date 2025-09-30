@@ -1,6 +1,6 @@
 {
   "name": "ctod",
-  "version": "0.9.3",
+  "version": "0.9.4",
   "description": "CtoD Is Chat To Data Utils.",
   "main": "./dist/index.js",
   "type": "module",
@@ -27,6 +27,7 @@
   "homepage": "https://github.com/KHC-ZhiHao/ctod#readme",
   "devDependencies": {
     "@anthropic-ai/sdk": "^0.50.4",
+    "@aws-sdk/client-bedrock-runtime": "^3.896.0",
     "@babel/core": "^7.4.5",
     "@babel/preset-env": "^7.4.5",
     "@google/generative-ai": "^0.21.0",
@@ -54,7 +55,7 @@
     "typescript-eslint": "^8.18.1"
   },
   "dependencies": {
-    "@huggingface/jinja": "^0.3.3",
+    "@huggingface/jinja": "^0.5.1",
     "@sodaru/yup-to-json-schema": "^2.0.1",
     "axios": "^1.11.0",
     "handlebars": "^4.7.7",

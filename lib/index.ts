@@ -7,7 +7,10 @@ export { validateToJsonSchema, defineYupSchema } from './utils/validate'
 export { OpenAICtodService } from './service/openai'
 export { Llama3CppCtodService } from './service/llama3.cpp'
 export { GoogleCtodService } from './service/google'
+
 export { AnthropicCtodService } from './service/anthropic'
+export { AnthropicChatDataGenerator } from './service/anthropic/chat'
+
 export { XCtodService } from './service/x'
 
 export { TextParser } from './core/parser'
