@@ -29,11 +29,11 @@ const characterPlugin = new CtoDPlugin({
             setPreMessages([
                 {
                     role: 'user',
-                    content: '請你扮演' + character
+                    content: 'Please play the role of ' + character
                 },
                 {
                     role: 'assistant',
-                    content: '沒問題，我現在是' + character
+                    content: 'No problem, I am now ' + character
                 }
             ])
         })
@@ -45,13 +45,13 @@ const characterPlugin = new CtoDPlugin({
 
 flow.run(async () => {
     const character = await input({
-        message: '請輸入角色名稱.',
-        default: '派大星'
+        message: 'Please enter the character name.',
+        default: 'Patrick Star'
     })
     
     const action = await input({
-        message: '你想對他問什麼？',
-        default: '你最好的朋友是誰？'
+        message: 'What would you like to ask them?',
+        default: 'Who is your best friend?'
     })
 
     const ctod = new CtoD({
@@ -89,7 +89,7 @@ flow.run(async () => {
             {
                 role: 'user',
                 content: [
-                    '請基於你的角色個性,並依據以下指令進行回應：',
+                    'Based on your character personality, please respond to the following instruction:',
                     action
                 ]
             }

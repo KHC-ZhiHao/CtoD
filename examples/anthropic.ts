@@ -4,7 +4,7 @@ import { CtoD, AnthropicCtodService, plugins } from '../lib/index.js'
 
 /**
  * @test npx esno ./examples/anthropic.ts
- * 必須手動安裝 '@anthropic-ai/sdk' 套件
+ * Must manually install '@anthropic-ai/sdk' package
  */
 
 const apiKey = fs.readFileSync('./.anthropic-api-key', 'utf-8').trim()
@@ -37,7 +37,7 @@ const brokerBuilder = ctod.createBrokerBuilder<{
             setPreMessages([
                 {
                     role: 'system',
-                    content: '你現在是一位擅長分類索引的藥師'
+                    content: 'You are now a pharmacist skilled at categorizing indexes'
                 }
             ])
         })
@@ -50,35 +50,35 @@ const broker = brokerBuilder.create(async({ zod, data, setMessages }) => {
         {
             role: 'user',
             content: [
-                '我有以下索引',
+                'I have the following indexes',
                 `${JSON.stringify(indexes)}`,
-                `請幫我解析"${question}"可能是哪個索引`,
-                '且相關性由高到低排序並給予分數，分數由 0 ~ 1'
+                `Please help me analyze which index "${question}" might belong to`,
+                'And sort by relevance from high to low with a score ranging from 0 to 1'
             ]
         }
     ])
     const item = zod.object({
-        name: zod.string().describe('索引名稱'),
-        score: zod.number().describe('評比分數')
+        name: zod.string().describe('Index name'),
+        score: zod.number().describe('Rating score')
     })
     return {
-        indexes: zod.array(item).describe('由高到低排序的索引')
+        indexes: zod.array(item).describe('Indexes sorted from high to low')
     }
 })
 
 broker.request({
-    indexes: ['胃痛', '腰痛', '頭痛', '喉嚨痛', '四肢疼痛'],
-    question: '喝咖啡，吃甜食，胃食道逆流'
+    indexes: ['Stomach pain', 'Lower back pain', 'Headache', 'Sore throat', 'Limb pain'],
+    question: 'Drinking coffee, eating sweets, acid reflux'
 }).then(e => {
-    console.log('輸出結果：', e.indexes)
+    console.log('Output result:', e.indexes)
     /*
         [
             {
-                name: '胃痛',
+                name: 'Stomach pain',
                 score: 1
             },
             {
-                name: '喉嚨痛',
+                name: 'Sore throat',
                 score: 0.7
             },
             ...

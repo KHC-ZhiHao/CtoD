@@ -20,15 +20,15 @@ const brokerBuilder = ctod.createBrokerBuilder<{
             setPreMessages([
                 {
                     role: 'system',
-                    content: '你現在是一個遊戲設計師'
+                    content: 'You are now a game designer'
                 },
                 {
                     role: 'user',
-                    content: '我在設計一個互動式遊戲，但我現在對於劇情下一步要發生什麼事情遇到了困難'
+                    content: 'I am designing an interactive game, but I am having trouble deciding what should happen next in the storyline'
                 },
                 {
                     role: 'assistant',
-                    content: '沒問題，我來幫你想想看。'
+                    content: 'No problem, let me help you think about it.'
                 }
             ])
         })
@@ -39,16 +39,16 @@ const broker = brokerBuilder.create(async({ zod, data, setMessages }) => {
     setMessages([
         {
             role: 'user',
-            content: data.scene || '任意發揮'
+            content: data.scene || 'Feel free to improvise'
         }
     ])
     return {
-        next: zod.array(zod.string()).describe('下一步要發生的事件列表')
+        next: zod.array(zod.string()).describe('List of events that should happen next')
     }
 })
 
 broker.request({
-    scene: '今天小紅帽遇到了大野狼，大野狼要吃掉小紅帽，小紅帽要怎麼辦？給我三個下一步要發生的事件'
+    scene: 'Today Little Red Riding Hood encountered the Big Bad Wolf. The Big Bad Wolf wants to eat Little Red Riding Hood. What should Little Red Riding Hood do? Give me three events that should happen next'
 }).then(result => {
     console.log(result.next)
 })
