@@ -1,6 +1,6 @@
-import { TextParser } from './parser'
-import { validate, ValidateCallback, ValidateCallbackOutputs } from '../utils/validate'
-import { ParserError } from '../utils/error'
+import { TextParser } from './parser.js'
+import { validate, ValidateCallback, ValidateCallbackOutputs } from '../utils/validate.js'
+import { ParserError } from '../utils/error.js'
 
 export type TranslatorParams<
     S extends ValidateCallback<any>,

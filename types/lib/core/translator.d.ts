@@ -1,5 +1,5 @@
-import { TextParser } from './parser';
-import { ValidateCallback, ValidateCallbackOutputs } from '../utils/validate';
+import { TextParser } from './parser.js';
+import { ValidateCallback, ValidateCallbackOutputs } from '../utils/validate.js';
 export type TranslatorParams<S extends ValidateCallback<any>, O extends ValidateCallback<any>> = {
     /**
      * @zh 輸入的資料格式。
@@ -55,9 +55,7 @@ export declare class Translator<S extends ValidateCallback<any>, O extends Valid
      * @en Convert text to serialized data.
      */
     parse(text: string): Promise<{
-        output: ReturnType<O> extends infer T ? { [K in keyof T]: ReturnType<O>[K] extends {
-            __outputType: any;
-        } ? ReturnType<O>[K]["__outputType"] : ReturnType<O>[K]; } : never;
+        output: ReturnType<O> extends infer T ? { [K in keyof T]: T[K] extends import("zod").ZodType<unknown, unknown, import("zod/v4/core").$ZodTypeInternals<unknown, unknown>> ? import("zod").infer<T[K]> : T[K]; } : never;
         parserName: string;
         parserFails: {
             name: string;

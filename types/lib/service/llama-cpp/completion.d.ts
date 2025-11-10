@@ -1,4 +1,4 @@
-import { Llama3CppCtodService } from './index';
+import { LlamaCppCtodService } from './index.js';
 type Message = {
     role: string;
     content: string;
@@ -15,11 +15,11 @@ type Stream = {
     onWarn?: (error: any) => void;
     onError?: (error: any) => void;
 };
-export declare class Llama3CppCompletion {
+export declare class LlamaCppCompletion {
     private getProp;
-    core: Llama3CppCtodService;
+    core: LlamaCppCtodService;
     config: Config;
-    constructor(core: Llama3CppCtodService);
+    constructor(core: LlamaCppCtodService);
     setConfig(config: Partial<Config>): void;
     completion(params: {
         options?: Options;

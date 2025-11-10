@@ -1,6 +1,6 @@
-import { validateToJsonSchema } from '../../utils/validate'
-import { GoogleMessage, GoogleChat, Config } from './chat'
-import type { GoogleGenerativeAI } from '@google/generative-ai'
+import { validateToJsonSchema } from '../../utils/validate.js'
+import { GoogleMessage, GoogleChat, Config } from './chat.js'
+import type { GoogleGenAI } from '@google/genai'
 
 type GPTContent = {
     type: 'image_url' | 'text'
@@ -17,10 +17,10 @@ type GPTMessage = {
 }
 
 export class GoogleCtodService {
-    generativeAI: GoogleGenerativeAI
+    googleGenAI: GoogleGenAI
 
-    constructor(generativeAI: any) {
-        this.generativeAI = generativeAI
+    constructor(googleGenAI: any) {
+        this.googleGenAI = googleGenAI
     }
 
     static chatGPTMessageToGoogleChatMessage(messages: GPTMessage[]): GoogleMessage[] {
@@ -68,11 +68,11 @@ export class GoogleCtodService {
     }
 
     static createChatRequestWithJsonSchema(params: {
-        googleGenerativeAI: any
+        googleGenAI: any
         config: Partial<Omit<Config, 'model'>> | (() => Promise<Partial<Omit<Config, 'model'>>>)
         model: string
     }) {
-        const googleGenerativeAI: GoogleGenerativeAI = params.googleGenerativeAI
+        const googleGenAI: GoogleGenAI = params.googleGenAI
         const removeAdditionalProperties = (schema: any) => {
             if (schema.type === 'object') {
                 delete schema.additionalProperties
@@ -85,25 +85,19 @@ export class GoogleCtodService {
             return schema
         }
         return async (messages: any[], { schema, abortController }: any) => {
-            const responseSchema = removeAdditionalProperties(validateToJsonSchema(schema.output))
-            const model = googleGenerativeAI.getGenerativeModel({
+            const config = typeof params.config === 'function' ? await params.config() : params.config
+            const response = await googleGenAI.models.generateContent({
                 model: params.model,
-                generationConfig: {
+                contents: GoogleCtodService.chatGPTMessageToGoogleChatMessage(messages),
+                config: {
+                    abortSignal: abortController.signal,
+                    maxOutputTokens: config.maxTokens,
+                    temperature: config.temperature,
                     responseMimeType: 'application/json',
-                    responseSchema
+                    responseJsonSchema: validateToJsonSchema(schema.output)
                 }
             })
-            const config = typeof params.config === 'function' ? await params.config() : params.config
-            const result = await model.generateContent({
-                generationConfig: {
-                    temperature: config.temperature,
-                    maxOutputTokens: config.maxTokens
-                },
-                contents: GoogleCtodService.chatGPTMessageToGoogleChatMessage(messages)
-            }, {
-                signal: abortController.signal
-            })
-            return result.response.text()
+            return response.text || ''
         }
     }
 

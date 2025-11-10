@@ -1,5 +1,4 @@
-import { OpenAICtodService } from './index';
-import { PromiseResponseType } from '../../types';
+import { OpenAICtodService } from './index.js';
 type ImageContent = {
     type: 'image_url' | 'text';
     text?: string;
@@ -70,5 +69,5 @@ export declare class OpenAIVision {
         apiResponse: ApiResponse;
     }>;
 }
-export type OpenAIChatVisionResponse = PromiseResponseType<OpenAIVision['view']>;
+export type OpenAIChatVisionResponse = Awaited<ReturnType<OpenAIVision['view']>>;
 export {};

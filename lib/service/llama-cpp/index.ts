@@ -1,9 +1,9 @@
 import axios, { AxiosInstance } from 'axios'
-import { s2t, t2s } from '../../utils/chinese-conv'
-import { validateToJsonSchema } from '../../utils/validate'
-import { Llama3CppCompletion, Config } from './completion'
+import { s2t, t2s } from '../../utils/chinese-conv.js'
+import { validateToJsonSchema } from '../../utils/validate.js'
+import { LlamaCppCompletion, Config } from './completion.js'
 
-export class Llama3CppCtodService {
+export class LlamaCppCtodService {
     _axios = axios.create()
 
     static createChatRequestWithJsonSchema(params: {
@@ -12,7 +12,7 @@ export class Llama3CppCtodService {
         talkOptions?: any
     }) {
         return async(messages: any[], { schema, onCancel }: any) => {
-            const ll3cpp = new Llama3CppCtodService()
+            const ll3cpp = new LlamaCppCtodService()
             const chat = ll3cpp.createCompletion()
             const config = typeof params.config === 'function' ? await params.config() : params.config
             chat.setConfig(config)
@@ -52,6 +52,6 @@ export class Llama3CppCtodService {
      */
 
     createCompletion() {
-        return new Llama3CppCompletion(this)
+        return new LlamaCppCompletion(this)
     }
 }

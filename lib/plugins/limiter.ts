@@ -1,4 +1,4 @@
-import { ChatBrokerPlugin } from '../core/plugin'
+import { ChatBrokerPlugin } from '../core/plugin.js'
 import { Event, flow, Schedule } from 'power-helper'
 
 type Events = {

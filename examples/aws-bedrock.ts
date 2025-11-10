@@ -1,9 +1,9 @@
 import { BedrockRuntimeClient, InvokeModelCommand } from '@aws-sdk/client-bedrock-runtime'
-import { CtoD, validateToJsonSchema, AnthropicChatDataGenerator, plugins } from '../lib/index'
+import { CtoD, validateToJsonSchema, AnthropicChatDataGenerator, plugins } from '../lib/index.js'
 
 /**
  * @test npx esno ./examples/aws-bedrock
- * 必須手動安裝 '@aws-sdk/client-bedrock-runtime' 套件
+ * 必須手動安装 '@aws-sdk/client-bedrock-runtime' 套件
  */
 
 const ctod = new CtoD({
@@ -23,9 +23,7 @@ const ctod = new CtoD({
                 temperature: 0.7
             }
         })
-        const client = new BedrockRuntimeClient({
-            region: 'us-east-1'
-        })
+        const client = new BedrockRuntimeClient({})
         const jsonSchema = validateToJsonSchema(schema.output)
         const body = dataGenerator.createChatAndStructureBody(message, jsonSchema)
         const input = {
@@ -63,7 +61,7 @@ const brokerBuilder = ctod.createBrokerBuilder<{
     }
 })
 
-const broker = brokerBuilder.create(async ({ yup, data, setMessages }) => {
+const broker = brokerBuilder.create(async ({ zod, data, setMessages }) => {
     const { indexes, question } = data
     setMessages([
         {
@@ -76,24 +74,12 @@ const broker = brokerBuilder.create(async ({ yup, data, setMessages }) => {
             ]
         }
     ])
-    const item = yup.object({
-        name: yup.string().required().meta({
-            jsonSchema: {
-                description: '索引名稱'
-            }
-        }),
-        score: yup.number().required().meta({
-            jsonSchema: {
-                description: '評比分數'
-            }
-        })
-    }).required()
+    const item = zod.object({
+        name: zod.string().describe('索引名稱'),
+        score: zod.number().describe('評比分數')
+    })
     return {
-        indexes: yup.array(item).required().meta({
-            jsonSchema: {
-                description: '由高到低排序的索引'
-            }
-        })
+        indexes: zod.array(item).describe('由高到低排序的索引')
     }
 })
 

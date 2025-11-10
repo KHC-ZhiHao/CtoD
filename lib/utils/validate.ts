@@ -1,8 +1,6 @@
-import * as Yup from 'yup'
-import { convertSchema } from '@sodaru/yup-to-json-schema'
-import { Schema } from 'yup'
+import { z, toJSONSchema } from 'zod'
 
-export type ValidateCallback<T extends Record<string, Schema>> = (_yup: typeof Yup) => {
+export type ValidateCallback<T extends Record<string, z.ZodTypeAny>> = (_z: typeof z) => {
     [K in keyof T]: T[K]
 }
 
@@ -10,7 +8,7 @@ export type ValidateCallbackOutputs<
     T extends ValidateCallback<any>,
     R = ReturnType<T>
 > = {
-    [K in keyof R]: R[K] extends { __outputType: any } ? R[K]['__outputType'] : R[K]
+    [K in keyof R]: R[K] extends z.ZodTypeAny ? z.infer<R[K]> : R[K]
 }
 
 export function definedValidateSchema<T extends ValidateCallback<any>>(cb: T): T {
@@ -21,44 +19,13 @@ export function validate<
     T extends ValidateCallback<any>,
     R = ReturnType<T>
 >(target: any, schemaCallback: T) {
-    return Yup.object(schemaCallback(Yup)).required().validateSync(target || {}) as {
-        [K in keyof R]: R[K] extends { __outputType: any } ? R[K]['__outputType'] : R[K]
+    return z.object(schemaCallback(z)).parse(target || {}) as {
+        [K in keyof R]: R[K] extends z.ZodTypeAny ? z.infer<R[K]> : R[K]
     }
 }
 
-export const defineYupSchema = <T extends Record<string, Schema>>(cb: ValidateCallback<T>): T => {
-    return cb(Yup)
-}
-
-export const validateToJsonSchema = <T extends ValidateCallback<any>>(cb: T) => {
-    const removeAllDefault = (schema: any) => {
-        if (schema.default) {
-            delete schema.default
-        }
-        if (schema.properties) {
-            for (let key in schema.properties) {
-                if (schema.properties[key].default) {
-                    delete schema.properties[key].default
-                }
-                removeAllDefault(schema.properties[key])
-            }
-        }
-        if (schema.items) {
-            removeAllDefault(schema.items)
-        }
-    }
-    const addAllAdditionalProperties = (jsonSchema: any) => {
-        if (jsonSchema.type === 'object') {
-            jsonSchema.additionalProperties = false
-            for (const key in jsonSchema.properties) {
-                addAllAdditionalProperties(jsonSchema.properties[key])
-            }
-        } else if (jsonSchema.type === 'array') {
-            addAllAdditionalProperties(jsonSchema.items)
-        }
-    }
-    const jsonSchema = convertSchema(Yup.object(cb(Yup)))
-    removeAllDefault(jsonSchema)
-    addAllAdditionalProperties(jsonSchema)
-    return jsonSchema
+export function validateToJsonSchema<T extends ValidateCallback<any>>(target: () => T) {
+    const schema = toJSONSchema(z.object(target()))
+    delete schema.$schema
+    return schema
 }

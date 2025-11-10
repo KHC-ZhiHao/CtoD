@@ -1,10 +1,10 @@
-import { ChatBrokerPlugin } from '../core/plugin'
+import { ChatBrokerPlugin } from '../core/plugin.js'
 
 export default new ChatBrokerPlugin({
     name: 'print-log',
-    params: yup => {
+    params: z => {
         return {
-            detail: yup.boolean().default(false)
+            detail: z.boolean().default(false)
         }
     },
     receiveData: () => {

@@ -1,5 +1,4 @@
-import { GoogleCtodService } from './index';
-import { PromiseResponseType } from '../../types';
+import { GoogleCtodService } from './index.js';
 /**
  *  if data:
  *  data: base64 string,
@@ -40,11 +39,11 @@ export declare class GoogleChat {
      * @en Talk to the AI
      */
     talk(messages?: GoogleMessage[]): Promise<{
-        text: string;
+        text: string | undefined;
         newMessages: (GoogleMessage | {
             role: string;
             parts: {
-                text: string;
+                text: string | undefined;
             }[];
         })[];
     }>;
@@ -62,5 +61,5 @@ export declare class GoogleChat {
         cancel: () => void;
     };
 }
-export type GoogleChatTalkResponse = PromiseResponseType<GoogleChat['talk']>;
+export type GoogleChatTalkResponse = Awaited<ReturnType<GoogleChat['talk']>>;
 export {};

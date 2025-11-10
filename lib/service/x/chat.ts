@@ -1,5 +1,5 @@
 import { json } from 'power-helper'
-import { XCtodService } from './index'
+import { XCtodService } from './index.js'
 
 export type XMessage = {
     role: 'system' | 'user' | 'assistant'

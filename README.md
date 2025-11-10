@@ -19,9 +19,9 @@
 
 現在我們頻繁的有透過口語化的方式交付任務 LLM 處理並要求回應 JSON 的需求，透過 CtoD 你可以讓這個模式有架構化的進行。
 
-在對話過程中，CtoD 採用 [yup](https://github.com/jquense/yup) 來驗證請求與回復資料是否符合預期，以確保一致性，只要保持這個互動模式，就可以利用在 API 串接或是自動化系統上。
+在對話過程中，CtoD 採用 [zod](https://zod.dev/basics) 來驗證請求與回復資料是否符合預期，以確保一致性，只要保持這個互動模式，就可以利用在 API 串接或是自動化系統上。
 
-我們還附帶支援 `OpenAI`, `Google`, `Llama3` 等相關 LLM 服務。
+我們還附帶支援 `OpenAI`, `Google`, `X`, `anthropic`, `llama.cpp` 等主流 LLM 網路或本地服務。
 
 ## 安裝
 
@@ -69,7 +69,7 @@ const brokerBuilder = ctod.createBrokerBuilder<{
     }
 })
 
-const broker = brokerBuilder.create(async({ yup, data, setMessages }) => {
+const broker = brokerBuilder.create(async({ zod, data, setMessages }) => {
     const { indexes, question } = data
     setMessages([
         {
@@ -82,24 +82,12 @@ const broker = brokerBuilder.create(async({ yup, data, setMessages }) => {
             ]
         }
     ])
-    const item = yup.object({
-        name: yup.string().required().meta({
-            jsonSchema: {
-                description: '索引名稱'
-            }
-        }),
-        score: yup.number().required().meta({
-            jsonSchema: {
-                description: '評比分數'
-            }
-        })
-    }).required()
+    const item = zod.object({
+        name: zod.string().describe('索引名稱'),
+        score: zod.number().describe('評比分數')
+    })
     return {
-        indexes: yup.array(item).required().meta({
-            jsonSchema: {
-                description: '由高到低排序的索引'
-            }
-        })
+        indexes: zod.array(item).describe('由高到低排序的索引')
     }
 })
 
@@ -124,14 +112,13 @@ broker.request({
 }).catch(error => {
     console.error('Error:', error)
 })
-
 ```
 
 ##  Plugin
 
 雖然 Broker 本身已經能夠處理大部分的事務，但透過 Plugin 可以協助改善複雜的流程，幫助專案工程化。
 
-每次發送請求時，Broker 會觸發一系列的生命週期，你可以從[原始碼](./lib/broker/openai.ts)中了解每個生命週期的參數與行為，並對其行為進行加工。
+每次發送請求時，Broker 會觸發一系列的生命週期，你可以從[原始碼](./lib/broker/chat.ts)中了解每個生命週期的參數與行為，並對其行為進行加工。
 
 現在，假設我們想要設計一個插件，它會在每次對話結束時將訊息備份到伺服器上：
 
@@ -141,15 +128,15 @@ import { CtoDPlugin } from 'ctod'
 const backupPlugin = new CtoDPlugin({
     name: 'backup-plugin',
     // 定義參數為 sendUrl
-    params: yup => {
+    params: zod => {
         return {
-            sendUrl: yup.string().required()
+            sendUrl: zod.string()
         }
     },
-    // 現階段你可以在執行過程中接收到資訊，資訊結構由這裡定義。
-    receiveData: yup => {
+    // 現階段你可以在執行過程中接收到資訊,資訊結構由這裡定義。
+    receiveData: zod => {
         return {
-            character: yup.string().required()
+            character: zod.string()
         }
     },
     onInstall({ params, attach, receive }) {
@@ -196,11 +183,14 @@ const ctod = new CtoD({
 
 [進階用法 - 請 AI COSPLAY](./examples/plugin.ts)
 
-## Other
-
-[計算 token 的方案: tiktoken](https://www.npmjs.com/package/tiktoken)
-
 ## Version History
+
+### 1.0.x
+
+1. 支援 zod 作為 schema 定義工具，並移除 yup 的支援。
+2. 改由 nodenext 作為編譯目標。
+3. 將 Google Service 改使用 @google/genai 套件。
+4. 將 Llama3Cpp 改名為 LlamaCpp。
 
 ### 0.9.x
 

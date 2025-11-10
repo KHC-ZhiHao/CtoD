@@ -1,5 +1,5 @@
-import { GoogleMessage, GoogleChat, Config } from './chat';
-import type { GoogleGenerativeAI } from '@google/generative-ai';
+import { GoogleMessage, GoogleChat, Config } from './chat.js';
+import type { GoogleGenAI } from '@google/genai';
 type GPTContent = {
     type: 'image_url' | 'text';
     text?: string;
@@ -13,11 +13,11 @@ type GPTMessage = {
     content: string | GPTContent[];
 };
 export declare class GoogleCtodService {
-    generativeAI: GoogleGenerativeAI;
-    constructor(generativeAI: any);
+    googleGenAI: GoogleGenAI;
+    constructor(googleGenAI: any);
     static chatGPTMessageToGoogleChatMessage(messages: GPTMessage[]): GoogleMessage[];
     static createChatRequestWithJsonSchema(params: {
-        googleGenerativeAI: any;
+        googleGenAI: any;
         config: Partial<Omit<Config, 'model'>> | (() => Promise<Partial<Omit<Config, 'model'>>>);
         model: string;
     }): (messages: any[], { schema, abortController }: any) => Promise<string>;

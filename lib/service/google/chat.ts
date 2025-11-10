@@ -1,6 +1,5 @@
 import { json } from 'power-helper'
-import { GoogleCtodService } from './index'
-import { PromiseResponseType } from '../../types'
+import { GoogleCtodService } from './index.js'
 
 /**
  *  if data:
@@ -60,17 +59,15 @@ export class GoogleChat {
 
     async talk(messages: GoogleMessage[] = []) {
         const newMessages = json.jpjs(messages)
-        const model = this.google.generativeAI.getGenerativeModel({
-            model: this.config.model
-        })
-        const result = await model.generateContent({
+        const response = await this.google.googleGenAI.models.generateContent({
+            model: this.config.model,
             contents: newMessages,
-            generationConfig: {
+            config: {
                 temperature: this.config.temperature,
                 maxOutputTokens: this.config.maxTokens
             }
         })
-        const text = result.response.text()
+        const text = response.text
         return {
             text,
             newMessages: [
@@ -102,34 +99,30 @@ export class GoogleChat {
         const state = {
             controller: new AbortController()
         }
-        const model = this.google.generativeAI.getGenerativeModel({
-            model: this.config.model
+        const model = this.google.googleGenAI.models.generateContentStream({
+            model: this.config.model,
+            contents: params.messages,
+            config: {
+                abortSignal: state.controller.signal,
+                temperature: this.config.temperature,
+                maxOutputTokens: this.config.maxTokens,
+            }
         })
-        model
-            .generateContentStream({
-                contents: params.messages,
-                generationConfig: {
-                    temperature: this.config.temperature,
-                    maxOutputTokens: this.config.maxTokens,
+        model.then(async(stream) => {
+            try {
+                for await (const chunk of stream) {
+                    const chunkText = chunk.candidates?.[0].content?.parts?.[0].text || ''
+                    params.onMessage(chunkText)
                 }
-            }, {
-                signal: state.controller.signal
-            })
-            .then(async({ stream }) => {
-                try {
-                    for await (const chunk of stream) {
-                        const chunkText = chunk.text()
-                        params.onMessage(chunkText)
-                    }
+                params.onEnd()
+            } catch (error) {
+                if (state.controller.signal.aborted) {
                     params.onEnd()
-                } catch (error) {
-                    if (state.controller.signal.aborted) {
-                        params.onEnd()
-                    } else {
-                        throw error
-                    }
+                } else {
+                    throw error
                 }
-            })
+            }
+        })
             .catch((error) => {
                 params.onError(error)
             })
@@ -141,4 +134,4 @@ export class GoogleChat {
     }
 }
 
-export type GoogleChatTalkResponse = PromiseResponseType<GoogleChat['talk']>
+export type GoogleChatTalkResponse = Awaited<ReturnType<GoogleChat['talk']>>

@@ -2,7 +2,7 @@ import stylistic from '@stylistic/eslint-plugin'
 import tseslint from 'typescript-eslint'
 
 export default [
-  stylistic.configs['recommended-flat'],
+  stylistic.configs['recommended'],
   {
     plugins: {
       '@stylistic': stylistic,

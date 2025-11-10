@@ -1,11 +1,11 @@
-import { ChatBrokerPlugin } from '../core/plugin'
+import { ChatBrokerPlugin } from '../core/plugin.js'
 
 export default new ChatBrokerPlugin({
     name: 'retry',
-    params: yup => {
+    params: z => {
         return {
-            retry: yup.number().required().default(1),
-            printWarn: yup.boolean().required().default(true)
+            retry: z.number().default(1),
+            printWarn: z.boolean().default(true)
         }
     },
     receiveData: () => {

@@ -1,7 +1,7 @@
 import axios from 'axios'
-import { XChat, Config } from './chat'
-import { XImagesGeneration } from './images-generation'
-import { validateToJsonSchema } from '../../utils/validate'
+import { XChat, Config } from './chat.js'
+import { XImagesGeneration } from './images-generation.js'
+import { validateToJsonSchema } from '../../utils/validate.js'
 
 export class XCtodService {
     _axios = axios.create()

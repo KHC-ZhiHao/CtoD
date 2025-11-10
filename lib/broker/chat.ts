@@ -1,9 +1,9 @@
-import { TextParser } from '../core/parser'
-import { ChatBrokerPlugin } from '../core/plugin'
+import { TextParser } from '../core/parser.js'
+import { ChatBrokerPlugin } from '../core/plugin.js'
 import { Event, flow, Hook, Log } from 'power-helper'
-import { Translator, TranslatorParams } from '../core/translator'
-import { ValidateCallback, ValidateCallbackOutputs } from '../utils/validate'
-import { ParserError } from '../utils/error'
+import { Translator, TranslatorParams } from '../core/translator.js'
+import { ValidateCallback, ValidateCallbackOutputs } from '../utils/validate.js'
+import { ParserError } from '../utils/error.js'
 
 export type Message = {
     role: 'system' | 'user' | 'assistant' | (string & Record<string, unknown>)

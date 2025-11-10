@@ -1,4 +1,4 @@
-import { XCtodService } from './index';
+import { XCtodService } from './index.js';
 export type XMessage = {
     role: 'system' | 'user' | 'assistant';
     name?: string;
@@ -94,7 +94,7 @@ export declare class XChat {
             isDone: boolean;
             apiResponse: ApiResponse;
         };
-        nextTalk: (prompt: string | string[]) => Promise<any>;
+        nextTalk: (prompt: string | string[]) => Promise</*elided*/ any>;
     }>;
 }
 export {};

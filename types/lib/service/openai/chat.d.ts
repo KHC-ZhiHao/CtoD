@@ -1,5 +1,4 @@
-import { OpenAICtodService } from './index';
-import { PromiseResponseType } from '../../types';
+import { OpenAICtodService } from './index.js';
 export type ChatGPTMessage = {
     role: 'system' | 'user' | 'assistant';
     name?: string;
@@ -103,8 +102,8 @@ export declare class OpenAIChat {
             isDone: boolean;
             apiResponse: ApiResponse;
         };
-        nextTalk: (prompt: string | string[]) => Promise<any>;
+        nextTalk: (prompt: string | string[]) => Promise</*elided*/ any>;
     }>;
 }
-export type OpenAIChatTalkResponse = PromiseResponseType<OpenAIChat['talk']>;
+export type OpenAIChatTalkResponse = Awaited<ReturnType<OpenAIChat['talk']>>;
 export {};

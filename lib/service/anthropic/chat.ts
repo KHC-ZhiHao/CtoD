@@ -1,5 +1,4 @@
-import { AnthropicCtodService } from './index'
-import { PromiseResponseType } from '../../types'
+import { AnthropicCtodService } from './index.js'
 
 type AnthropicSdk = AnthropicCtodService['anthropicSdk']
 
@@ -197,4 +196,4 @@ export class AnthropicChat {
     }
 }
 
-export type AnthropicChatTalkResponse = PromiseResponseType<AnthropicChat['talk']>
+export type AnthropicChatTalkResponse = Awaited<ReturnType<AnthropicChat['talk']>>

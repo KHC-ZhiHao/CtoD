@@ -1,7 +1,7 @@
-import Retry from './retry'
-import PrintLog from './print-log'
-import Limiter from './limiter'
-import Role from './role'
+import Retry from './retry.js'
+import PrintLog from './print-log.js'
+import Limiter from './limiter.js'
+import Role from './role.js'
 
 /**
  * @zh 一個基於印出 log 的 plugin。

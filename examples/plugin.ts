@@ -1,22 +1,22 @@
 import fs from 'fs'
 import { flow } from 'power-helper'
-import { prompt } from 'inquirer'
-import { CtoD, CtoDPlugin, plugins, OpenAICtodService } from '../lib/index'
+import { input } from '@inquirer/prompts'
+import { CtoD, CtoDPlugin, plugins, OpenAICtodService } from '../lib/index.js'
 
 /**
  * @test npx esno ./examples/plugin.ts
  */
 
-const apiKey = fs.readFileSync('./.api-key', 'utf-8').trim()
+const apiKey = fs.readFileSync('./.openai-api-key', 'utf-8').trim()
 
 const characterPlugin = new CtoDPlugin({
     name: 'character',
     params: () => {
         return {}
     },
-    receiveData: yup => {
+    receiveData: zod => {
         return {
-            character: yup.string().required()
+            character: zod.string()
         }
     },
     onInstall: ({ receive, attachAfter }) => {
@@ -44,20 +44,15 @@ const characterPlugin = new CtoDPlugin({
 })
 
 flow.run(async () => {
-    const { character, action } = await prompt([
-        {
-            type: 'input',
-            name: 'character',
-            message: '請輸入角色名稱.',
-            default: '派大星'
-        },
-        {
-            type: 'input',
-            name: 'action',
-            message: '你想對他問什麼？',
-            default: '你最好的朋友是誰？'
-        }
-    ])
+    const character = await input({
+        message: '請輸入角色名稱.',
+        default: '派大星'
+    })
+    
+    const action = await input({
+        message: '你想對他問什麼？',
+        default: '你最好的朋友是誰？'
+    })
 
     const ctod = new CtoD({
         plugins: () => {
@@ -89,18 +84,18 @@ flow.run(async () => {
         },
     })
 
-    const broker = brokerBuilder.create(async({ yup, setMessages }) => {
+    const broker = brokerBuilder.create(async({ zod, setMessages }) => {
         setMessages([
             {
                 role: 'user',
                 content: [
-                    '請基於你的角色個性，並依據以下指令進行回應：',
+                    '請基於你的角色個性,並依據以下指令進行回應：',
                     action
                 ]
             }
         ])
         return {
-            message: yup.string().required()
+            message: zod.string()
         }
     })
     try {

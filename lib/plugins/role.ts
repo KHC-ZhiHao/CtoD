@@ -1,10 +1,10 @@
-import { ChatBrokerPlugin } from '../core/plugin'
+import { ChatBrokerPlugin } from '../core/plugin.js'
 
 export default new ChatBrokerPlugin({
     name: 'role',
-    params: yup => {
+    params: z => {
         return {
-            role: yup.string().required()
+            role: z.string()
         }
     },
     receiveData: () => {

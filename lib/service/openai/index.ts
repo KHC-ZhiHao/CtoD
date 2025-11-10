@@ -1,8 +1,8 @@
 import axios from 'axios'
-import { OpenAIVision } from './vision'
-import { OpenAIChat, Config } from './chat'
-import { OpenAIImagesGeneration } from './images-generation'
-import { validateToJsonSchema } from '../../utils/validate'
+import { OpenAIVision } from './vision.js'
+import { OpenAIChat, Config } from './chat.js'
+import { OpenAIImagesGeneration } from './images-generation.js'
+import { validateToJsonSchema } from '../../utils/validate.js'
 
 export class OpenAICtodService {
     _axios = axios.create()

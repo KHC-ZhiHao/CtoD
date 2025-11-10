@@ -1,4 +1,4 @@
-import { Config, AnthropicChat } from './chat';
+import { Config, AnthropicChat } from './chat.js';
 import type { Anthropic } from '@anthropic-ai/sdk';
 type GPTContent = {
     type: 'image_url' | 'text';

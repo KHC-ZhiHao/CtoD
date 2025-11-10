@@ -1,4 +1,4 @@
-import { XCtodService } from './index';
+import { XCtodService } from './index.js';
 type ApiResponse = {
     created: string;
     data: {

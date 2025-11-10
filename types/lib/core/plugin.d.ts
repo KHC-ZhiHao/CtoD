@@ -1,7 +1,7 @@
-import { Translator } from './translator';
-import { ChatBrokerHooks } from '../broker/chat';
+import { Translator } from './translator.js';
+import { ChatBrokerHooks } from '../broker/chat.js';
 import { Log, Hook, Event } from 'power-helper';
-import { ValidateCallback, ValidateCallbackOutputs } from '../utils/validate';
+import { ValidateCallback, ValidateCallbackOutputs } from '../utils/validate.js';
 type BrokerHooks = ChatBrokerHooks<any, any, any, any>;
 type BrokerPluginParams<T extends ValidateCallback<any>, R extends ValidateCallback<any>> = {
     name: string;
@@ -28,7 +28,7 @@ export declare class ChatBrokerPlugin<T extends ValidateCallback<any>, R extends
         params: ValidateCallbackOutputs<T, ReturnType<T>>;
         send: (data: ValidateCallbackOutputs<R>) => void;
         receive: (callback: any) => void;
-        __receiveData: ValidateCallbackOutputs<R, ReturnType<R>>;
+        __receiveData: ValidateCallbackOutputs<R>;
     };
 }
 export {};

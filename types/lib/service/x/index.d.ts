@@ -1,5 +1,5 @@
-import { XChat, Config } from './chat';
-import { XImagesGeneration } from './images-generation';
+import { XChat, Config } from './chat.js';
+import { XImagesGeneration } from './images-generation.js';
 export declare class XCtodService {
     _axios: import("axios").AxiosInstance;
     _apiKey: string;

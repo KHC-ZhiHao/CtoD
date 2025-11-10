@@ -1,5 +1,5 @@
 import fs from 'fs'
-import { CtoD, OpenAICtodService, plugins } from '../lib/index'
+import { CtoD, OpenAICtodService, plugins } from '../lib/index.js'
 
 /**
  * @test npx esno ./examples/openai.ts
@@ -40,7 +40,7 @@ const brokerBuilder = ctod.createBrokerBuilder<{
     }
 })
 
-const broker = brokerBuilder.create(async({ yup, data, setMessages }) => {
+const broker = brokerBuilder.create(async({ zod, data, setMessages }) => {
     const { indexes, question } = data
     setMessages([
         {
@@ -53,24 +53,12 @@ const broker = brokerBuilder.create(async({ yup, data, setMessages }) => {
             ]
         }
     ])
-    const item = yup.object({
-        name: yup.string().required().meta({
-            jsonSchema: {
-                description: '索引名稱'
-            }
-        }),
-        score: yup.number().required().meta({
-            jsonSchema: {
-                description: '評比分數'
-            }
-        })
-    }).required()
+    const item = zod.object({
+        name: zod.string().describe('索引名稱'),
+        score: zod.number().describe('評比分數')
+    })
     return {
-        indexes: yup.array(item).required().meta({
-            jsonSchema: {
-                description: '由高到低排序的索引'
-            }
-        })
+        indexes: zod.array(item).describe('由高到低排序的索引')
     }
 })
 

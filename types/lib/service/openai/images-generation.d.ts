@@ -1,4 +1,4 @@
-import { OpenAICtodService } from './index';
+import { OpenAICtodService } from './index.js';
 type ApiResponse = {
     created: string;
     data: {

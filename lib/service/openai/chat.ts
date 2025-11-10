@@ -1,6 +1,5 @@
 import { json } from 'power-helper'
-import { OpenAICtodService } from './index'
-import { PromiseResponseType } from '../../types'
+import { OpenAICtodService } from './index.js'
 
 export type ChatGPTMessage = {
     role: 'system' | 'user' | 'assistant'
@@ -240,4 +239,4 @@ export class OpenAIChat {
     }
 }
 
-export type OpenAIChatTalkResponse = PromiseResponseType<OpenAIChat['talk']>
+export type OpenAIChatTalkResponse = Awaited<ReturnType<OpenAIChat['talk']>>

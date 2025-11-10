@@ -1,6 +1,6 @@
-import { Llama3CppCtodService } from './index'
+import { LlamaCppCtodService } from './index.js'
 import { flow, Once } from 'power-helper'
-import { s2t, t2s } from '../../utils/chinese-conv'
+import { s2t, t2s } from '../../utils/chinese-conv.js'
 import { Template } from '@huggingface/jinja'
 
 type Message = {
@@ -24,13 +24,13 @@ type Stream = {
 }
 
 class Requester {
-    private core: Llama3CppCompletion
+    private core: LlamaCppCompletion
     private streamAbortControllers: {
         id: string
         controller: AbortController
     }[] = []
 
-    constructor(core: Llama3CppCompletion) {
+    constructor(core: LlamaCppCompletion) {
         this.core = core
     }
 
@@ -150,7 +150,7 @@ class Requester {
     }
 }
 
-export class Llama3CppCompletion {
+export class LlamaCppCompletion {
     private getProp = new Once({
         handler: async() => {
             const url = `${this.config.baseUrl}/props`
@@ -163,14 +163,14 @@ export class Llama3CppCompletion {
         }
     })
 
-    core: Llama3CppCtodService
+    core: LlamaCppCtodService
     config: Config = {
         baseUrl: '',
         headers: {},
         autoConvertTraditionalChinese: true
     }
 
-    constructor(core: Llama3CppCtodService) {
+    constructor(core: LlamaCppCtodService) {
         this.core = core
     }
 

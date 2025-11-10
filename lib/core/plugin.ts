@@ -1,7 +1,7 @@
-import { Translator } from './translator'
-import { ChatBrokerHooks } from '../broker/chat'
+import { Translator } from './translator.js'
+import { ChatBrokerHooks } from '../broker/chat.js'
 import { Log, Hook, Event } from 'power-helper'
-import { ValidateCallback, ValidateCallbackOutputs } from '../utils/validate'
+import { ValidateCallback, ValidateCallbackOutputs } from '../utils/validate.js'
 
 type BrokerHooks = ChatBrokerHooks<any, any, any, any>
 type BrokerPluginParams<

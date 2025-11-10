@@ -1,6 +1,6 @@
 import fs from 'fs'
-import { GoogleGenerativeAI } from '@google/generative-ai'
-import { CtoD, GoogleCtodService, plugins } from '../lib/index'
+import { GoogleGenAI } from '@google/genai'
+import { CtoD, GoogleCtodService, plugins } from '../lib/index.js'
 
 /**
  * @test npx esno ./examples/google.ts
@@ -19,9 +19,11 @@ const ctod = new CtoD({
         }
     },
     request: GoogleCtodService.createChatRequestWithJsonSchema({
-        googleGenerativeAI: new GoogleGenerativeAI(apiKey),
+        googleGenAI: new GoogleGenAI({
+            apiKey
+        }),
         config: {},
-        model: 'gemini-1.5-flash'
+        model: 'gemini-2.0-flash'
     })
 })
 
@@ -41,7 +43,7 @@ const brokerBuilder = ctod.createBrokerBuilder<{
     }
 })
 
-const broker = brokerBuilder.create(async({ yup, data, setMessages }) => {
+const broker = brokerBuilder.create(async({ zod, data, setMessages }) => {
     const { indexes, question } = data
     setMessages([
         {
@@ -54,24 +56,12 @@ const broker = brokerBuilder.create(async({ yup, data, setMessages }) => {
             ]
         }
     ])
-    const item = yup.object({
-        name: yup.string().required().meta({
-            jsonSchema: {
-                description: '索引名稱'
-            }
-        }),
-        score: yup.number().required().meta({
-            jsonSchema: {
-                description: '評比分數'
-            }
-        })
-    }).required()
+    const item = zod.object({
+        name: zod.string().describe('索引名稱'),
+        score: zod.number().describe('評比分數')
+    })
     return {
-        indexes: yup.array(item).required().meta({
-            jsonSchema: {
-                description: '由高到低排序的索引'
-            }
-        })
+        indexes: zod.array(item).describe('由高到低排序的索引')
     }
 })
 

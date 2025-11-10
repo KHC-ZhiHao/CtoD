@@ -1,7 +1,7 @@
 /**
  * @zh 繁体转简体
  * @en Traditional to Simplified
- */
+*/
 export declare const t2s: (text: string) => string;
 /**
  * @zh 简体转繁体

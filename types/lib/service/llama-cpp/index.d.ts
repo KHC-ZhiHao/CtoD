@@ -1,6 +1,6 @@
 import { AxiosInstance } from 'axios';
-import { Llama3CppCompletion, Config } from './completion';
-export declare class Llama3CppCtodService {
+import { LlamaCppCompletion, Config } from './completion.js';
+export declare class LlamaCppCtodService {
     _axios: AxiosInstance;
     static createChatRequestWithJsonSchema(params: {
         axios?: AxiosInstance;
@@ -16,5 +16,5 @@ export declare class Llama3CppCtodService {
      * @zh 建立 補強/ 對話物件。
      * @en Create completion object.
      */
-    createCompletion(): Llama3CppCompletion;
+    createCompletion(): LlamaCppCompletion;
 }

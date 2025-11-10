@@ -1,11 +1,11 @@
-import { CtoD, Llama3CppCtodService } from '../lib/index'
+import { CtoD, LlamaCppCtodService } from '../lib/index.js'
 
 /**
  * @test npx esno ./examples/llama.cpp.ts
  */
 
 const ctod = new CtoD({
-    request: Llama3CppCtodService.createChatRequestWithJsonSchema({
+    request: LlamaCppCtodService.createChatRequestWithJsonSchema({
         config: {
             baseUrl: 'http://localhost:12333'
         }
@@ -35,7 +35,7 @@ const brokerBuilder = ctod.createBrokerBuilder<{
     }
 })
 
-const broker = brokerBuilder.create(async({ yup, data, setMessages }) => {
+const broker = brokerBuilder.create(async({ zod, data, setMessages }) => {
     setMessages([
         {
             role: 'user',
@@ -43,7 +43,7 @@ const broker = brokerBuilder.create(async({ yup, data, setMessages }) => {
         }
     ])
     return {
-        next: yup.array().of(yup.string().required()).required()
+        next: zod.array(zod.string()).describe('下一步要發生的事件列表')
     }
 })
 

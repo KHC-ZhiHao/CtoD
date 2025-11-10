@@ -1,6 +1,6 @@
-import { OpenAIVision } from './vision';
-import { OpenAIChat, Config } from './chat';
-import { OpenAIImagesGeneration } from './images-generation';
+import { OpenAIVision } from './vision.js';
+import { OpenAIChat, Config } from './chat.js';
+import { OpenAIImagesGeneration } from './images-generation.js';
 export declare class OpenAICtodService {
     _axios: import("axios").AxiosInstance;
     _apiKey: string;

@@ -1,7 +1,7 @@
-import { ChatBrokerPlugin } from '../core/plugin';
+import { ChatBrokerPlugin } from '../core/plugin.js';
 import { Event, Hook, Log } from 'power-helper';
-import { Translator, TranslatorParams } from '../core/translator';
-import { ValidateCallback, ValidateCallbackOutputs } from '../utils/validate';
+import { Translator, TranslatorParams } from '../core/translator.js';
+import { ValidateCallback, ValidateCallbackOutputs } from '../utils/validate.js';
 export type Message = {
     role: 'system' | 'user' | 'assistant' | (string & Record<string, unknown>);
     name?: string;

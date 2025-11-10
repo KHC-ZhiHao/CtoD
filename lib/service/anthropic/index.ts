@@ -1,5 +1,5 @@
-import { validateToJsonSchema } from '../../utils/validate'
-import { Config, AnthropicChat } from './chat'
+import { validateToJsonSchema } from '../../utils/validate.js'
+import { Config, AnthropicChat } from './chat.js'
 import type { Anthropic } from '@anthropic-ai/sdk'
 
 type GPTContent = {
