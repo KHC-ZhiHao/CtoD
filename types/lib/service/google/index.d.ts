@@ -1,4 +1,5 @@
 import { GoogleMessage, GoogleChat, Config } from './chat.js';
+import { GoogleImagesGeneration } from './images-generation.js';
 import type { GoogleGenAI } from '@google/genai';
 type GPTContent = {
     type: 'image_url' | 'text';
@@ -22,5 +23,6 @@ export declare class GoogleCtodService {
         model: string;
     }): (messages: any[], { schema, abortController }: any) => Promise<string>;
     createChat(): GoogleChat;
+    createImagesGeneration(): GoogleImagesGeneration;
 }
 export {};

@@ -1,5 +1,6 @@
 import { validateToJsonSchema } from '../../utils/validate.js'
 import { GoogleMessage, GoogleChat, Config } from './chat.js'
+import { GoogleImagesGeneration } from './images-generation.js'
 import type { GoogleGenAI } from '@google/genai'
 
 type GPTContent = {
@@ -103,5 +104,9 @@ export class GoogleCtodService {
 
     createChat() {
         return new GoogleChat(this)
+    }
+
+    createImagesGeneration() {
+        return new GoogleImagesGeneration(this)
     }
 }

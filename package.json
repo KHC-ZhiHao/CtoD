@@ -1,6 +1,6 @@
 {
   "name": "ctod",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "CtoD Is Chat To Data Utils.",
   "main": "./dist/index.js",
   "type": "module",
@@ -30,7 +30,7 @@
     "@aws-sdk/client-bedrock-runtime": "^3.927.0",
     "@babel/core": "^7.28.5",
     "@babel/preset-env": "^7.28.5",
-    "@google/genai": "^1.29.0",
+    "@google/genai": "^1.30.0",
     "@stylistic/eslint-plugin": "^5.5.0",
     "@types/chai": "^5.2.3",
     "@types/inquirer": "9.0.9",
