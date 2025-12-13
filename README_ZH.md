@@ -26,7 +26,7 @@
 
 在對話過程中，CtoD 採用 [zod](https://zod.dev/basics) 來驗證請求與回復資料是否符合預期，以確保一致性，只要保持這個互動模式，就可以利用在 API 串接或是自動化系統上。
 
-我們還附帶支援 `OpenAI`, `Google`, `X`, `anthropic`, `llama.cpp` 等主流 LLM 網路或本地服務。
+我們還附帶支援 `OpenAI`, `Google`, `X`, `anthropic`, `llama.cpp` 等主流 LLM 雲端或本地服務。
 
 ## 安裝
 

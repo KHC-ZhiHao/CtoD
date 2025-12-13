@@ -19,7 +19,7 @@ const ctod = new CtoD({
     request: OpenAICtodService.createChatRequestWithJsonSchema({
         apiKey,
         config: {
-            model: 'gpt-4o'
+            model: 'gpt-5'
         }
     })
 })

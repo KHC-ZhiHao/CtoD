@@ -66,7 +66,7 @@ flow.run(async () => {
         request: OpenAICtodService.createChatRequestWithJsonSchema({
             apiKey,
             config: {
-                model: 'gpt-4o'
+                model: 'gpt-5'
             }
         })
     })

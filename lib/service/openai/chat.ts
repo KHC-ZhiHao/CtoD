@@ -44,11 +44,6 @@ export type Config = {
      */
     temperature: number
     /**
-     * @zh 是否強制要回傳 JSON 格式的資料
-     * @en Whether to force the return of JSON format data
-     */
-    forceJsonFormat: boolean
-    /**
      * @zh 每次對話最多產生幾個 tokens。
      * @en How many tokens to complete to.
      */
@@ -61,8 +56,7 @@ export class OpenAIChat {
         n: 1,
         model: 'gpt-4o',
         temperature: 1,
-        maxTokens: undefined,
-        forceJsonFormat: true
+        maxTokens: undefined
     }
 
     constructor(openai: OpenAICtodService) {
@@ -104,25 +98,12 @@ export class OpenAIChat {
      */
 
     async talk(messages: ChatGPTMessage[] = [], options?: {
-        /** 要 forceJsonFormat 為 true 才會生效 */
         jsonSchema?: any
         abortController?: AbortController
     }) {
         const newMessages = json.jpjs(messages)
-        const isSupportJson = [
-            'gpt-4-turbo-preview',
-            'gpt-4-turbo',
-            'gpt-4o',
-            'gpt-4o-mini',
-            'gpt-3.5-turbo-1106'
-        ].includes(this.config.model)
         let response_format: any = undefined
-        if (isSupportJson && this.config.forceJsonFormat) {
-            response_format = {
-                type: 'json_object'
-            }
-        }
-        if (isSupportJson && this.config.forceJsonFormat && options?.jsonSchema) {
+        if (options?.jsonSchema) {
             response_format = {
                 type: 'json_schema',
                 json_schema: options.jsonSchema

@@ -2,6 +2,7 @@ import { ChatBrokerPlugin } from '../core/plugin.js';
 import { Event, Hook, Log } from 'power-helper';
 import { Translator, TranslatorParams } from '../core/translator.js';
 import { ValidateCallback, ValidateCallbackOutputs } from '../utils/validate.js';
+import { z } from 'zod';
 export type Message = {
     role: 'system' | 'user' | 'assistant' | (string & Record<string, unknown>);
     name?: string;
@@ -148,4 +149,15 @@ export declare class ChatBroker<S extends ValidateCallback<any>, O extends Valid
      * @en Send request to chatbot.
      */
     request<T extends Translator<S, O>>(data: T['__schemeType']): Promise<T['__outputType']>;
+    /**
+     * @zh 取得預先請求的資訊，包含輸出規格與預設訊息，這生命週期只會執行到 start 階段為止，也不會觸發 plugin。
+     * @en Get pre-request information, including output specifications and default messages. This life cycle will only execute up to the start stage and will not trigger plugins.
+     */
+    getPreRequestInfo<T extends Translator<S, O>>(data: T['__schemeType']): Promise<{
+        outputSchema: {
+            [x: string]: any;
+        };
+        outputJsonSchema: z.core.JSONSchema.JSONSchema;
+        requestMessages: Message[];
+    }>;
 }

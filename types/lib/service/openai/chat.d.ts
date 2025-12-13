@@ -40,11 +40,6 @@ export type Config = {
      */
     temperature: number;
     /**
-     * @zh 是否強制要回傳 JSON 格式的資料
-     * @en Whether to force the return of JSON format data
-     */
-    forceJsonFormat: boolean;
-    /**
      * @zh 每次對話最多產生幾個 tokens。
      * @en How many tokens to complete to.
      */
@@ -72,7 +67,6 @@ export declare class OpenAIChat {
      * @en Talk to the AI
      */
     talk(messages?: ChatGPTMessage[], options?: {
-        /** 要 forceJsonFormat 為 true 才會生效 */
         jsonSchema?: any;
         abortController?: AbortController;
     }): Promise<{

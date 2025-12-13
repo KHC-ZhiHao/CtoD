@@ -23,7 +23,7 @@ const ctod = new CtoD({
             apiKey
         }),
         config: {},
-        model: 'gemini-2.0-flash'
+        model: 'gemini-2.5-flash'
     })
 })
 

@@ -2,8 +2,9 @@ import { TextParser } from '../core/parser.js'
 import { ChatBrokerPlugin } from '../core/plugin.js'
 import { Event, flow, Hook, Log } from 'power-helper'
 import { Translator, TranslatorParams } from '../core/translator.js'
-import { ValidateCallback, ValidateCallbackOutputs } from '../utils/validate.js'
+import { ValidateCallback, ValidateCallbackOutputs, validateToJsonSchema } from '../utils/validate.js'
 import { ParserError } from '../utils/error.js'
+import { z } from 'zod'
 
 export type Message = {
     role: 'system' | 'user' | 'assistant' | (string & Record<string, unknown>)
@@ -228,7 +229,7 @@ export class ChatBroker<
         // event
         //
 
-        let listeners = [
+        const listeners = [
             this.event.on('cancel', ({ requestId }) => {
                 if (requestId === id) {
                     cancelTrigger()
@@ -238,8 +239,8 @@ export class ChatBroker<
                 cancelTrigger()
             })
         ]
-        let eventOff = () => listeners.forEach(e => e.off())
-        let cancelTrigger = () => {
+        const eventOff = () => listeners.forEach(e => e.off())
+        const cancelTrigger = () => {
             if (isCancel === false) {
                 if (isSending && waitCancel) {
                     waitCancel()
@@ -249,7 +250,7 @@ export class ChatBroker<
                 eventOff()
             }
         }
-        let onCancel = (cb: () => void) => {
+        const onCancel = (cb: () => void) => {
             waitCancel = () => {
                 cb()
             }
@@ -438,5 +439,61 @@ export class ChatBroker<
         const { request } = this.requestWithId(data)
         const output = await request
         return output
+    }
+
+    /**
+     * @zh 取得預先請求的資訊，包含輸出規格與預設訊息，這生命週期只會執行到 start 階段為止，也不會觸發 plugin。
+     * @en Get pre-request information, including output specifications and default messages. This life cycle will only execute up to the start stage and will not trigger plugins.
+     */
+
+    async getPreRequestInfo<T extends Translator<S, O>>(data: T['__schemeType']) {
+        this._install()
+        let id = flow.createUuid()
+        let schema = this.translator.getValidate()
+        let plugins = {} as any
+        let metadata = new Map()
+        let question = await this.translator.compile(data, {
+            schema
+        })
+        let preMessages: Message[] = []
+        let messages: Message[] = []
+        if (question.prompt) {
+            messages.push({
+                role: 'user',
+                content: question.prompt
+            })
+        }
+        await this.hook.notify('start', {
+            id,
+            data,
+            schema,
+            plugins,
+            messages,
+            metadata,
+            setPreMessages: ms => {
+                preMessages = ms.map(e => {
+                    return {
+                        ...e,
+                        content: Array.isArray(e.content) ? e.content.join('\n') : e.content
+                    }
+                })
+            },
+            changeMessages: ms => {
+                messages = ms
+            },
+            changeOutputSchema: output => {
+                this.translator.changeOutputSchema(output)
+                schema = this.translator.getValidate()
+            }
+        })
+        const outputSchema = schema.output(z)
+        return {
+            outputSchema,
+            outputJsonSchema: validateToJsonSchema(() => schema.output(z) as any),
+            requestMessages: [
+                ...preMessages,
+                ...messages
+            ]
+        }
     }
 }
