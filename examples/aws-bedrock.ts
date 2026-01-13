@@ -20,6 +20,7 @@ const ctod = new CtoD({
             return {
                 model: '',
                 maxTokens: 8192,
+                thinking: false,
                 temperature: 0.7
             }
         })

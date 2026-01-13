@@ -15,6 +15,7 @@ export type Config = {
     model: string
     maxTokens: number
     temperature: number
+    thinking: boolean
 }
 
 export class AnthropicChatDataGenerator {
@@ -32,6 +33,17 @@ export class AnthropicChatDataGenerator {
             system: messages.find(e => e.role === 'system')?.content,
             messages: messages.filter(e => e.role !== 'system')
         }
+    }
+
+    getThinkingParams() {
+        const config = this.config()
+        const budgetTokens = Math.floor(config.maxTokens * 0.25)
+        return config.thinking === false
+            ? undefined
+            : {
+                budget_tokens: budgetTokens <= 1024 ? 1024 : (budgetTokens > 32000 ? 32000 : budgetTokens),
+                type: 'enabled'
+            } as const
     }
 
     createChatAndStructureBody(messages: Message[], jsonSchema: any): Parameters<AnthropicSdk['messages']['create']>[0] {
@@ -72,17 +84,33 @@ export class AnthropicChatDataGenerator {
         return {
             model: config.model,
             max_tokens: config.maxTokens,
-            temperature: config.temperature,
+            temperature: config.thinking ? 1 : config.temperature,
             system: newMessages.system,
-            messages: newMessages.messages
+            messages: newMessages.messages,
+            thinking: this.getThinkingParams()
         }
     }
 
     parseTalkResult(result: Awaited<ReturnType<AnthropicSdk['messages']['create']>>): string {
-        let output = ''
-        let textContent: any = 'content' in result ? result.content.find(e => e.type === 'text') : null
-        if (textContent) {
-            output = textContent.text
+        let output: string[] = []
+        if ('content' in result) {
+            for (let contentBlock of result.content) {
+                if (contentBlock.type === 'text') {
+                    output.push(contentBlock.text)
+                }
+            }
+        }
+        return output.join('\n')
+    }
+
+    parseTalkThingsResult(result: Awaited<ReturnType<AnthropicSdk['messages']['create']>>): string[] {
+        let output: string[] = []
+        if ('content' in result) {
+            for (let contentBlock of result.content) {
+                if (contentBlock.type === 'thinking') {
+                    output.push(contentBlock.thinking)
+                }
+            }
         }
         return output
     }
@@ -93,9 +121,10 @@ export class AnthropicChatDataGenerator {
         return {
             model: config.model,
             max_tokens: config.maxTokens,
-            temperature: config.temperature,
+            temperature: config.thinking ? 1 : config.temperature,
             system: newMessages.system,
             stream: true,
+            thinking: this.getThinkingParams(),
             messages: newMessages.messages
         }
     }
@@ -106,6 +135,7 @@ export class AnthropicChat {
     dataGenerator = new AnthropicChatDataGenerator(() => this.config)
     config: Config = {
         model: 'claude-3-5-haiku-latest',
+        thinking: false,
         maxTokens: 8192,
         temperature: 0.7
     }
@@ -137,6 +167,18 @@ export class AnthropicChat {
         return this.dataGenerator.parseChatAndStructureResult(msg)
     }
 
+    async chatAndStructureWithDetails(messages: Message[], jsonSchema: any, options?: { abortController?: AbortController }) {
+        const anthropic = this.anthropic.anthropicSdk
+        const body = this.dataGenerator.createChatAndStructureBody(messages, jsonSchema)
+        const msg = await anthropic.messages.create(body, {
+            signal: options?.abortController?.signal
+        })
+        return {
+            data: this.dataGenerator.parseChatAndStructureResult(msg),
+            thinking: this.dataGenerator.parseTalkThingsResult(msg)
+        }
+    }
+
     /**
      * @zh 進行對話
      * @en Talk to the AI
@@ -150,6 +192,21 @@ export class AnthropicChat {
     }
 
     /**
+     * @zh 進行對話，並且回傳詳細內容
+     * @en Talk to the AI and return detailed content
+     */
+
+    async talkAndDetails(messages: Message[] = []) {
+        const anthropic = this.anthropic.anthropicSdk
+        const body = this.dataGenerator.createTalkBody(messages)
+        const msg = await anthropic.messages.create(body)
+        return {
+            text: this.dataGenerator.parseTalkResult(msg),
+            thinking: this.dataGenerator.parseTalkThingsResult(msg)
+        }
+    }
+
+    /**
      * @zh 進行對話，並且以串流的方式輸出
      * @en Talk to the AI and output in a streaming way
      */
@@ -157,13 +214,13 @@ export class AnthropicChat {
     talkStream(params: {
         messages: Message[]
         onMessage: (_message: string) => void
+        onThinking?: (_thinking: string) => void
         onEnd: () => void
-        onWarn: (_warn: any) => void
         onError: (_error: any) => void
     }) {
         let stream: Extract<Awaited<ReturnType<typeof anthropic.messages.create>>, { controller: any }> | null = null
         const anthropic = this.anthropic.anthropicSdk
-        const { onMessage, onEnd, onError } = params
+        const { onThinking, onMessage, onEnd, onError } = params
         const body = this.dataGenerator.createTalkStreamBody(params.messages)
         const performStreamedChat = async () => {
             try {
@@ -172,8 +229,12 @@ export class AnthropicChat {
                     stream = result
                     for await (const messageStream of stream) {
                         if (messageStream.type === 'content_block_delta') {
-                            const deltaText = 'text' in messageStream.delta ? messageStream.delta.text : ''
-                            onMessage(deltaText)
+                            if (messageStream.delta.type === 'thinking_delta' && onThinking) {
+                                onThinking(messageStream.delta.thinking)
+                            }
+                            if (messageStream.delta.type === 'text_delta') {
+                                onMessage(messageStream.delta.text)
+                            }
                         }
                     }
                 }
