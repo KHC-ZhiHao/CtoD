@@ -9,7 +9,7 @@ export declare class XCtodService {
     static createChatRequestWithJsonSchema(params: {
         axios?: any;
         apiKey: string | (() => Promise<string>);
-        config?: Partial<Pick<Config, 'model' | 'temperature'>> | (() => Promise<Partial<Pick<Config, 'model' | 'temperature'>>>);
+        config?: Partial<Pick<Config, 'model' | 'temperature' | 'reasoning'>> | (() => Promise<Partial<Pick<Config, 'model' | 'temperature' | 'reasoning'>>>);
     }): (messages: any[], { schema, abortController }: any) => Promise<string>;
     constructor(apiKey?: string);
     /**

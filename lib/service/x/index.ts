@@ -33,7 +33,7 @@ export class XCtodService {
     static createChatRequestWithJsonSchema(params: {
         axios?: any
         apiKey: string | (() => Promise<string>)
-        config?: Partial<Pick<Config, 'model' | 'temperature'>> | (() => Promise<Partial<Pick<Config, 'model' | 'temperature'>>>)
+        config?: Partial<Pick<Config, 'model' | 'temperature' | 'reasoning'>> | (() => Promise<Partial<Pick<Config, 'model' | 'temperature' | 'reasoning'>>>)
     }) {
         return async(messages: any[], { schema, abortController }: any) => {
             const xAi = new XCtodService(typeof params.apiKey === 'string' ? params.apiKey : await params.apiKey())

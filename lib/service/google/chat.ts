@@ -29,14 +29,22 @@ export type Config = {
     model: string
     maxTokens: number
     temperature: number
+    thinkingConfig: {
+        enabled: boolean
+        level: 'THINKING_LEVEL_UNSPECIFIED' | 'LOW' | 'HIGH'
+    }
 }
 
 export class GoogleChat {
     google: GoogleCtodService
     config: Config = {
-        model: 'gemini-2.0-flash',
+        model: 'gemini-3-flash-preview',
         maxTokens: 1024,
-        temperature: 0.7
+        temperature: 0.7,
+        thinkingConfig: {
+            enabled: false,
+            level: 'THINKING_LEVEL_UNSPECIFIED'
+        }
     }
 
     constructor(google: GoogleCtodService) {
@@ -52,6 +60,18 @@ export class GoogleChat {
         Object.assign(this.config, options)
     }
 
+    static getThinkingConfig(config?: Config['thinkingConfig']) {
+        if (!config) {
+            return undefined
+        }
+        return config.enabled === null
+            ? undefined
+            : {
+                includeThoughts: true,
+                thinkingLevel: config.level as any
+            }
+    }
+
     /**
      * @zh 進行對話
      * @en Talk to the AI
@@ -64,7 +84,8 @@ export class GoogleChat {
             contents: newMessages,
             config: {
                 temperature: this.config.temperature,
-                maxOutputTokens: this.config.maxTokens
+                maxOutputTokens: this.config.maxTokens,
+                thinkingConfig: GoogleChat.getThinkingConfig(this.config.thinkingConfig)
             }
         })
         const text = response.text
@@ -93,7 +114,7 @@ export class GoogleChat {
         messages: GoogleMessage[]
         onMessage: (_message: string) => void
         onEnd: () => void
-        onWarn: (_warn: any) => void
+        onThinking?: (_thinking: string) => void
         onError: (_error: any) => void
     }) {
         const state = {
@@ -106,13 +127,22 @@ export class GoogleChat {
                 abortSignal: state.controller.signal,
                 temperature: this.config.temperature,
                 maxOutputTokens: this.config.maxTokens,
+                thinkingConfig: GoogleChat.getThinkingConfig(this.config.thinkingConfig)
             }
         })
         model.then(async(stream) => {
             try {
                 for await (const chunk of stream) {
-                    const chunkText = chunk.candidates?.[0].content?.parts?.[0].text || ''
-                    params.onMessage(chunkText)
+                    const parts = chunk.candidates?.[0].content?.parts || []
+                    for (let part of parts) {
+                        if (part.text) {
+                            if (part.thought) {
+                                params.onThinking?.(part.text)
+                            } else {
+                                params.onMessage(part.text)
+                            }
+                        }
+                    }
                 }
                 params.onEnd()
             } catch (error) {

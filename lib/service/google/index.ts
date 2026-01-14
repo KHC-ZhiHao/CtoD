@@ -95,7 +95,8 @@ export class GoogleCtodService {
                     maxOutputTokens: config.maxTokens,
                     temperature: config.temperature,
                     responseMimeType: 'application/json',
-                    responseJsonSchema: validateToJsonSchema(schema.output)
+                    responseJsonSchema: validateToJsonSchema(schema.output),
+                    thinkingConfig: GoogleChat.getThinkingConfig(config.thinkingConfig)
                 }
             })
             return response.text || ''

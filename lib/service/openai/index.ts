@@ -39,7 +39,7 @@ export class OpenAICtodService {
     static createChatRequestWithJsonSchema(params: {
         axios?: any
         apiKey: string | (() => Promise<string>)
-        config?: Partial<Pick<Config, 'model' | 'temperature'>> | (() => Promise<Partial<Pick<Config, 'model' | 'temperature'>>>)
+        config?: Partial<Pick<Config, 'model' | 'temperature' | 'reasoning'>> | (() => Promise<Partial<Pick<Config, 'model' | 'temperature' | 'reasoning'>>>)
     }) {
         return async(messages: any[], { schema, onCancel }: any) => {
             const openai = new OpenAICtodService(typeof params.apiKey === 'string' ? params.apiKey : await params.apiKey())

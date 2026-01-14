@@ -3,7 +3,7 @@ export * as templates from './templates.js'
 export * as chineseConverter from './utils/chinese-conv.js'
 export { CtoD } from './ctod.js'
 export { validateToJsonSchema } from './utils/validate.js'
-
+export { parseJSONStream } from './utils/json.js'
 export { OpenAICtodService } from './service/openai/index.js'
 export { LlamaCppCtodService } from './service/llama-cpp/index.js'
 export { GoogleCtodService } from './service/google/index.js'

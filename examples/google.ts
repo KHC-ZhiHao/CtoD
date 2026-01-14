@@ -22,8 +22,13 @@ const ctod = new CtoD({
         googleGenAI: new GoogleGenAI({
             apiKey
         }),
-        config: {},
-        model: 'gemini-2.5-flash'
+        config: {
+            thinkingConfig: {
+                enabled: false,
+                level: 'HIGH'
+            }
+        },
+        model: 'gemini-3-flash-preview'
     })
 })
 

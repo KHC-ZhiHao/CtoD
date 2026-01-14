@@ -19,7 +19,7 @@ const ctod = new CtoD({
     request: XCtodService.createChatRequestWithJsonSchema({
         apiKey,
         config: {
-            model: 'grok-4-latest',
+            model: 'grok-4-1-fast-non-reasoning'
         }
     })
 })

@@ -1,8 +1,9 @@
 import { json } from 'power-helper'
+import { parseJSONStream } from '../../utils/json.js'
 import { OpenAICtodService } from './index.js'
 
 export type ChatGPTMessage = {
-    role: 'system' | 'user' | 'assistant'
+    role: 'system' | 'user' | 'assistant' | string
     name?: string
     content: string
 }
@@ -10,29 +11,152 @@ export type ChatGPTMessage = {
 type ApiResponse = {
     id: string
     object: string
-    created: number
-    choices: Array<{
-        index: number
-        finish_reason: string
-        message: {
-            role: 'system' | 'user' | 'assistant'
-            name?: string
-            content: string
-        }
+    created_at: number
+    status: string
+    completed_at: number
+    error: any
+    incomplete_details: any
+    instructions: any
+    max_output_tokens: any
+    model: string
+    output: Array<{
+        type: string
+        id: string
+        status?: string
+        role?: string
+        summary?: Array<{
+            text: string
+            type: string
+        }>
+        content?: Array<{
+            type: string
+            text: string
+            annotations: Array<any>
+        }>
     }>
+    parallel_tool_calls: boolean
+    previous_response_id: any
+    reasoning: {
+        effort: any
+        summary: any
+    }
+    store: boolean
+    temperature: number
+    text: {
+        format: {
+            type: string
+        }
+    }
+    tool_choice: string
+    tools: Array<any>
+    top_p: number
+    truncation: string
     usage: {
-        prompt_tokens: number
-        completion_tokens: number
+        input_tokens: number
+        input_tokens_details: {
+            cached_tokens: number
+        }
+        output_tokens: number
+        output_tokens_details: {
+            reasoning_tokens: number
+        }
         total_tokens: number
+    }
+    user: any
+    metadata: {}
+}
+
+type StreamResponse = {
+    type: string
+    item?: {
+        id: string
+        type: string
+        summary?: Array<any>
+        status?: string
+        content?: Array<any>
+        role?: string
+    }
+    output_index?: number
+    sequence_number: number
+    content_index?: number
+    delta?: string
+    item_id?: string
+    logprobs?: Array<any>
+    obfuscation?: string
+    part?: {
+        type: string
+        annotations: Array<any>
+        logprobs: Array<any>
+        text: string
+    }
+    response?: {
+        id: string
+        object: string
+        created_at: number
+        status: string
+        background: boolean
+        completed_at: number
+        error: any
+        frequency_penalty: number
+        incomplete_details: any
+        instructions: any
+        max_output_tokens: any
+        max_tool_calls: any
+        model: string
+        output: Array<{
+            id: string
+            type: string
+            summary?: Array<any>
+            status?: string
+            content?: Array<{
+                type: string
+                annotations: Array<any>
+                logprobs: Array<any>
+                text: string
+            }>
+            role?: string
+        }>
+        parallel_tool_calls: boolean
+        presence_penalty: number
+        previous_response_id: any
+        prompt_cache_key: any
+        prompt_cache_retention: any
+        reasoning: {
+            effort: string
+            summary: any
+        }
+        safety_identifier: any
+        service_tier: string
+        store: boolean
+        temperature: number
+        text: {
+            format: {
+                type: string
+            }
+            verbosity: string
+        }
+        tool_choice: string
+        tools: Array<any>
+        top_logprobs: number
+        top_p: number
+        truncation: string
+        usage: {
+            input_tokens: number
+            input_tokens_details: {
+                cached_tokens: number
+            }
+            output_tokens: number
+            output_tokens_details: {
+                reasoning_tokens: number
+            }
+            total_tokens: number
+        }
+        user: any
+        metadata: {}
     }
 }
 
 export type Config = {
-    /**
-     * @zh 一次回應數量
-     * @en How many chat completion choices to generate for each input message.
-     */
-    n: number
     /**
      * @zh 選擇運行的模型'
      * @en The model to use for this chat completion.
@@ -48,13 +172,20 @@ export type Config = {
      * @en How many tokens to complete to.
      */
     maxTokens?: number
+    /**
+     * @zh 是否要啟用思考。
+     * @en Whether to enable reasoning.
+     */
+    reasoning?: {
+        effort?: 'none' | 'minimal' | 'low' | 'medium' | 'high' | 'xhigh'
+        summary?: 'concise' | 'detailed' | 'auto'
+    }
 }
 
 export class OpenAIChat {
     openai: OpenAICtodService
     config: Config = {
-        n: 1,
-        model: 'gpt-4o',
+        model: 'gpt-5',
         temperature: 1,
         maxTokens: undefined
     }
@@ -106,15 +237,23 @@ export class OpenAIChat {
         if (options?.jsonSchema) {
             response_format = {
                 type: 'json_schema',
-                json_schema: options.jsonSchema
+                schema: options.jsonSchema.schema
             }
         }
-        const result = await this.openai._axios.post<ApiResponse>(`${this.openai._baseUrl}/v1/chat/completions`, {
+        const result = await this.openai._axios.post<ApiResponse>(`${this.openai._baseUrl}/v1/responses`, {
             model: this.config.model,
-            n: this.config.n,
-            messages: newMessages,
-            response_format,
-            temperature: this.config.temperature
+            input: newMessages,
+            temperature: this.config.temperature,
+            max_output_tokens: this.config.maxTokens,
+            reasoning: this.config.reasoning,
+            text: response_format == null
+                ? undefined
+                : {
+                    format: {
+                        ...response_format,
+                        name: 'response_format'
+                    }
+                }
         }, {
             signal: options?.abortController?.signal,
             headers: {
@@ -122,17 +261,18 @@ export class OpenAIChat {
                 'Authorization': `Bearer ${this.openai._apiKey}`
             }
         })
-        const choices = result.data.choices || []
-        const message = choices[0]?.message || {
+        const outputText = result.data.output.find(e => e.type === 'message')?.content?.find(e => e.type === 'output_text')
+        const reasoningText = result.data.output.find(e => e.type === 'reasoning')?.summary?.find(e => e.type === 'summary_text')
+        const message = {
             role: 'assistant',
-            content: ''
-        }
+            content: outputText?.text || ''
+        } as const
         newMessages.push(message)
         return {
             id: result?.data.id as string,
             text: message.content as string,
             newMessages,
-            isDone: choices[0]?.finish_reason === 'stop',
+            reasoningText: reasoningText?.text,
             apiResponse: result.data
         }
     }
@@ -141,11 +281,12 @@ export class OpenAIChat {
         messages: any[]
         onMessage: (_message: string) => void
         onEnd: () => void
-        onWarn: (_warn: any) => void
         onError: (_error: any) => void
+        onWarn?: (_warn: any) => void
+        onThinking?: (_message: string) => void
     }) {
         const controller = new AbortController()
-        fetch(`${this.openai._baseUrl}/v1/chat/completions`, {
+        fetch(`${this.openai._baseUrl}/v1/responses`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -154,39 +295,40 @@ export class OpenAIChat {
             body: JSON.stringify({
                 model: this.config.model,
                 stream: true,
-                messages: params.messages
+                input: params.messages,
+                max_output_tokens: this.config.maxTokens,
+                reasoning: this.config.reasoning
             }),
             signal: controller.signal
         }).then(async response => {
+            if (response.ok === false) {
+                throw new Error(`HTTP error! status: ${response.status}`)
+            }
+            let lastChunk = ''
             const reader = response.body?.pipeThrough(new TextDecoderStream()).getReader()
             if (!reader) {
                 throw new Error('Can not get reader')
             }
-
             while (true) {
                 const { value, done } = await reader.read()
                 if (done) {
                     break
                 }
-                const items = value.split('\n')
-                for (let item of items) {
-                    if (item.length === 0) {
-                        continue
+                let dataList = value.split('\n').filter(v => v.startsWith('data:'))
+                for (let data of dataList) {
+                    const response = parseJSONStream<StreamResponse>(lastChunk + data.slice(5))
+                    for (const item of response.items) {
+                        if (item.type === 'response.reasoning_summary_text.delta') {
+                            params.onThinking && params.onThinking(item.delta || '')
+                        }
+                        if (item.type === 'response.output_text.delta') {
+                            params.onMessage(item.delta || '')
+                        }
+                        if (item.type === 'response.completed') {
+                            params.onEnd()
+                        }
                     }
-                    if (item.startsWith(':')) {
-                        continue
-                    }
-                    if (item === 'data: [DONE]') {
-                        params.onEnd()
-                        break
-                    }
-                    try {
-                        const result = JSON.parse(item.substring(6))
-                        const content = result.choices[0].delta.content
-                        params.onMessage(content)
-                    } catch (error) {
-                        params.onWarn(error)
-                    }
+                    lastChunk = response.lastChunk
                 }
             }
         }).catch(error => {

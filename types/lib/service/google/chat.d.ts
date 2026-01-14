@@ -24,6 +24,10 @@ export type Config = {
     model: string;
     maxTokens: number;
     temperature: number;
+    thinkingConfig: {
+        enabled: boolean;
+        level: 'THINKING_LEVEL_UNSPECIFIED' | 'LOW' | 'HIGH';
+    };
 };
 export declare class GoogleChat {
     google: GoogleCtodService;
@@ -34,6 +38,10 @@ export declare class GoogleChat {
      * @en Change some settings of the conversation
      */
     setConfig(options: Partial<Config>): void;
+    static getThinkingConfig(config?: Config['thinkingConfig']): {
+        includeThoughts: boolean;
+        thinkingLevel: any;
+    } | undefined;
     /**
      * @zh 進行對話
      * @en Talk to the AI
@@ -55,7 +63,7 @@ export declare class GoogleChat {
         messages: GoogleMessage[];
         onMessage: (_message: string) => void;
         onEnd: () => void;
-        onWarn: (_warn: any) => void;
+        onThinking?: (_thinking: string) => void;
         onError: (_error: any) => void;
     }): {
         cancel: () => void;

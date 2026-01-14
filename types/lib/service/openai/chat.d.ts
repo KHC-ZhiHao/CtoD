@@ -1,34 +1,67 @@
 import { OpenAICtodService } from './index.js';
 export type ChatGPTMessage = {
-    role: 'system' | 'user' | 'assistant';
+    role: 'system' | 'user' | 'assistant' | string;
     name?: string;
     content: string;
 };
 type ApiResponse = {
     id: string;
     object: string;
-    created: number;
-    choices: Array<{
-        index: number;
-        finish_reason: string;
-        message: {
-            role: 'system' | 'user' | 'assistant';
-            name?: string;
-            content: string;
-        };
+    created_at: number;
+    status: string;
+    completed_at: number;
+    error: any;
+    incomplete_details: any;
+    instructions: any;
+    max_output_tokens: any;
+    model: string;
+    output: Array<{
+        type: string;
+        id: string;
+        status?: string;
+        role?: string;
+        summary?: Array<{
+            text: string;
+            type: string;
+        }>;
+        content?: Array<{
+            type: string;
+            text: string;
+            annotations: Array<any>;
+        }>;
     }>;
+    parallel_tool_calls: boolean;
+    previous_response_id: any;
+    reasoning: {
+        effort: any;
+        summary: any;
+    };
+    store: boolean;
+    temperature: number;
+    text: {
+        format: {
+            type: string;
+        };
+    };
+    tool_choice: string;
+    tools: Array<any>;
+    top_p: number;
+    truncation: string;
     usage: {
-        prompt_tokens: number;
-        completion_tokens: number;
+        input_tokens: number;
+        input_tokens_details: {
+            cached_tokens: number;
+        };
+        output_tokens: number;
+        output_tokens_details: {
+            reasoning_tokens: number;
+        };
         total_tokens: number;
     };
+    user: any;
+    metadata: {};
 };
 export type Config = {
-    /**
-     * @zh 一次回應數量
-     * @en How many chat completion choices to generate for each input message.
-     */
-    n: number;
     /**
      * @zh 選擇運行的模型'
      * @en The model to use for this chat completion.
@@ -44,6 +77,14 @@ export type Config = {
      * @en How many tokens to complete to.
      */
     maxTokens?: number;
+    /**
+     * @zh 是否要啟用思考。
+     * @en Whether to enable reasoning.
+     */
+    reasoning?: {
+        effort?: 'none' | 'minimal' | 'low' | 'medium' | 'high' | 'xhigh';
+        summary?: 'concise' | 'detailed' | 'auto';
+    };
 };
 export declare class OpenAIChat {
     openai: OpenAICtodService;
@@ -73,15 +114,16 @@ export declare class OpenAIChat {
         id: string;
         text: string;
         newMessages: ChatGPTMessage[];
-        isDone: boolean;
+        reasoningText: string | undefined;
         apiResponse: ApiResponse;
     }>;
     talkStream(params: {
         messages: any[];
         onMessage: (_message: string) => void;
         onEnd: () => void;
-        onWarn: (_warn: any) => void;
         onError: (_error: any) => void;
+        onWarn?: (_warn: any) => void;
+        onThinking?: (_message: string) => void;
     }): {
         cancel: () => void;
     };
@@ -93,7 +135,7 @@ export declare class OpenAIChat {
             id: string;
             text: string;
             newMessages: ChatGPTMessage[];
-            isDone: boolean;
+            reasoningText: string | undefined;
             apiResponse: ApiResponse;
         };
         nextTalk: (prompt: string | string[]) => Promise</*elided*/ any>;
