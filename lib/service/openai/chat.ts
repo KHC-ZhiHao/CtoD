@@ -285,7 +285,13 @@ export class OpenAIChat {
         onWarn?: (_warn: any) => void
         onThinking?: (_message: string) => void
     }) {
+        let endFlag = false
         const controller = new AbortController()
+        const end = () => {
+            if (endFlag) return
+            endFlag = true
+            params.onEnd()
+        }
         fetch(`${this.openai._baseUrl}/v1/responses`, {
             method: 'POST',
             headers: {
@@ -312,6 +318,7 @@ export class OpenAIChat {
             while (true) {
                 const { value, done } = await reader.read()
                 if (done) {
+                    end()
                     break
                 }
                 let dataList = value.split('\n').filter(v => v.startsWith('data:'))
@@ -325,7 +332,7 @@ export class OpenAIChat {
                             params.onMessage(item.delta || '')
                         }
                         if (item.type === 'response.completed') {
-                            params.onEnd()
+                            end()
                         }
                     }
                     lastChunk = response.lastChunk
@@ -333,7 +340,7 @@ export class OpenAIChat {
             }
         }).catch(error => {
             if (error.name === 'AbortError') {
-                params.onEnd()
+                end()
             } else {
                 params.onError(error)
             }

@@ -266,7 +266,13 @@ export class XChat {
         onThinking?: (_message: string) => void
         onError: (_error: any) => void
     }) {
+        let endFlag = false
         const controller = new AbortController()
+        const end = () => {
+            if (endFlag) return
+            endFlag = true
+            params.onEnd()
+        }
         fetch('https://api.x.ai/v1/responses', {
             method: 'POST',
             headers: {
@@ -293,6 +299,7 @@ export class XChat {
             while (true) {
                 const { value, done } = await reader.read()
                 if (done) {
+                    end()
                     break
                 }
                 let dataList = value.split('\n').filter(v => v.startsWith('data:'))
@@ -306,7 +313,7 @@ export class XChat {
                             params.onMessage(item.delta || '')
                         }
                         if (item.type === 'response.completed') {
-                            params.onEnd()
+                            end()
                         }
                     }
                     lastChunk = response.lastChunk
@@ -314,7 +321,7 @@ export class XChat {
             }
         }).catch(error => {
             if (error.name === 'AbortError') {
-                params.onEnd()
+                end()
             } else {
                 params.onError(error)
             }

@@ -1,6 +1,6 @@
 {
   "name": "ctod",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "CtoD Is Chat To Data Utils.",
   "main": "./dist/index.js",
   "type": "module",
