@@ -29,6 +29,7 @@ export type Config = {
     model: string
     maxTokens: number
     temperature: number
+    enableGoogleSearch: boolean
     thinkingConfig: {
         enabled: boolean
         level: 'THINKING_LEVEL_UNSPECIFIED' | 'LOW' | 'HIGH'
@@ -41,6 +42,7 @@ export class GoogleChat {
         model: 'gemini-3-flash-preview',
         maxTokens: 1024,
         temperature: 0.7,
+        enableGoogleSearch: false,
         thinkingConfig: {
             enabled: false,
             level: 'THINKING_LEVEL_UNSPECIFIED'
@@ -64,7 +66,7 @@ export class GoogleChat {
         if (!config) {
             return undefined
         }
-        return config.enabled === null
+        return !config.enabled
             ? undefined
             : {
                 includeThoughts: true,
@@ -85,7 +87,14 @@ export class GoogleChat {
             config: {
                 temperature: this.config.temperature,
                 maxOutputTokens: this.config.maxTokens,
-                thinkingConfig: GoogleChat.getThinkingConfig(this.config.thinkingConfig)
+                thinkingConfig: GoogleChat.getThinkingConfig(this.config.thinkingConfig),
+                tools: !this.config.enableGoogleSearch
+                    ? []
+                    : [
+                        {
+                            googleSearch: {}
+                        }
+                    ]
             }
         })
         const text = response.text
@@ -127,7 +136,14 @@ export class GoogleChat {
                 abortSignal: state.controller.signal,
                 temperature: this.config.temperature,
                 maxOutputTokens: this.config.maxTokens,
-                thinkingConfig: GoogleChat.getThinkingConfig(this.config.thinkingConfig)
+                thinkingConfig: GoogleChat.getThinkingConfig(this.config.thinkingConfig),
+                tools: !this.config.enableGoogleSearch
+                    ? []
+                    : [
+                        {
+                            googleSearch: {}
+                        }
+                    ]
             }
         })
         model.then(async(stream) => {

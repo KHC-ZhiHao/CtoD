@@ -38,7 +38,7 @@ export class AnthropicChatDataGenerator {
     getThinkingParams() {
         const config = this.config()
         const budgetTokens = Math.floor(config.maxTokens * 0.25)
-        return config.thinking === false
+        return !config.thinking
             ? undefined
             : {
                 budget_tokens: budgetTokens <= 1024 ? 1024 : (budgetTokens > 32000 ? 32000 : budgetTokens),

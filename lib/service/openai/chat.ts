@@ -321,12 +321,21 @@ export class OpenAIChat {
                     end()
                     break
                 }
-                let dataList = value.split('\n').filter(v => v.startsWith('data:'))
+                let dataList: string[] = value.split('\n').map(e => {
+                    if (e.startsWith('data:')) {
+                        return e.slice(5).trim()
+                    }
+                    if (lastChunk && !e.startsWith('event:')) {
+                        return lastChunk + e.trim()
+                    }
+                    return ''
+                })
                 for (let data of dataList) {
-                    const response = parseJSONStream<StreamResponse>(lastChunk + data.slice(5))
+                    if (!data) continue
+                    const response = parseJSONStream<StreamResponse>(data)
                     for (const item of response.items) {
-                        if (item.type === 'response.reasoning_summary_text.delta') {
-                            params.onThinking && params.onThinking(item.delta || '')
+                        if (item.type === 'response.reasoning_summary_text.delta' && params.onThinking) {
+                            params.onThinking(item.delta || '')
                         }
                         if (item.type === 'response.output_text.delta') {
                             params.onMessage(item.delta || '')

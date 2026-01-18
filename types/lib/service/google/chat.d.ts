@@ -24,6 +24,7 @@ export type Config = {
     model: string;
     maxTokens: number;
     temperature: number;
+    enableGoogleSearch: boolean;
     thinkingConfig: {
         enabled: boolean;
         level: 'THINKING_LEVEL_UNSPECIFIED' | 'LOW' | 'HIGH';
