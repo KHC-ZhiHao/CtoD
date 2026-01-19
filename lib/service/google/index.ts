@@ -24,7 +24,10 @@ export class GoogleCtodService {
         this.googleGenAI = googleGenAI
     }
 
-    static chatGPTMessageToGoogleChatMessage(messages: GPTMessage[]): GoogleMessage[] {
+    static chatGPTMessageToGoogleChatMessage(messages: GPTMessage[]): {
+        system: string
+        messages: GoogleMessage[]
+    } {
         const contentToParts = (content: string | GPTMessage['content']): GoogleMessage['parts'] => {
             if (typeof content === 'string') {
                 return [
@@ -53,8 +56,15 @@ export class GoogleCtodService {
             }
             return []
         }
-        return messages.map((message) => {
-            if (message.role === 'user' || message.role === 'system') {
+        let system = ''
+        const outputMessages: GoogleMessage[] = messages.map((message) => {
+            if (message.role === 'system') {
+                system = typeof message.content === 'string' ? message.content : ''
+                return {
+                    role: 'user',
+                    parts: []
+                }
+            } else if (message.role === 'user') {
                 return {
                     role: 'user',
                     parts: contentToParts(message.content)
@@ -66,6 +76,10 @@ export class GoogleCtodService {
                 }
             }
         })
+        return {
+            system,
+            messages: outputMessages.filter((msg) => msg.parts.length > 0)
+        }
     }
 
     static createChatRequestWithJsonSchema(params: {
@@ -87,13 +101,15 @@ export class GoogleCtodService {
         }
         return async (messages: any[], { schema, abortController }: any) => {
             const config = typeof params.config === 'function' ? await params.config() : params.config
+            const context = GoogleCtodService.chatGPTMessageToGoogleChatMessage(messages)
             const response = await googleGenAI.models.generateContent({
                 model: params.model,
-                contents: GoogleCtodService.chatGPTMessageToGoogleChatMessage(messages),
+                contents: context.messages,
                 config: {
                     abortSignal: abortController.signal,
                     maxOutputTokens: config.maxTokens,
                     temperature: config.temperature,
+                    systemInstruction: context.system || undefined,
                     responseMimeType: 'application/json',
                     responseJsonSchema: validateToJsonSchema(schema.output),
                     thinkingConfig: GoogleChat.getThinkingConfig(config.thinkingConfig)

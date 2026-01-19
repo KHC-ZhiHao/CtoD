@@ -16,7 +16,10 @@ type GPTMessage = {
 export declare class GoogleCtodService {
     googleGenAI: GoogleGenAI;
     constructor(googleGenAI: any);
-    static chatGPTMessageToGoogleChatMessage(messages: GPTMessage[]): GoogleMessage[];
+    static chatGPTMessageToGoogleChatMessage(messages: GPTMessage[]): {
+        system: string;
+        messages: GoogleMessage[];
+    };
     static createChatRequestWithJsonSchema(params: {
         googleGenAI: any;
         config: Partial<Omit<Config, 'model'>> | (() => Promise<Partial<Omit<Config, 'model'>>>);

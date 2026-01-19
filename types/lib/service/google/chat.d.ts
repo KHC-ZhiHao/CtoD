@@ -47,7 +47,10 @@ export declare class GoogleChat {
      * @zh 進行對話
      * @en Talk to the AI
      */
-    talk(messages?: GoogleMessage[]): Promise<{
+    talk(params: {
+        system?: string;
+        messages: GoogleMessage[];
+    }): Promise<{
         text: string | undefined;
         newMessages: (GoogleMessage | {
             role: string;
@@ -61,6 +64,7 @@ export declare class GoogleChat {
      * @en Talk to the AI and output in a streaming way
      */
     talkStream(params: {
+        system?: string;
         messages: GoogleMessage[];
         onMessage: (_message: string) => void;
         onEnd: () => void;

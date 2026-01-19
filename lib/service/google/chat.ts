@@ -79,14 +79,18 @@ export class GoogleChat {
      * @en Talk to the AI
      */
 
-    async talk(messages: GoogleMessage[] = []) {
-        const newMessages = json.jpjs(messages)
+    async talk(params: {
+        system?: string
+        messages: GoogleMessage[]
+    }) {
+        const newMessages = json.jpjs(params.messages)
         const response = await this.google.googleGenAI.models.generateContent({
             model: this.config.model,
             contents: newMessages,
             config: {
                 temperature: this.config.temperature,
                 maxOutputTokens: this.config.maxTokens,
+                systemInstruction: params.system || undefined,
                 thinkingConfig: GoogleChat.getThinkingConfig(this.config.thinkingConfig),
                 tools: !this.config.enableGoogleSearch
                     ? []
@@ -120,6 +124,7 @@ export class GoogleChat {
      */
 
     talkStream(params: {
+        system?: string
         messages: GoogleMessage[]
         onMessage: (_message: string) => void
         onEnd: () => void
@@ -136,6 +141,7 @@ export class GoogleChat {
                 abortSignal: state.controller.signal,
                 temperature: this.config.temperature,
                 maxOutputTokens: this.config.maxTokens,
+                systemInstruction: params.system || undefined,
                 thinkingConfig: GoogleChat.getThinkingConfig(this.config.thinkingConfig),
                 tools: !this.config.enableGoogleSearch
                     ? []
