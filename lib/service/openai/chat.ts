@@ -1,11 +1,13 @@
 import { json } from 'power-helper'
 import { parseJSONStream } from '../../utils/json.js'
 import { OpenAICtodService } from './index.js'
+import { PolymorphicMessage } from '../../broker/chat.js'
 
 export type ChatGPTMessage = {
     role: 'system' | 'user' | 'assistant' | string
     name?: string
-    content: string
+    content?: string
+    contents?: PolymorphicMessage[]
 }
 
 type ApiResponse = {
@@ -194,6 +196,39 @@ export class OpenAIChat {
         this.openai = openai
     }
 
+    static toApiMessages(messages: ChatGPTMessage[]) {
+        return messages.map(message => {
+            const output = []
+            if (message.content) {
+                output.push({
+                    type: 'input_text',
+                    text: message.content
+                })
+            }
+            if (message.contents) {
+                for (const item of message.contents) {
+                    if (item.type === 'text') {
+                        output.push({
+                            type: 'input_text',
+                            text: item.content
+                        })
+                    } else if (item.type === 'image') {
+                        const url = item.content || ''
+                        output.push({
+                            type: 'input_image',
+                            image_url: url
+                        })
+                    }
+                }
+            }
+            return {
+                role: message.role,
+                name: message.name,
+                content: output
+            }
+        })
+    }
+
     /**
      * @zh 改變對話的一些設定
      * @en Change some settings of the conversation
@@ -242,7 +277,7 @@ export class OpenAIChat {
         }
         const result = await this.openai._axios.post<ApiResponse>(`${this.openai._baseUrl}/v1/responses`, {
             model: this.config.model,
-            input: newMessages,
+            input: OpenAIChat.toApiMessages(newMessages),
             temperature: this.config.temperature,
             max_output_tokens: this.config.maxTokens,
             reasoning: this.config.reasoning,
@@ -280,17 +315,20 @@ export class OpenAIChat {
     talkStream(params: {
         messages: any[]
         onMessage: (_message: string) => void
-        onEnd: () => void
+        onEnd: (_params: { isManualCancelled: boolean }) => void
         onError: (_error: any) => void
         onWarn?: (_warn: any) => void
         onThinking?: (_message: string) => void
     }) {
         let endFlag = false
+        let isManualCancelled = false
         const controller = new AbortController()
         const end = () => {
             if (endFlag) return
             endFlag = true
-            params.onEnd()
+            params.onEnd({
+                isManualCancelled
+            })
         }
         fetch(`${this.openai._baseUrl}/v1/responses`, {
             method: 'POST',
@@ -355,7 +393,11 @@ export class OpenAIChat {
             }
         })
         return {
-            cancel: () => controller.abort()
+            isManualCancelled: () => isManualCancelled,
+            cancel: () => {
+                isManualCancelled = true
+                controller.abort()
+            }
         }
     }
 

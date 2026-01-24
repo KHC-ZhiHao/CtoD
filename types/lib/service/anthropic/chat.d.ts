@@ -1,8 +1,10 @@
 import { AnthropicCtodService } from './index.js';
+import { PolymorphicMessage } from '../../broker/chat.js';
 type AnthropicSdk = AnthropicCtodService['anthropicSdk'];
 export type Message = {
     role: string;
-    content: string;
+    content?: string;
+    contents?: PolymorphicMessage[];
 };
 export type Config = {
     /**
@@ -76,9 +78,12 @@ export declare class AnthropicChat {
         messages: Message[];
         onMessage: (_message: string) => void;
         onThinking?: (_thinking: string) => void;
-        onEnd: () => void;
+        onEnd: (_params: {
+            isManualCancelled: boolean;
+        }) => void;
         onError: (_error: any) => void;
     }): {
+        isManualCancelled: () => boolean;
         cancel: () => void;
     };
 }

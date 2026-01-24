@@ -1,6 +1,6 @@
 import fs from 'fs'
 import { GoogleGenAI } from '@google/genai'
-import { CtoD, GoogleCtodService, plugins } from '../lib/index.js'
+import { paragraph, CtoD, GoogleCtodService, plugins } from '../lib/index.js'
 
 /**
  * @test npx esno ./examples/google.ts
@@ -53,11 +53,16 @@ const broker = brokerBuilder.create(async({ zod, data, setMessages }) => {
     setMessages([
         {
             role: 'user',
-            content: [
-                'I have the following indexes',
-                `${JSON.stringify(indexes)}`,
-                `Please help me analyze which index "${question}" might belong to`,
-                'And sort by relevance from high to low with a score ranging from 0 to 1'
+            contents: [
+                {
+                    type: 'text',
+                    content: paragraph([
+                        'I have the following indexes',
+                        `${JSON.stringify(indexes)}`,
+                        `Please help me analyze which index "${question}" might belong to`,
+                        'And sort by relevance from high to low with a score ranging from 0 to 1'
+                    ])
+                }
             ]
         }
     ])

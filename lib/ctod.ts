@@ -1,4 +1,4 @@
-import { ChatBroker, Message, Params as ChatBrokerParams, ChatBrokerHooks, RequestContext } from './broker/chat.js'
+import { PolymorphicMessage, ChatBroker, Message, Params as ChatBrokerParams, ChatBrokerHooks, RequestContext } from './broker/chat.js'
 import { ChatBrokerPlugin } from './core/plugin.js'
 import * as z from 'zod'
 
@@ -29,7 +29,11 @@ export class CtoD<
                         send: (data: PS[K]['__receiveData']) => void
                     }
                 }
-                setMessages: (messages: (Omit<Message, 'content'> & { content: string | string[] })[]) => void
+                setMessages: (messages: (
+                    Omit<Message, 'content'>
+                    & { content?: string | string[] }
+                    & { contents?: PolymorphicMessage[] }
+                )[]) => void
                 metadata: Map<string, any>
             }) => Promise<O>) => {
                 return new ChatBroker<
@@ -52,7 +56,8 @@ export class CtoD<
                                     changeMessages(messages.map(e => {
                                         return {
                                             role: e.role,
-                                            content: Array.isArray(e.content) ? e.content.join('\n') : e.content
+                                            content: Array.isArray(e.content) ? e.content.join('\n') : e.content,
+                                            contents: e.contents
                                         }
                                     }))
                                 },

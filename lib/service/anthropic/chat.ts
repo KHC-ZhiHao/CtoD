@@ -1,10 +1,13 @@
 import { AnthropicCtodService } from './index.js'
+import { flow } from 'power-helper'
+import { PolymorphicMessage } from '../../broker/chat.js'
 
 type AnthropicSdk = AnthropicCtodService['anthropicSdk']
 
 export type Message = {
     role: string
-    content: string
+    content?: string
+    contents?: PolymorphicMessage[]
 }
 
 export type Config = {
@@ -30,8 +33,66 @@ export class AnthropicChatDataGenerator {
 
     private translateMessages(messages: any[]) {
         return {
-            system: messages.find(e => e.role === 'system')?.content,
-            messages: messages.filter(e => e.role !== 'system')
+            system: flow.run(() => {
+                let systemMessage = messages.find(e => e.role === 'system')
+                let output = ''
+                if (systemMessage) {
+                    if (systemMessage.content) {
+                        output += systemMessage.content
+                    }
+                    if (systemMessage.contents) {
+                        for (let contentBlock of systemMessage.contents) {
+                            if (contentBlock.type === 'text') {
+                                output += `\n${contentBlock.content}`
+                            }
+                        }
+                    }
+                }
+                return output
+            }),
+            messages: messages.filter(e => e.role !== 'system').map(e => {
+                const output: any[] = []
+                if (e.content) {
+                    output.push({
+                        type: 'text',
+                        text: e.content
+                    })
+                }
+                if (e.contents) {
+                    for (let contentBlock of e.contents) {
+                        if (contentBlock.type === 'text') {
+                            output.push({
+                                type: 'text',
+                                text: contentBlock.content
+                            })
+                        }
+                        if (contentBlock.type === 'image') {
+                            if (contentBlock.content.startsWith('http')) {
+                                output.push({
+                                    type: 'image',
+                                    source: {
+                                        type: 'url',
+                                        url: contentBlock.content
+                                    }
+                                })
+                            } else {
+                                output.push({
+                                    type: 'image',
+                                    source: {
+                                        type: 'base64',
+                                        media_type: 'image/png',
+                                        data: contentBlock.content.split(',')[1]
+                                    }
+                                })
+                            }
+                        }
+                    }
+                }
+                return {
+                    role: e.role,
+                    content: output
+                }
+            })
         }
     }
 
@@ -215,12 +276,13 @@ export class AnthropicChat {
         messages: Message[]
         onMessage: (_message: string) => void
         onThinking?: (_thinking: string) => void
-        onEnd: () => void
+        onEnd: (_params: { isManualCancelled: boolean }) => void
         onError: (_error: any) => void
     }) {
+        let isManualCancelled = false
         let stream: Extract<Awaited<ReturnType<typeof anthropic.messages.create>>, { controller: any }> | null = null
-        const anthropic = this.anthropic.anthropicSdk
         const { onThinking, onMessage, onEnd, onError } = params
+        const anthropic = this.anthropic.anthropicSdk
         const body = this.dataGenerator.createTalkStreamBody(params.messages)
         const performStreamedChat = async () => {
             try {
@@ -238,14 +300,18 @@ export class AnthropicChat {
                         }
                     }
                 }
-                onEnd()
+                onEnd({
+                    isManualCancelled
+                })
             } catch (error) {
                 onError(error)
             }
         }
         performStreamedChat()
         return {
+            isManualCancelled: () => isManualCancelled,
             cancel: () => {
+                isManualCancelled = true
                 const int = setInterval(() => {
                     if (stream && stream.controller) {
                         stream.controller.abort()

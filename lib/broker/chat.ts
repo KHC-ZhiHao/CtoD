@@ -6,10 +6,16 @@ import { ValidateCallback, ValidateCallbackOutputs, validateToJsonSchema } from 
 import { ParserError } from '../utils/error.js'
 import { z } from 'zod'
 
+export type PolymorphicMessage = {
+    type: 'text' | 'image'
+    content: string
+}
+
 export type Message = {
     role: 'system' | 'user' | 'assistant' | (string & Record<string, unknown>)
     name?: string
-    content: string
+    content?: string
+    contents?: PolymorphicMessage[]
 }
 
 export type ChatBrokerHooks<
@@ -38,7 +44,11 @@ export type ChatBrokerHooks<
             output: O
         }
         messages: Message[]
-        setPreMessages: (messages: (Omit<Message, 'content'> & { content: string | string[] })[]) => void
+        setPreMessages: (messages: (
+            Omit<Message, 'content'>
+            & { content?: string | string[] }
+            & { contents?: PolymorphicMessage[] }
+        )[]) => void
         changeMessages: (messages: Message[]) => void
         changeOutputSchema: (output: O) => void
     }

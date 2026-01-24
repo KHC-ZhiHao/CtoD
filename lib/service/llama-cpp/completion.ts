@@ -2,10 +2,12 @@ import { LlamaCppCtodService } from './index.js'
 import { flow, Once } from 'power-helper'
 import { s2t, t2s } from '../../utils/chinese-conv.js'
 import { Template } from '@huggingface/jinja'
+import { PolymorphicMessage } from '../../broker/chat.js'
 
 type Message = {
     role: string
     content: string
+    contents: PolymorphicMessage[]
 }
 
 type Options = any
@@ -18,12 +20,13 @@ export type Config = {
 
 type Stream = {
     onMessage: (message: string) => void
-    onEnd?: () => void
+    onEnd?: (params: { isManualCancelled: boolean }) => void
     onWarn?: (error: any) => void
     onError?: (error: any) => void
 }
 
 class Requester {
+    isManualCancelled = false
     private core: LlamaCppCompletion
     private streamAbortControllers: {
         id: string
@@ -139,6 +142,7 @@ class Requester {
     }
 
     cancel() {
+        this.isManualCancelled = true
         this.streamAbortControllers.forEach(e => e.controller.abort())
         this.streamAbortControllers = []
     }
@@ -222,7 +226,13 @@ export class LlamaCppCompletion {
         const requester = new Requester(this)
         requester.stream({
             path: 'completion',
-            onEnd: params.onEnd || (() => null),
+            onEnd: () => {
+                if (params.onEnd) {
+                    params.onEnd({
+                        isManualCancelled: requester.isManualCancelled
+                    })
+                }
+            },
             onMessage: e => {
                 const message = this.config.autoConvertTraditionalChinese ? s2t(e.content) : e.content
                 params.onMessage(message)
@@ -266,10 +276,22 @@ export class LlamaCppCompletion {
                         ...(params.options || {}),
                         response_format: params.response_format,
                         messages: params.messages.map(e => {
-                            return {
+                            const output = {
                                 role: e.role,
-                                content: this.config.autoConvertTraditionalChinese ? t2s(e.content) : e.content
+                                content: ''
                             }
+                            if (e.content) {
+                                output.content = this.config.autoConvertTraditionalChinese ? t2s(e.content) : e.content
+                            }
+                            if (e.contents) {
+                                output.content += e.contents.map(item => {
+                                    if (item.type === 'text') {
+                                        return item.content
+                                    }
+                                    return ''
+                                }).join('\n')
+                            }
+                            return output
                         })
                     }
                 })
@@ -288,7 +310,13 @@ export class LlamaCppCompletion {
         const requester = new Requester(this)
         requester.stream({
             path: 'v1/chat/completions',
-            onEnd: params.onEnd || (() => null),
+            onEnd: () => {
+                if (params.onEnd) {
+                    params.onEnd({
+                        isManualCancelled: requester.isManualCancelled
+                    })
+                }
+            },
             onMessage: e => {
                 let content = e.choices[0].delta.content
                 if (content) {

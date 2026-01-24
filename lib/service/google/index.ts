@@ -1,12 +1,13 @@
 import { validateToJsonSchema } from '../../utils/validate.js'
 import { GoogleMessage, GoogleChat, Config } from './chat.js'
 import { GoogleImagesGeneration } from './images-generation.js'
+import { OpenAIChat } from '../openai/chat.js'
 import type { GoogleGenAI } from '@google/genai'
 
 type GPTContent = {
-    type: 'image_url' | 'text'
+    type: 'image_url' | 'text' | 'input_text' | 'input_image'
     text?: string
-    image_url?: {
+    image_url?: string | {
         url: string
         detail?: string
     }
@@ -37,14 +38,21 @@ export class GoogleCtodService {
                 ]
             } else if (Array.isArray(content)) {
                 return content.map(({ type, image_url, text }): GoogleMessage['parts'][number] => {
-                    if (type === 'image_url') {
-                        // base64
-                        const url = image_url?.url || ''
-                        const mimeType = url.includes('data:image/png') ? 'image/png' : 'image/jpeg'
-                        return {
-                            inlineData: {
-                                data: url.split('base64,')[1] || '',
-                                mimeType
+                    if (type === 'image_url' || type === 'input_image') {
+                        const url = (typeof image_url === 'string' ? image_url : image_url?.url) || ''
+                        if (url.startsWith('http')) {
+                            return {
+                                fileData: {
+                                    fileUri: url
+                                }
+                            }
+                        } else {
+                            const mimeType = url.includes('data:image/png') ? 'image/png' : 'image/jpeg'
+                            return {
+                                inlineData: {
+                                    data: url.split('base64,')[1] || '',
+                                    mimeType
+                                }
                             }
                         }
                     } else {
@@ -59,7 +67,18 @@ export class GoogleCtodService {
         let system = ''
         const outputMessages: GoogleMessage[] = messages.map((message) => {
             if (message.role === 'system') {
-                system = typeof message.content === 'string' ? message.content : ''
+                if (typeof message.content === 'string') {
+                    system = message.content
+                }
+                if (Array.isArray(message.content)) {
+                    system = message.content.map(part => {
+                        if (part.type === 'text' || part.type === 'input_text') {
+                            return part.text || ''
+                        } else {
+                            return ''
+                        }
+                    }).join('\n')
+                }
                 return {
                     role: 'user',
                     parts: []
@@ -101,7 +120,7 @@ export class GoogleCtodService {
         }
         return async (messages: any[], { schema, abortController }: any) => {
             const config = typeof params.config === 'function' ? await params.config() : params.config
-            const context = GoogleCtodService.chatGPTMessageToGoogleChatMessage(messages)
+            const context = GoogleCtodService.chatGPTMessageToGoogleChatMessage(OpenAIChat.toApiMessages(messages) as GPTMessage[])
             const response = await googleGenAI.models.generateContent({
                 model: params.model,
                 contents: context.messages,

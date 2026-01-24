@@ -1,8 +1,10 @@
 import { OpenAICtodService } from './index.js';
+import { PolymorphicMessage } from '../../broker/chat.js';
 export type ChatGPTMessage = {
     role: 'system' | 'user' | 'assistant' | string;
     name?: string;
-    content: string;
+    content?: string;
+    contents?: PolymorphicMessage[];
 };
 type ApiResponse = {
     id: string;
@@ -90,6 +92,19 @@ export declare class OpenAIChat {
     openai: OpenAICtodService;
     config: Config;
     constructor(openai: OpenAICtodService);
+    static toApiMessages(messages: ChatGPTMessage[]): {
+        role: string;
+        name: string | undefined;
+        content: ({
+            type: string;
+            text: string;
+            image_url?: undefined;
+        } | {
+            type: string;
+            image_url: string;
+            text?: undefined;
+        })[];
+    }[];
     /**
      * @zh 改變對話的一些設定
      * @en Change some settings of the conversation
@@ -120,11 +135,14 @@ export declare class OpenAIChat {
     talkStream(params: {
         messages: any[];
         onMessage: (_message: string) => void;
-        onEnd: () => void;
+        onEnd: (_params: {
+            isManualCancelled: boolean;
+        }) => void;
         onError: (_error: any) => void;
         onWarn?: (_warn: any) => void;
         onThinking?: (_message: string) => void;
     }): {
+        isManualCancelled: () => boolean;
         cancel: () => void;
     };
     /**

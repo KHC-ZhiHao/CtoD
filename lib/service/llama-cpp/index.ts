@@ -12,13 +12,13 @@ export class LlamaCppCtodService {
         talkOptions?: any
     }) {
         return async(messages: any[], { schema, onCancel }: any) => {
-            const ll3cpp = new LlamaCppCtodService()
-            const chat = ll3cpp.createCompletion()
+            const llamaCpp = new LlamaCppCtodService()
+            const chat = llamaCpp.createCompletion()
             const config = typeof params.config === 'function' ? await params.config() : params.config
             chat.setConfig(config)
             let formatSchema = validateToJsonSchema(schema.output)
             if (params.axios) {
-                ll3cpp.setAxios(params.axios)
+                llamaCpp.setAxios(params.axios)
             }
             if (chat.config.autoConvertTraditionalChinese) {
                 formatSchema = JSON.parse(t2s(JSON.stringify(formatSchema)))

@@ -14,6 +14,10 @@ type Part = {
         data: string
         mimeType: string
     }
+} | {
+    fileData: {
+        fileUri: string
+    }
 }
 
 export type GoogleMessage = {
@@ -127,11 +131,12 @@ export class GoogleChat {
         system?: string
         messages: GoogleMessage[]
         onMessage: (_message: string) => void
-        onEnd: () => void
+        onEnd: (_params: { isManualCancelled: boolean }) => void
         onThinking?: (_thinking: string) => void
         onError: (_error: any) => void
     }) {
         const state = {
+            isManualCancelled: false,
             controller: new AbortController()
         }
         const model = this.google.googleGenAI.models.generateContentStream({
@@ -166,10 +171,14 @@ export class GoogleChat {
                         }
                     }
                 }
-                params.onEnd()
+                params.onEnd({
+                    isManualCancelled: state.isManualCancelled
+                })
             } catch (error) {
                 if (state.controller.signal.aborted) {
-                    params.onEnd()
+                    params.onEnd({
+                        isManualCancelled: state.isManualCancelled
+                    })
                 } else {
                     throw error
                 }
@@ -179,7 +188,9 @@ export class GoogleChat {
                 params.onError(error)
             })
         return {
+            isManualCancelled: () => state.isManualCancelled,
             cancel: () => {
+                state.isManualCancelled = true
                 state.controller.abort()
             }
         }

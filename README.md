@@ -47,7 +47,7 @@ yarn add ctod
 This example demonstrates how to pass a medication index and customer requirements to a chatbot and return the most suitable results. Developers can use the index results to search the database for the most appropriate medication for consumers:
 
 ```ts
-import { CtoD, OpenAICtodService } from 'ctod'
+import { CtoD, OpenAICtodService, paragraph } from 'ctod'
     
 const ctod = new CtoD({
     request: OpenAICtodService.createChatRequestWithJsonSchema({
@@ -79,11 +79,16 @@ const broker = brokerBuilder.create(async({ zod, data, setMessages }) => {
     setMessages([
         {
             role: 'user',
-            content: [
-                'I have the following indexes',
-                `${JSON.stringify(indexes)}`,
-                `Please help me analyze which index "${question}" might belong to`,
-                'Rank by relevance from high to low and give scores, scores range from 0 to 1'
+            contents: [
+                {
+                    type: 'text',
+                    content: paragraph([
+                        'I have the following indexes',
+                        `${JSON.stringify(indexes)}`,
+                        `Please help me analyze which index "${question}" might belong to`,
+                        'And sort by relevance from high to low with a score ranging from 0 to 1'
+                    ])
+                }
             ]
         }
     ])

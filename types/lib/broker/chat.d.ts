@@ -3,10 +3,15 @@ import { Event, Hook, Log } from 'power-helper';
 import { Translator, TranslatorParams } from '../core/translator.js';
 import { ValidateCallback, ValidateCallbackOutputs } from '../utils/validate.js';
 import { z } from 'zod';
+export type PolymorphicMessage = {
+    type: 'text' | 'image';
+    content: string;
+};
 export type Message = {
     role: 'system' | 'user' | 'assistant' | (string & Record<string, unknown>);
     name?: string;
-    content: string;
+    content?: string;
+    contents?: PolymorphicMessage[];
 };
 export type ChatBrokerHooks<S extends ValidateCallback<any>, O extends ValidateCallback<any>, P extends ChatBrokerPlugin<any, any>, PS extends Record<string, ReturnType<P['use']>>> = {
     /**
@@ -28,7 +33,9 @@ export type ChatBrokerHooks<S extends ValidateCallback<any>, O extends ValidateC
         };
         messages: Message[];
         setPreMessages: (messages: (Omit<Message, 'content'> & {
-            content: string | string[];
+            content?: string | string[];
+        } & {
+            contents?: PolymorphicMessage[];
         })[]) => void;
         changeMessages: (messages: Message[]) => void;
         changeOutputSchema: (output: O) => void;

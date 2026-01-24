@@ -11,6 +11,10 @@ type Part = {
         data: string;
         mimeType: string;
     };
+} | {
+    fileData: {
+        fileUri: string;
+    };
 };
 export type GoogleMessage = {
     role: 'model' | 'user';
@@ -67,10 +71,13 @@ export declare class GoogleChat {
         system?: string;
         messages: GoogleMessage[];
         onMessage: (_message: string) => void;
-        onEnd: () => void;
+        onEnd: (_params: {
+            isManualCancelled: boolean;
+        }) => void;
         onThinking?: (_thinking: string) => void;
         onError: (_error: any) => void;
     }): {
+        isManualCancelled: () => boolean;
         cancel: () => void;
     };
 }

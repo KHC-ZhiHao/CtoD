@@ -32,12 +32,22 @@ export class AnthropicCtodService {
                     : e.content.map((content) => {
                         if (content.type === 'image_url') {
                             const url = content.image_url?.url || ''
-                            return {
-                                type: 'image',
-                                source: {
-                                    type: 'base64',
-                                    media_type: url.slice(5).split(';')[0],
-                                    data: url.split(',')[1]
+                            if (url.startsWith('http')) {
+                                return {
+                                    type: 'image',
+                                    source: {
+                                        type: url,
+                                        url: url
+                                    }
+                                }
+                            } else {
+                                return {
+                                    type: 'image',
+                                    source: {
+                                        type: 'base64',
+                                        media_type: url.slice(5).split(';')[0],
+                                        data: url.split(',')[1]
+                                    }
                                 }
                             }
                         }

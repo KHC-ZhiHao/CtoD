@@ -1,5 +1,5 @@
 import fs from 'fs'
-import { CtoD, OpenAICtodService, plugins } from '../lib/index.js'
+import { CtoD, OpenAICtodService, plugins, paragraph } from '../lib/index.js'
 
 /**
  * @test npx esno ./examples/openai.ts
@@ -45,11 +45,16 @@ const broker = brokerBuilder.create(async({ zod, data, setMessages }) => {
     setMessages([
         {
             role: 'user',
-            content: [
-                'I have the following indexes',
-                `${JSON.stringify(indexes)}`,
-                `Please help me analyze which index "${question}" might belong to`,
-                'And sort by relevance from high to low with a score ranging from 0 to 1'
+            contents: [
+                {
+                    type: 'text',
+                    content: paragraph([
+                        'I have the following indexes',
+                        `${JSON.stringify(indexes)}`,
+                        `Please help me analyze which index "${question}" might belong to`,
+                        'And sort by relevance from high to low with a score ranging from 0 to 1'
+                    ])
+                }
             ]
         }
     ])

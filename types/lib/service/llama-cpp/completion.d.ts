@@ -1,7 +1,9 @@
 import { LlamaCppCtodService } from './index.js';
+import { PolymorphicMessage } from '../../broker/chat.js';
 type Message = {
     role: string;
     content: string;
+    contents: PolymorphicMessage[];
 };
 type Options = any;
 export type Config = {
@@ -11,7 +13,9 @@ export type Config = {
 };
 type Stream = {
     onMessage: (message: string) => void;
-    onEnd?: () => void;
+    onEnd?: (params: {
+        isManualCancelled: boolean;
+    }) => void;
     onWarn?: (error: any) => void;
     onError?: (error: any) => void;
 };

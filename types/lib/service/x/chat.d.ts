@@ -1,8 +1,10 @@
 import { XCtodService } from './index.js';
+import { PolymorphicMessage } from '../../broker/chat.js';
 export type XMessage = {
     role: 'system' | 'user' | 'assistant';
     name?: string;
-    content: string;
+    content?: string;
+    contents?: PolymorphicMessage[];
 };
 type ApiResponse = {
     id: string;
@@ -89,6 +91,19 @@ export type Config = {
 export declare class XChat {
     xAi: XCtodService;
     config: Config;
+    static toApiMessages(messages: XMessage[]): {
+        role: "system" | "user" | "assistant";
+        name: string | undefined;
+        content: ({
+            type: string;
+            text: string;
+            image_url?: undefined;
+        } | {
+            type: string;
+            image_url: string;
+            text?: undefined;
+        })[];
+    }[];
     constructor(xAi: XCtodService);
     /**
      * @zh 改變對話的一些設定
@@ -113,11 +128,14 @@ export declare class XChat {
     talkStream(params: {
         messages: any[];
         onMessage: (_message: string) => void;
-        onEnd: () => void;
+        onEnd: (_params: {
+            isManualCancelled: boolean;
+        }) => void;
         onWarn?: (_warn: any) => void;
         onThinking?: (_message: string) => void;
         onError: (_error: any) => void;
     }): {
+        isManualCancelled: () => boolean;
         cancel: () => void;
     };
     /**

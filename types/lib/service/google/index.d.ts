@@ -2,9 +2,9 @@ import { GoogleMessage, GoogleChat, Config } from './chat.js';
 import { GoogleImagesGeneration } from './images-generation.js';
 import type { GoogleGenAI } from '@google/genai';
 type GPTContent = {
-    type: 'image_url' | 'text';
+    type: 'image_url' | 'text' | 'input_text' | 'input_image';
     text?: string;
-    image_url?: {
+    image_url?: string | {
         url: string;
         detail?: string;
     };

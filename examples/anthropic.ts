@@ -1,6 +1,6 @@
 import fs from 'fs'
 import { Anthropic } from '@anthropic-ai/sdk'
-import { CtoD, AnthropicCtodService, plugins } from '../lib/index.js'
+import { CtoD, AnthropicCtodService, plugins, paragraph } from '../lib/index.js'
 
 /**
  * @test npx esno ./examples/anthropic.ts
@@ -38,6 +38,15 @@ const brokerBuilder = ctod.createBrokerBuilder<{
                 {
                     role: 'system',
                     content: 'You are now a pharmacist skilled at categorizing indexes'
+                },
+                {
+                    role: 'user',
+                    contents: [
+                        {
+                            type: 'text',
+                            content: 'I have the following indexes'
+                        }
+                    ]
                 }
             ])
         })
@@ -49,11 +58,16 @@ const broker = brokerBuilder.create(async({ zod, data, setMessages }) => {
     setMessages([
         {
             role: 'user',
-            content: [
-                'I have the following indexes',
-                `${JSON.stringify(indexes)}`,
-                `Please help me analyze which index "${question}" might belong to`,
-                'And sort by relevance from high to low with a score ranging from 0 to 1'
+            contents: [
+                {
+                    type: 'text',
+                    content: paragraph([
+                        'I have the following indexes',
+                        `${JSON.stringify(indexes)}`,
+                        `Please help me analyze which index "${question}" might belong to`,
+                        'And sort by relevance from high to low with a score ranging from 0 to 1'
+                    ])
+                }
             ]
         }
     ])

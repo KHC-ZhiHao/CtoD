@@ -1,11 +1,13 @@
 import { json } from 'power-helper'
 import { XCtodService } from './index.js'
 import { parseJSONStream } from '../../utils/json.js'
+import { PolymorphicMessage } from '../../broker/chat.js'
 
 export type XMessage = {
     role: 'system' | 'user' | 'assistant'
     name?: string
-    content: string
+    content?: string
+    contents?: PolymorphicMessage[]
 }
 
 type ApiResponse = {
@@ -190,6 +192,39 @@ export class XChat {
         maxTokens: undefined
     }
 
+    static toApiMessages(messages: XMessage[]) {
+        return messages.map(message => {
+            const output = []
+            if (message.content) {
+                output.push({
+                    type: 'input_text',
+                    text: message.content
+                })
+            }
+            if (message.contents) {
+                for (const item of message.contents) {
+                    if (item.type === 'text') {
+                        output.push({
+                            type: 'input_text',
+                            text: item.content
+                        })
+                    } else if (item.type === 'image') {
+                        const url = item.content || ''
+                        output.push({
+                            type: 'input_image',
+                            image_url: url
+                        })
+                    }
+                }
+            }
+            return {
+                role: message.role,
+                name: message.name,
+                content: output
+            }
+        })
+    }
+
     constructor(xAi: XCtodService) {
         this.xAi = xAi
     }
@@ -223,7 +258,7 @@ export class XChat {
         }
         const result = await this.xAi._axios.post<ApiResponse>('https://api.x.ai/v1/responses', {
             model: this.config.model,
-            input: newMessages,
+            input: XChat.toApiMessages(newMessages),
             temperature: this.config.temperature,
             max_output_tokens: this.config.maxTokens,
             reasoning: this.config.reasoning,
@@ -261,17 +296,20 @@ export class XChat {
     talkStream(params: {
         messages: any[]
         onMessage: (_message: string) => void
-        onEnd: () => void
+        onEnd: (_params: { isManualCancelled: boolean }) => void
         onWarn?: (_warn: any) => void
         onThinking?: (_message: string) => void
         onError: (_error: any) => void
     }) {
         let endFlag = false
+        let isManualCancelled = false
         const controller = new AbortController()
         const end = () => {
             if (endFlag) return
             endFlag = true
-            params.onEnd()
+            params.onEnd({
+                isManualCancelled
+            })
         }
         fetch('https://api.x.ai/v1/responses', {
             method: 'POST',
@@ -336,7 +374,11 @@ export class XChat {
             }
         })
         return {
-            cancel: () => controller.abort()
+            isManualCancelled: () => isManualCancelled,
+            cancel: () => {
+                isManualCancelled = true
+                controller.abort()
+            }
         }
     }
 

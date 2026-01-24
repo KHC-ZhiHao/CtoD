@@ -79,11 +79,16 @@ const broker = brokerBuilder.create(async({ zod, data, setMessages }) => {
     setMessages([
         {
             role: 'user',
-            content: [
-                '我有以下索引',
-                `${JSON.stringify(indexes)}`,
-                `請幫我解析"${question}"可能是哪個索引`,
-                '且相關性由高到低排序並給予分數，分數由 0 ~ 1'
+            contents: [
+                {
+                    type: 'text',
+                    content: paragraph([
+                        '我有以下索引',
+                        `${JSON.stringify(indexes)}`,
+                        `請幫我解析"${question}"可能是哪個索引`,
+                        '且相關性由高到低排序並給予分數，分數由 0 ~ 1'
+                    ])
+                }
             ]
         }
     ])
