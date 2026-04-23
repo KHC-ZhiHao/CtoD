@@ -5,6 +5,7 @@ import { Translator, TranslatorParams } from '../core/translator.js'
 import { ValidateCallback, ValidateCallbackOutputs, validateToJsonSchema } from '../utils/validate.js'
 import { ParserError } from '../utils/error.js'
 import { z } from 'zod'
+import { CtoD } from '../ctod.js'
 
 export type PolymorphicMessage = {
     type: 'text' | 'image'
@@ -221,6 +222,15 @@ export class ChatBroker<
         } else {
             this.event.emit('cancelAll', {})
         }
+    }
+
+    cloneFrom(ctod: CtoD<any, any>) {
+        const newParams = structuredClone(this.params)
+        newParams.request = ctod.params.request
+        if (ctod.params.plugins) {
+            newParams.plugins = ctod.params.plugins
+        }
+        return new ChatBroker(newParams)
     }
 
     requestWithId<T extends Translator<S, O>>(data: T['__schemeType']): {

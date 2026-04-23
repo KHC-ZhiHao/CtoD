@@ -2,8 +2,8 @@ import { LlamaCppCtodService } from './index.js';
 import { PolymorphicMessage } from '../../broker/chat.js';
 type Message = {
     role: string;
-    content: string;
-    contents: PolymorphicMessage[];
+    content?: string;
+    contents?: PolymorphicMessage[];
 };
 type Options = any;
 export type Config = {

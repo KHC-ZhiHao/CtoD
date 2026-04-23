@@ -3,6 +3,7 @@ import { Event, Hook, Log } from 'power-helper';
 import { Translator, TranslatorParams } from '../core/translator.js';
 import { ValidateCallback, ValidateCallbackOutputs } from '../utils/validate.js';
 import { z } from 'zod';
+import { CtoD } from '../ctod.js';
 export type PolymorphicMessage = {
     type: 'text' | 'image';
     content: string;
@@ -147,6 +148,7 @@ export declare class ChatBroker<S extends ValidateCallback<any>, O extends Valid
     constructor(params: Params<S, O, C, P, PS>);
     protected _install(): any;
     cancel(requestId?: string): Promise<void>;
+    cloneFrom(ctod: CtoD<any, any>): ChatBroker<S, O, P, PS, C>;
     requestWithId<T extends Translator<S, O>>(data: T['__schemeType']): {
         id: string;
         request: Promise<T['__outputType']>;
@@ -164,7 +166,9 @@ export declare class ChatBroker<S extends ValidateCallback<any>, O extends Valid
         outputSchema: {
             [x: string]: any;
         };
-        outputJsonSchema: z.core.JSONSchema.JSONSchema;
+        outputJsonSchema: z.core.ZodStandardJSONSchemaPayload<z.ZodObject<{
+            [x: string]: any;
+        }, z.core.$strip>>;
         requestMessages: Message[];
     }>;
 }

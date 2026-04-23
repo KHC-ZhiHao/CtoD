@@ -7,4 +7,4 @@ export type ValidateCallbackOutputs<T extends ValidateCallback<any>, R = ReturnT
 };
 export declare function definedValidateSchema<T extends ValidateCallback<any>>(cb: T): T;
 export declare function validate<T extends ValidateCallback<any>, R = ReturnType<T>>(target: any, schemaCallback: T): { [K in keyof R]: R[K] extends z.ZodTypeAny ? z.infer<R[K]> : R[K]; };
-export declare function validateToJsonSchema<T extends ValidateCallback<any>>(target: () => T): z.core.JSONSchema.JSONSchema;
+export declare function validateToJsonSchema<T extends ValidateCallback<any>>(target: () => T): z.core.ZodStandardJSONSchemaPayload<z.ZodObject<{ -readonly [P in keyof T]: T[P]; }, z.core.$strip>>;

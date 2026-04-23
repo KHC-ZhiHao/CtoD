@@ -6,8 +6,8 @@ import { PolymorphicMessage } from '../../broker/chat.js'
 
 type Message = {
     role: string
-    content: string
-    contents: PolymorphicMessage[]
+    content?: string
+    contents?: PolymorphicMessage[]
 }
 
 type Options = any
@@ -332,7 +332,7 @@ export class LlamaCppCompletion {
                 messages: params.messages.map(e => {
                     return {
                         role: e.role,
-                        content: this.config.autoConvertTraditionalChinese ? t2s(e.content) : e.content
+                        content: this.config.autoConvertTraditionalChinese ? t2s(e.content || '') : e.content
                     }
                 })
             }
