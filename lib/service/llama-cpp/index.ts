@@ -33,7 +33,8 @@ export class LlamaCppCtodService {
             })
             onCancel(cancel)
             const { message } = await run()
-            return chat.config.autoConvertTraditionalChinese ? s2t(message) : message
+            const stringMessage = typeof message === 'string' ? message : JSON.stringify(message)
+            return chat.config.autoConvertTraditionalChinese ? s2t(stringMessage) : stringMessage
         }
     }
 

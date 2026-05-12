@@ -11,6 +11,13 @@ type Message = {
 }
 
 type Options = any
+type Content = {
+    type: 'text' | 'image_url'
+    text?: string
+    image_url?: {
+        url: string
+    }
+}[]
 
 export type Config = {
     baseUrl: string
@@ -201,7 +208,22 @@ export class LlamaCppCompletion {
                 const template = new Template(props.chat_template)
                 const prompt = template.render({
                     bos_token: props.bos_token,
-                    messages: params.messages
+                    messages: params.messages.map(e => {
+                        const output: any = { role: e.role, content: [] as Content }
+                        if (e.content) {
+                            output.content.push({ type: 'text', text: this.config.autoConvertTraditionalChinese ? t2s(e.content) : e.content })
+                        }
+                        if (e.contents) {
+                            e.contents.forEach(item => {
+                                if (item.type === 'text') {
+                                    output.content.push({ type: 'text', text: this.config.autoConvertTraditionalChinese ? t2s(item.content) : item.content })
+                                } else if (item.type === 'image') {
+                                    output.content.push({ type: 'image_url', image_url: { url: item.content } })
+                                }
+                            })
+                        }
+                        return output
+                    })
                 }).slice(0, props.eos_token.length * -1 - 1)
                 const result = await requester.fetch({
                     path: 'completion',
@@ -244,7 +266,22 @@ export class LlamaCppCompletion {
                 const template = new Template(props.chat_template)
                 const prompt = template.render({
                     bos_token: props.bos_token,
-                    messages: params.messages
+                    messages: params.messages.map(e => {
+                        const output: any = { role: e.role, content: [] as Content }
+                        if (e.content) {
+                            output.content.push({ type: 'text', text: this.config.autoConvertTraditionalChinese ? t2s(e.content) : e.content })
+                        }
+                        if (e.contents) {
+                            e.contents.forEach(item => {
+                                if (item.type === 'text') {
+                                    output.content.push({ type: 'text', text: this.config.autoConvertTraditionalChinese ? t2s(item.content) : item.content })
+                                } else if (item.type === 'image') {
+                                    output.content.push({ type: 'image_url', image_url: { url: item.content } })
+                                }
+                            })
+                        }
+                        return output
+                    })
                 }).slice(0, props.eos_token.length * -1 - 1)
                 return {
                     ...(params.options || {}),
@@ -278,18 +315,30 @@ export class LlamaCppCompletion {
                         messages: params.messages.map(e => {
                             const output = {
                                 role: e.role,
-                                content: ''
+                                content: [] as Content
                             }
                             if (e.content) {
-                                output.content = this.config.autoConvertTraditionalChinese ? t2s(e.content) : e.content
+                                output.content.push({
+                                    type: 'text',
+                                    text: this.config.autoConvertTraditionalChinese ? t2s(e.content) : e.content
+                                })
                             }
                             if (e.contents) {
-                                output.content += e.contents.map(item => {
+                                e.contents.forEach(item => {
                                     if (item.type === 'text') {
-                                        return item.content
+                                        output.content.push({
+                                            type: 'text',
+                                            text: this.config.autoConvertTraditionalChinese ? t2s(item.content) : item.content
+                                        })
+                                    } else if (item.type === 'image') {
+                                        output.content.push({
+                                            type: 'image_url',
+                                            image_url: {
+                                                url: item.content
+                                            }
+                                        })
                                     }
-                                    return ''
-                                }).join('\n')
+                                })
                             }
                             return output
                         })
@@ -330,10 +379,34 @@ export class LlamaCppCompletion {
                 ...(params.options || {}),
                 stream: true,
                 messages: params.messages.map(e => {
-                    return {
+                    const output = {
                         role: e.role,
-                        content: this.config.autoConvertTraditionalChinese ? t2s(e.content || '') : e.content
+                        content: [] as Content
                     }
+                    if (e.content) {
+                        output.content.push({
+                            type: 'text',
+                            text: this.config.autoConvertTraditionalChinese ? t2s(e.content) : e.content
+                        })
+                    }
+                    if (e.contents) {
+                        e.contents.forEach(item => {
+                            if (item.type === 'text') {
+                                output.content.push({
+                                    type: 'text',
+                                    text: this.config.autoConvertTraditionalChinese ? t2s(item.content) : item.content
+                                })
+                            } else if (item.type === 'image') {
+                                output.content.push({
+                                    type: 'image_url',
+                                    image_url: {
+                                        url: item.content
+                                    }
+                                })
+                            }
+                        })
+                    }
+                    return output
                 })
             }
         })
