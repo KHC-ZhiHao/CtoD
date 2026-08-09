@@ -6,7 +6,7 @@ export declare class LlamaCppCtodService {
         axios?: AxiosInstance;
         config: Partial<Config> | (() => Promise<Partial<Config>>);
         talkOptions?: any;
-    }): (messages: any[], { schema, onCancel }: any) => Promise<string>;
+    }): (messages: any[], { schema, onCancel }: any) => Promise<any>;
     /**
      * @zh 如果你有需要特別設定 axios，請使用這方法。
      * @en If you need to set axios, please use this method.

@@ -1,5 +1,6 @@
 import { ChatBrokerPlugin } from '../core/plugin.js';
-declare const _default: ChatBrokerPlugin<(z: typeof import("node_modules/zod/v4/classic/external.cjs")) => {
-    role: import("zod").ZodString;
+import { z } from 'zod';
+declare const _default: ChatBrokerPlugin<() => {
+    role: z.ZodString;
 }, () => {}>;
 export default _default;

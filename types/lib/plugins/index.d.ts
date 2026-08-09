@@ -2,14 +2,14 @@
  * @zh 一個基於印出 log 的 plugin。
  * @en A plugin based on printing log.
  */
-export declare const PrintLogPlugin: import("../index.js").ChatBrokerPlugin<(z: typeof import("node_modules/zod/v4/classic/external.cjs")) => {
+export declare const PrintLogPlugin: import("../index.js").ChatBrokerPlugin<() => {
     detail: import("zod").ZodDefault<import("zod").ZodBoolean>;
 }, () => {}>;
 /**
  * @zh 當解析失敗時，會自動重試的對話。
  * @en A conversation that will automatically retry when parsing fails.
  */
-export declare const RetryPlugin: import("../index.js").ChatBrokerPlugin<(z: typeof import("node_modules/zod/v4/classic/external.cjs")) => {
+export declare const RetryPlugin: import("../index.js").ChatBrokerPlugin<() => {
     retry: import("zod").ZodDefault<import("zod").ZodNumber>;
     printWarn: import("zod").ZodDefault<import("zod").ZodBoolean>;
 }, () => {}>;
@@ -42,6 +42,6 @@ export declare const LimiterPluginGlobState: {
  * @zh 設定角色扮演。
  * @en Set role play.
  */
-export declare const RolePlugin: import("../index.js").ChatBrokerPlugin<(z: typeof import("node_modules/zod/v4/classic/external.cjs")) => {
+export declare const RolePlugin: import("../index.js").ChatBrokerPlugin<() => {
     role: import("zod").ZodString;
 }, () => {}>;

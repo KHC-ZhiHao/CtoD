@@ -1,8 +1,9 @@
 import { ChatBrokerPlugin } from '../core/plugin.js'
+import { z } from 'zod'
 
 export default new ChatBrokerPlugin({
     name: 'print-log',
-    params: z => {
+    params: () => {
         return {
             detail: z.boolean().default(false)
         }

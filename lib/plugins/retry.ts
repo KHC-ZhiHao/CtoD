@@ -1,8 +1,9 @@
 import { ChatBrokerPlugin } from '../core/plugin.js'
+import { z } from 'zod'
 
 export default new ChatBrokerPlugin({
     name: 'retry',
-    params: z => {
+    params: () => {
         return {
             retry: z.number().default(1),
             printWarn: z.boolean().default(true)

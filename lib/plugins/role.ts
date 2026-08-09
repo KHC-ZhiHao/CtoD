@@ -1,8 +1,8 @@
 import { ChatBrokerPlugin } from '../core/plugin.js'
-
+import { z } from 'zod'
 export default new ChatBrokerPlugin({
     name: 'role',
-    params: z => {
+    params: () => {
         return {
             role: z.string()
         }
